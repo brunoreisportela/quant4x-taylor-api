@@ -26,6 +26,6 @@ class Talk:
             return "Error: No response could be obtained by Taylor this time."
 
     def __init__(self, *args, **kwargs):
-        openai.api_key = "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"
+        openai.api_key = "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"
 
         super().__init__(*args, **kwargs)
