@@ -26,7 +26,6 @@ class Talk:
             return "Error: No response could be obtained by Taylor this time."
 
     def __init__(self, *args, **kwargs):
-        os.environ["OPENAI_API_KEY"] = "iEZY4RVMzKHx1TIgOegbT3BlbkFJuJDkdLDNe9d9b5mqI1yM"
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
         super().__init__(*args, **kwargs)
