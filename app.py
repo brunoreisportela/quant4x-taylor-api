@@ -15,9 +15,17 @@ talk = Talk()
 
 @app.route("/")
 def service():
-    # talk.get_response("What is your name? Tell me about Quant4x.")
     return "Echo"
 
 @app.route("/echo")
 def echo():
     return "Echo"
+
+@app.route("/question", methods=['GET'])
+def question():
+    question = request.args["question"]
+
+    if len(question) > 1:
+        return json.dumps(talk.get_response(question))
+    else:
+        return json.dumps("No answer obtained due no question was made.")
