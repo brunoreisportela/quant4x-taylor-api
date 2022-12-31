@@ -5,15 +5,17 @@ import json
 
 from flask import Flask,request
 
-from modules import Jack
+from modules import Talk
 from modules import Whatsapp
 
 app = Flask(__name__)
 
+talk = Talk()
 # whatsapp = Whatsapp()
 
 @app.route("/")
 def service():
+    # talk.get_response("What is your name? Tell me about Quant4x.")
     return "Echo"
 
 @app.route("/echo")
