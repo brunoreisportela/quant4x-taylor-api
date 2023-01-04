@@ -2,7 +2,6 @@ import os
 import argparse
 import sys
 import time
-import requests
 
 import json
 
@@ -16,9 +15,9 @@ args = parser.parse_args()
 
 mt_path = args.path
 
-def get_first_day_week():
+def get_first_day_week(dt):
     # This is for getting from an specific date --- Test only ---
-    day = '24/01/2022'
+    day = '06/04/2022'
     dt = datetime.strptime(day, '%d/%m/%Y')
 
     # This is to get from the actual date -- Prod ---
@@ -38,29 +37,35 @@ def read_file(path):
 
         data = json.load(f)
 
-        # first_day_week = get_first_day_week()
+        day = '06/04/2022'
+        dt = datetime.strptime(day, '%d/%m/%Y')
 
-        # transactions = 0
+        first_day_week = get_first_day_week(dt)
 
-        # deposits = 0.0
-        # current_balance = 0.0
-        # previous_balance = 0.0
+        transactions = 0
+        deposits = 0.0
+        prior_profit = 0.0
+        current_profit = 0.0
 
-        # for i in data['transactions']:
-        #     # print(i)
-        #     transactions += 1
-        #     transaction_close_date = datetime.strptime(i["close_time"], '%Y.%m.%d %H:%M:%S')
+        for i in data['transactions']:
+            # print(i)
+            transactions += 1
+            transaction_close_date = datetime.strptime(i["close_time"], '%Y.%m.%d %H:%M:%S')
 
+            if i["type"] != 0 and i["type"] != 1:
+                deposits += i['profit']+(i['swap'])
 
+            else:
+                if transaction_close_date < first_day_week:
+                    prior_profit += i['profit']+(i['swap'])
 
-        #     if transaction_close_date >= first_day_week:
-        #         print(i)
-        #         current_balance += i['profit']+(i['swap'])
-
-        #     if transaction_close_date < first_day_week:
-        #         previous_balance += i['profit']+(i['swap'])
+                if transaction_close_date >= first_day_week:
+                    current_profit += i['profit']+(i['swap'])
             
-        # print(transactions)
+        print(transactions)
+        print(deposits)
+        print(prior_profit)
+        print(current_profit)
         # print(data["kpi"]["balance"])
 
     except:
