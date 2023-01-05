@@ -2,6 +2,8 @@
 import os
 import openai
 
+from dotenv import load_dotenv
+
 
 class Talk:
 
@@ -28,6 +30,8 @@ class Talk:
             return "Error: No response could be obtained by Taylor this time."
 
     def __init__(self, *args, **kwargs):
+        load_dotenv()
+
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
         super().__init__(*args, **kwargs)
