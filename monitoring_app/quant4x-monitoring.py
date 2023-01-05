@@ -10,7 +10,13 @@ from os import path
 from datetime import datetime, timedelta
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-p", "--path", default="C:\\Users\\Extreme PC\\Documents\\node\\quant4x-dashboard\\python", help="Set MT4 main path")
+
+# for windows
+# parser.add_argument("-p", "--path", default="C:\\Users\\Extreme PC\\Documents\\node\\quant4x-dashboard\\python", help="Set MT4 main path")
+
+# for mac
+parser.add_argument("-p", "--path", default="/Users/babablacksheep/projects/python/quant4x-taylor-api/monitoring_app", help="Set MT4 main path")
+
 args = parser.parse_args()
 
 mt_path = args.path
@@ -31,6 +37,7 @@ def get_first_day_week(dt):
 
     return start
 
+
 def read_file(path):
     try:
         f = open(path, "r")
@@ -50,7 +57,8 @@ def read_file(path):
         for i in data['transactions']:
             # print(i)
             transactions += 1
-            transaction_close_date = datetime.strptime(i["close_time"], '%Y.%m.%d %H:%M:%S')
+            transaction_close_date = datetime.strptime(
+                i["close_time"], '%Y.%m.%d %H:%M:%S')
 
             if i["type"] != 0 and i["type"] != 1:
                 deposits += i['profit']+(i['swap'])
@@ -61,7 +69,7 @@ def read_file(path):
 
                 if transaction_close_date >= first_day_week:
                     current_profit += i['profit']+(i['swap'])
-            
+
         print(transactions)
         print(deposits)
         print(prior_profit)
@@ -71,20 +79,26 @@ def read_file(path):
     except:
         print("Failure on opening a file")
 
+
 def search_files():
     try:
         while True:
             for (dir_path, dir_names, file_names) in walk(mt_path):
-                path_to_check = dir_path+"\\track_taylor.txt"
+                # for windows
+                # path_to_check = dir_path+"\\track_taylor.txt"
+
+                # for mac
+                path_to_check = dir_path+"/track_taylor.txt"
 
                 if path.exists(path_to_check):
                     read_file(path_to_check)
-            
+
             time.sleep(10.0)
 
     except KeyboardInterrupt:
         print("Program finished by user.")
         pass
+
 
 if __name__ == "__main__":
     search_files()
