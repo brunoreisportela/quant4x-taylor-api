@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+          "label": "cleaning_port",
+          "command": "sudo lsof -t -i tcp:5000 -s tcp:listen | sudo xargs kill", // Could be any other shell command
+          "type": "shell"
+      }
+    ],
+    "inputs": [{
+      "id": "terminate",
+      "type": "command",
+      "command": "workbench.action.tasks.terminate",
+      "args": "terminateAll"
+    }]
+  }
