@@ -4,11 +4,14 @@ import json
 # sudo lsof -i -P -n | grep LISTEN
 
 from flask import Flask,request
+from flask_cors import CORS
 
 from modules import Talk
 from modules import Whatsapp
 
 app = Flask(__name__)
+
+CORS(app)
 
 talk = Talk()
 # whatsapp = Whatsapp()
