@@ -148,4 +148,5 @@ def search_files():
 
 
 if __name__ == "__main__":
-    search_files()
+    # search_files()
+    read_file("track_taylor.txt")
