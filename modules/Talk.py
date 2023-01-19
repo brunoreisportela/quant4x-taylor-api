@@ -24,8 +24,8 @@ class Talk:
         for account in accounts:
             string_compound += f"Product: {account[u'product_name']} performance from {account[u'start_scope']} to {account[u'end_scope']}, Balance: {account[u'balance']}, having a profit/loss of {account[u'profit_loss']} and drawdown of {account[u'drawdown']}.\n"
 
-        self.stats_knowledge = f"Taylor's product performance are the following:\n {string_compound}"
-    
+        self.stats_knowledge = f"This is Taylor's products performance summary:\n {string_compound}"
+
         self.stats_notes = "The products performance given, represents individual performance per assets groups. The overall week result is not being calculated yet."
 
     def get_response(self, input):
