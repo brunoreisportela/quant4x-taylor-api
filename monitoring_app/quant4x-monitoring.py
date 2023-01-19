@@ -38,8 +38,8 @@ def get_first_day_week(dt):
     # This is to get from the actual date -- Prod ---
     dt = datetime.today()
 
-    start = dt - timedelta(days=dt.weekday())
-    end = start + timedelta(days=6)
+    start = dt - timedelta(days=dt.weekday()+1)
+    end = start + timedelta(days=7)
 
     # print(start)
     # print(end)
@@ -54,8 +54,8 @@ def get_last_day_week(dt):
     # This is to get from the actual date -- Prod ---
     dt = datetime.today()
 
-    start = dt - timedelta(days=dt.weekday())
-    end = start + timedelta(days=6)
+    start = dt - timedelta(days=dt.weekday()+1)
+    end = start + timedelta(days=7)
 
     # print(start)
     # print(end)
@@ -132,10 +132,10 @@ def search_files():
         while True:
             for (dir_path, dir_names, file_names) in walk(mt_path):
                 # for windows
-                path_to_check = dir_path+"\\track_taylor.txt"
+                # path_to_check = dir_path+"\\track_taylor.txt"
 
                 # for mac
-                # path_to_check = dir_path+"/track_taylor.txt"
+                path_to_check = dir_path+"/track_taylor.txt"
 
                 if path.exists(path_to_check) == True:
                     read_file(path_to_check)
