@@ -8,6 +8,7 @@ from flask_cors import CORS
 
 from modules import Talk
 from modules import Whatsapp
+from modules import Firestore
 
 app = Flask(__name__)
 
@@ -15,6 +16,7 @@ CORS(app)
 
 talk = Talk()
 # whatsapp = Whatsapp()
+firestore = Firestore()
 
 @app.route("/")
 def service():
