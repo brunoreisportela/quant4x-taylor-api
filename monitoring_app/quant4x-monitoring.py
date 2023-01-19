@@ -132,10 +132,10 @@ def search_files():
         while True:
             for (dir_path, dir_names, file_names) in walk(mt_path):
                 # for windows
-                # path_to_check = dir_path+"\\track_taylor.txt"
+                path_to_check = dir_path+"\\track_taylor.txt"
 
                 # for mac
-                path_to_check = dir_path+"/track_taylor.txt"
+                # path_to_check = dir_path+"/track_taylor.txt"
 
                 if path.exists(path_to_check) == True:
                     read_file(path_to_check)
@@ -148,5 +148,5 @@ def search_files():
 
 
 if __name__ == "__main__":
-    # search_files()
-    read_file("track_taylor.txt")
+    search_files()
+    # read_file("track_taylor.txt")
