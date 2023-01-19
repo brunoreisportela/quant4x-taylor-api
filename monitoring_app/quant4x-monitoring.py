@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser()
 # parser.add_argument("-p", "--path", default="C:\\Users\\Extreme PC\\Documents\\node\\quant4x-dashboard\\python", help="Set MT4 main path")
 
 # for mac
-parser.add_argument("-p", "--path", default="/Users/babablacksheep/projects/python/quant4x-taylor-api/monitoring_app", help="Set MT4 main path")
+parser.add_argument("-p", "--path", default="C:\\Users\\babablacksheep\\AppData\\Roaming\\MetaQuotes\\Terminal", help="Set MT4 main path")
 
 args = parser.parse_args()
 
@@ -41,8 +41,8 @@ def get_first_day_week(dt):
     start = dt - timedelta(days=dt.weekday())
     end = start + timedelta(days=6)
 
-    print(start)
-    print(end)
+    # print(start)
+    # print(end)
 
     return start
 
@@ -57,8 +57,8 @@ def get_last_day_week(dt):
     start = dt - timedelta(days=dt.weekday())
     end = start + timedelta(days=6)
 
-    print(start)
-    print(end)
+    # print(start)
+    # print(end)
 
     return end    
 
@@ -97,10 +97,10 @@ def read_file(path):
                 if transaction_close_date >= first_day_week:
                     current_profit += i['profit']+(i['swap'])
 
-        print(transactions)
-        print(deposits)
-        print(prior_profit)
-        print(current_profit)
+        # print(transactions)
+        # print(deposits)
+        # print(prior_profit)
+        # print(current_profit)
         # print(data["kpi"]["balance"])
 
         id = data['mt_account_id']
@@ -109,6 +109,8 @@ def read_file(path):
 
         date_scope = f"{data['mt_account_id']}-{fmt_first_day}-{fmt_last_day}"
 
+        print( f"Account: {id} | date signature: {date_scope}" )
+        
         doc_ref = db.collection(u'accounts').document(date_scope)
         doc_ref.set({
             u'account_id': f"{id}",
@@ -118,7 +120,7 @@ def read_file(path):
             u'end_scope': last_day_week.strftime("%m/%d/%Y"),
             u'machine_name': data["info"]["machine_name"],
             u'product_name': data["info"]["product_name"],
-            u'return': current_profit
+            u'profit_loss': current_profit
         })
 
     except ValueError:
@@ -135,7 +137,7 @@ def search_files():
                 # for mac
                 # path_to_check = dir_path+"/track_taylor.txt"
 
-                if path.exists(path_to_check):
+                if path.exists(path_to_check) == True:
                     read_file(path_to_check)
 
             time.sleep(1800.0)
