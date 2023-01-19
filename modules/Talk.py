@@ -3,29 +3,38 @@ import os
 import openai
 
 from dotenv import load_dotenv
-
+from .Firestore import *
 
 class Talk:
+
+    pre_prompt = ""
+    stats_knowledge = ""
+    stats_notes = ""
+
+    firestore = Firestore()
+
+    def prepare(self):
+        # Biased example
+        accounts = self.firestore.get_current_week_per_product_name()
+
+        self.pre_prompt = "Please call yourself as Taylor AI, created by Quant4x. Quant4x is a fintech company based in Montreal, Canada that uses artificial intelligence in its trading and investment strategies. The company claims to achieve superior returns compared to traditional investment instruments. According to the information provided, Quant4x has had an outstanding track record in the high-risk investment market, where the majority of investors do not succeed for more than four trimesters. The company's founders and board members have a background in the financial and technology industries, and have developed award-winning solutions in multiple countries. Quant4x was founded in 2019 by Bruno Reis Portela, Andres Jhonson, Felipe Baraona, and Pablo Sprenger. It is important to note that Taylor, the artificial intelligence I am programmed to be, does not predict the market and cannot provide investment advice. Taylor's market forecasts are based on indicators and metrics that compare past market behavior to try to predict future trends. However, this information cannot be provided through this channel of communication."
+
+        string_compound = ""
+
+        for account in accounts:
+            string_compound += f"Product: {account[u'product_name']} performance from {account[u'start_scope']} to {account[u'end_scope']}, Balance: {account[u'balance']}, having a profit/loss of {account[u'profit_loss']} and drawdown of {account[u'drawdown']}.\n"
+
+        self.stats_knowledge = f"Taylor's product performance are the following:\n {string_compound}"
+    
+        self.stats_notes = "The products performance given, represents individual performance per assets groups. The overall week result is not being calculated yet."
 
     def get_response(self, input):
 
         input = input.replace("\"", "\n")
 
-        # Biased example
-        pre_prompt = "Please call yourself as Taylor AI, created by Quant4x. Quant4x is a fintech company based in Montreal, Canada that uses artificial intelligence in its trading and investment strategies. The company claims to achieve superior returns compared to traditional investment instruments. According to the information provided, Quant4x has had an outstanding track record in the high-risk investment market, where the majority of investors do not succeed for more than four trimesters. The company's founders and board members have a background in the financial and technology industries, and have developed award-winning solutions in multiple countries. Quant4x was founded in 2019 by Bruno Reis Portela, Andres Jhonson, Felipe Baraona, and Pablo Sprenger. It is important to note that Taylor, the artificial intelligence I am programmed to be, does not predict the market and cannot provide investment advice. Taylor's market forecasts are based on indicators and metrics that compare past market behavior to try to predict future trends. However, this information cannot be provided through this channel of communication."
-
-        stats_knowledge = "Taylor's product performance this week:\n Product: Metals, Balance: 529.47, Drawndown: -50, This week vs previous week: 7.1%. Product: Indices, Balance: 120.00, Drawndown: -100, This week vs previous week: -17%. Product: Forex, Balance: 1250.20, Drawdown: -190, This week vs previous week: 6%. Product: Energy, Balance: 520.25, Drawdown: -12, This week vs previous week: 2.6%."
-
-        stats_notes = "The products performance given, represents individual performance per assets groups. The overall week result is not being calculated yet."
-
-        # For non biased service
-        pre_prompt = ""
-        stats_knowledge = ""
-        stats_notes = ""
-
         response = openai.Completion.create(
             model="text-davinci-003",
-            prompt=f"{pre_prompt}{stats_knowledge}{stats_notes}\n {input}\n",
+            prompt=f"{self.pre_prompt}{self.stats_knowledge}{self.stats_notes}\n {input}\n",
             max_tokens=800,
             temperature=0
         )
@@ -39,5 +48,7 @@ class Talk:
         load_dotenv()
 
         openai.api_key = os.getenv("OPENAI_API_KEY")
+
+        self.prepare()
 
         super().__init__(*args, **kwargs)

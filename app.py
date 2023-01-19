@@ -14,9 +14,8 @@ app = Flask(__name__)
 
 CORS(app)
 
-talk = Talk()
 # whatsapp = Whatsapp()
-firestore = Firestore()
+talk = Talk()
 
 @app.route("/")
 def service():
