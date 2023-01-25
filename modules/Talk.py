@@ -11,7 +11,7 @@ class Talk:
     stats_knowledge = ""
     stats_notes = ""
 
-    firestore = Firestore()
+    firestore = None
 
     def prepare(self):
         # Biased example
@@ -44,8 +44,10 @@ class Talk:
         else:
             return "Error: No response could be obtained by Taylor this time."
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, firestore, *args, **kwargs):
         load_dotenv()
+
+        self.firestore = firestore
 
         openai.api_key = os.getenv("OPENAI_API_KEY")
 

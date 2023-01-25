@@ -28,6 +28,45 @@ class Firestore:
                 products.append(doc_dict)
 
         return products
+    
+    def get_accounts(self):
+
+        accounts = self.db.collection(u'accounts')
+        results = accounts.get()
+
+        products = []
+
+        for doc in results:
+            doc_dict = doc.to_dict()
+
+            account_doc = self.db.collection(u'accounts').where(u'account_id', u'==', doc_dict[u'account_id'])
+
+            account_dict = doc_dict
+
+            account_dict.pop(u'end_scope')
+            account_dict.pop(u'start_scope')
+            
+            history = []
+
+            for account in account_doc.get():
+                history_dict_from_account = account.to_dict()
+
+                history_dict = {}
+                history_dict[u'start_scope'] = history_dict_from_account[u'start_scope']
+                history_dict[u'end_scope'] = history_dict_from_account[u'end_scope']
+                history_dict[u'profit_loss'] = history_dict_from_account[u'profit_loss']
+
+                history.append(history_dict)
+
+
+            account_dict["profit_loss"] = history[len(history)-1]["profit_loss"]
+
+            account_dict[u'history'] = history
+
+            products.append(account_dict)
+
+
+        return products
 
     def findProductInArray(self, array, name):
         for item in array:
