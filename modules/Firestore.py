@@ -63,7 +63,8 @@ class Firestore:
 
             account_dict[u'history'] = history
 
-            products.append(account_dict)
+            if self.findKeyInArray(products, doc_dict["account_id"], "account_id") == False:
+                products.append(account_dict)
 
 
         return products
@@ -71,6 +72,13 @@ class Firestore:
     def findProductInArray(self, array, name):
         for item in array:
             if name == item:
+                return True
+        
+        return False
+    
+    def findKeyInArray(self, array, name, key):
+        for item in array:
+            if item[key] == name:
                 return True
         
         return False
