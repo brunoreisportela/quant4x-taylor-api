@@ -37,10 +37,7 @@ class Firestore:
                 history_dict[u'end_scope'] = history_dict_from_account[u'end_scope']
                 history_dict[u'profit_loss'] = history_dict_from_account[u'profit_loss']
 
-                
-
                 history.append(history_dict)
-
 
             account_dict["profit_loss"] = history[len(history)-1]["profit_loss"]
 
