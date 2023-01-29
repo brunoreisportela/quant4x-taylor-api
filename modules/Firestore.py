@@ -13,7 +13,7 @@ class Firestore:
     def get_accounts(self):
 
         accounts = self.db.collection(u'accounts')
-        results = accounts.get()
+        results = accounts.order_by(u'start_scope', direction=firestore.Query.DESCENDING).get()
 
         products = []
 
@@ -36,6 +36,8 @@ class Firestore:
                 history_dict[u'start_scope'] = history_dict_from_account[u'start_scope']
                 history_dict[u'end_scope'] = history_dict_from_account[u'end_scope']
                 history_dict[u'profit_loss'] = history_dict_from_account[u'profit_loss']
+
+                
 
                 history.append(history_dict)
 
