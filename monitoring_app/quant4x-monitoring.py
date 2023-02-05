@@ -4,6 +4,7 @@ import sys
 import time
 
 import json
+import logging
 
 from os import walk
 from os import path
@@ -148,5 +149,10 @@ def search_files():
 
 
 if __name__ == "__main__":
-    search_files()
+    try:
+        search_files()
+    except Exception as e:
+        logging.critical(e, exc_info=True)  # log exception info at CRITICAL log level
+        search_files()
+        pass
     # read_file("track_taylor.txt")
