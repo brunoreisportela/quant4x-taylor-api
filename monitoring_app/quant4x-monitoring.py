@@ -117,6 +117,7 @@ def read_file(path):
             u'account_id': f"{id}",
             u'drawdown': data["kpi"]["drawn_down"],
             u'balance': data["kpi"]["balance"],
+            u'equity': data["kpi"]["equity"],
             u'start_scope': first_day_week.strftime("%m/%d/%Y"),
             u'end_scope': last_day_week.strftime("%m/%d/%Y"),
             u'machine_name': data["info"]["machine_name"],
@@ -149,10 +150,12 @@ def search_files():
 
 
 if __name__ == "__main__":
+    # to test
+    # read_file("track_taylor.txt")
+
     try:
         search_files()
     except Exception as e:
         logging.critical(e, exc_info=True)  # log exception info at CRITICAL log level
         search_files()
         pass
-    # read_file("track_taylor.txt")
