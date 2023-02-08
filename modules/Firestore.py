@@ -36,8 +36,10 @@ class Firestore:
                 history_dict[u'start_scope'] = history_dict_from_account[u'start_scope']
                 history_dict[u'end_scope'] = history_dict_from_account[u'end_scope']
                 history_dict[u'profit_loss'] = history_dict_from_account[u'profit_loss']
-                history_dict[u'equity'] = history_dict_from_account[u'equity']
                 history_dict[u'balance'] = history_dict_from_account[u'balance']
+                
+                if u'equity' in history_dict_from_account:
+                    history_dict[u'equity'] = history_dict_from_account[u'equity']
 
                 history.append(history_dict)
 
