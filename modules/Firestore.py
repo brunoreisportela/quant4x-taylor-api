@@ -48,6 +48,9 @@ class Firestore:
         return end
     
     def get_balance_from_list(self, balance_list, name):
+        if name == "FX":
+            name = "FOREX"
+            
         for balance in balance_list:
             if balance[u'name'] == name:
                 return balance[u'balance']
