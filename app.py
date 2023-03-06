@@ -31,6 +31,10 @@ def echo():
 def accounts():
     return json.dumps(firestore.get_accounts())
 
+@app.route("/products/performance", methods=['GET'])
+def products_performance():
+    return json.dumps(firestore.get_products_performance())
+
 @app.route("/question", methods=['GET'])
 def question():
     question = request.args["question"]
