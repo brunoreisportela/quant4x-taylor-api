@@ -36,7 +36,7 @@ def accounts():
 @app.route("/sentiment", methods=['GET'])
 def sentiment():
     index = request.args["index"]
-    return json.dumps(symbol_sentiment.get_status(0))
+    return json.dumps(symbol_sentiment.get_status(index))
 
 @app.route("/products/performance", methods=['GET'])
 def products_performance():
