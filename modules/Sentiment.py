@@ -55,7 +55,7 @@ class Sentiment:
                 symbol  = symbol[u'symbol'],
                 screener= symbol[u'screener'],
                 exchange= symbol[u'exchange'],
-                interval= Interval.INTERVAL_15_MINUTES,
+                interval= Interval.INTERVAL_30_MINUTES,
                 # proxies={'http': 'http://example.com:8080'} # Uncomment to enable proxy (replace the URL).
             )
 
