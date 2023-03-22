@@ -48,7 +48,8 @@ class Sentiment:
         recommendation = "NEUTRAL"
 
         try:
-            symbol = self.symbols[index]
+            int_index = int(index)
+            symbol = self.symbols[int_index]
 
             instrument = TA_Handler(
                 symbol  = symbol[u'symbol'],
