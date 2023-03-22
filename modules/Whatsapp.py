@@ -1,4 +1,3 @@
-import os
 import requests
 import json
 
@@ -8,7 +7,7 @@ class Whatsapp:
     def addContact(self, name, phone, payload):
         url = "https://live-server-11222.wati.io/api/v1/addContact/"+phone
 
-        payload = {
+        contact_payload = {
             "customParams": [
                 {
                     "name": "system",
@@ -23,11 +22,10 @@ class Whatsapp:
             "Authorization": self.bearer
         }
 
-        response = requests.post(url, json=payload, headers=headers)
+        response = requests.post(url, json=contact_payload, headers=headers)
 
-        self.sendIt(name, phone, payload)
-
-        print(response.text)
+        return self.sendIt(name, phone, payload)
+        # return response.text
 
     def sendMessage(self, name, phone, payload):
         url = "https://live-server-11222.wati.io/api/v1/getContacts"
@@ -52,11 +50,11 @@ class Whatsapp:
                     is_contact_already_registered = True
 
         if is_contact_already_registered:
-            self.sendIt(name, phone, payload)
+            return self.sendIt(phone, payload)
         else:
-            self.addContact(name, phone, payload)
+            return self.addContact(name, phone, payload)
 
-    def sendIt(self, name, phone, payload):
+    def sendIt(self, phone, payload):
         url = "https://live-server-11222.wati.io/api/v1/sendTemplateMessage?whatsappNumber="+phone
 
         # payload = {
@@ -69,15 +67,15 @@ class Whatsapp:
         #     ],
         #     "template_name": "welcome_quant4x"
         # }
-
+        
         headers = {
             "Content-Type": "text/json",
             "Authorization": self.bearer
-        }
-                
+        }     
+        
         response = requests.post(url, json=payload, headers=headers)
-
-        print(response.text)
+        
+        return response.text
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
