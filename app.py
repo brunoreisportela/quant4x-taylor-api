@@ -55,6 +55,6 @@ def question():
     
 @app.route("/whatsapp/send_message", methods=['POST'])
 def whatsapp_send_message():
-    payload = request.args["payload"]
+    payload = request.form["payload"]
 
     return maytapi.sendMessage(payload)
