@@ -116,7 +116,7 @@ class Firestore:
         now_est = datetime.now()
         
         first_day_week_adjusted = first_day_week.replace(hour=20, minute=00)
-        last_day_week_adjusted = last_day_week.replace(hour=11, minute=00)
+        last_day_week_adjusted = last_day_week.replace(hour=22, minute=00)
         
         if now_est > first_day_week_adjusted and now_est < last_day_week_adjusted:
             return True
