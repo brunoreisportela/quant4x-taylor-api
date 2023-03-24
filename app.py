@@ -10,6 +10,7 @@ from modules import Talk
 from modules import Whatsapp
 from modules import Firestore
 from modules import Sentiment
+from modules import MayTapi
 
 app = Flask(__name__)
 
@@ -18,6 +19,7 @@ CORS(app)
 whatsapp = Whatsapp()
 firestore = Firestore()
 symbol_sentiment = Sentiment()
+maytapi = MayTapi()
 
 talk = Talk(firestore = firestore)
 
@@ -53,8 +55,6 @@ def question():
     
 @app.route("/whatsapp/send_message", methods=['POST'])
 def whatsapp_send_message():
-    name = request.args["name"]
-    phone = request.args["phone"]
     payload = request.args["payload"]
 
-    return whatsapp.sendMessage(name, phone, payload)
+    return maytapi.sendMessage(payload)
