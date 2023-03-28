@@ -9,37 +9,44 @@ class Sentiment:
         {
             u'symbol' : u'GC1!',
             u'screener' : u'america',
-            u'exchange' : u'COMEX'
+            u'exchange' : u'COMEX',
+            u'interval' : u'INTERVAL_1_HOUR'
         },
         {
             u'symbol' : u'UKOIL',
             u'screener' : u'cfd',
-            u'exchange' : u'FX'
+            u'exchange' : u'FX',
+            u'interval' : u'INTERVAL_1_DAY'
         },
         {
             u'symbol' : u'SPX',
             u'screener' : u'america',
-            u'exchange' : u'SP'
+            u'exchange' : u'SP',
+            u'interval' : u'INTERVAL_1_DAY'
         },
         {
             u'symbol' : u'GBPUSD',
             u'screener' : u'forex',
-            u'exchange' : u'FX_IDC'
+            u'exchange' : u'FX_IDC',
+            u'interval' : u'INTERVAL_1_HOUR'
         },
         {
             u'symbol' : u'EURUSD',
             u'screener' : u'forex',
-            u'exchange' : u'FX_IDC'
+            u'exchange' : u'FX_IDC',
+            u'interval' : u'INTERVAL_1_HOUR'
         },
         {
             u'symbol' : u'USDJPY',
             u'screener' : u'forex',
-            u'exchange' : u'FX_IDC'
+            u'exchange' : u'FX_IDC',
+            u'interval' : u'INTERVAL_1_HOUR'
         },
         {
             u'symbol' : u'USDCAD',
             u'screener' : u'forex',
-            u'exchange' : u'FX_IDC'
+            u'exchange' : u'FX_IDC',
+            u'interval' : u'INTERVAL_1_HOUR'
         },
     ]
 
@@ -51,15 +58,20 @@ class Sentiment:
             int_index = int(index)
             symbol = self.symbols[int_index]
 
+            interval_to_use = Interval.INTERVAL_1_HOUR
+
+            if symbol[u'interval'] == "INTERVAL_1_DAY":
+                interval_to_use = Interval.INTERVAL_1_DAY
+
             instrument = TA_Handler(
                 symbol  = symbol[u'symbol'],
                 screener= symbol[u'screener'],
                 exchange= symbol[u'exchange'],
-                interval= Interval.INTERVAL_1_HOUR,
+                interval= interval_to_use,
                 # proxies={'http': 'http://example.com:8080'} # Uncomment to enable proxy (replace the URL).
             )
 
-            recommendation = instrument.get_analysis().summary["RECOMMENDATION"]
+            recommendation = instrument.get_analysis().moving_averages["RECOMMENDATION"]
 
         except Exception as e:
             logging.critical(e, exc_info=True)  # log exception info at CRITICAL log level
