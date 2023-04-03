@@ -28,25 +28,25 @@ class Sentiment:
             u'symbol' : u'GBPUSD',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_1_HOUR'
+            u'interval' : u'INTERVAL_15_MINUTES'
         },
         {
             u'symbol' : u'EURUSD',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_1_HOUR'
+            u'interval' : u'INTERVAL_15_MINUTES'
         },
         {
             u'symbol' : u'USDJPY',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_1_HOUR'
+            u'interval' : u'INTERVAL_15_MINUTES'
         },
         {
             u'symbol' : u'USDCAD',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_1_HOUR'
+            u'interval' : u'INTERVAL_15_MINUTES'
         },
     ]
 
@@ -58,7 +58,7 @@ class Sentiment:
             int_index = int(index)
             symbol = self.symbols[int_index]
 
-            interval_to_use = Interval.INTERVAL_1_HOUR
+            interval_to_use = Interval.INTERVAL_15_MINUTES
 
             if symbol[u'interval'] == "INTERVAL_1_DAY":
                 interval_to_use = Interval.INTERVAL_1_DAY
