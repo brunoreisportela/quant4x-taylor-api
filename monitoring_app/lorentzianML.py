@@ -8,9 +8,8 @@ import ml
 import kernels
 
 from datetime import datetime
-from polygon import RESTClient
 
-client = RESTClient(api_key="pW2Bd6QRLV3N4NaXWvLjB92o4Z3JqwrS")
+import yfinance as yf
 
 def get_data(symbol="BTCUSDT", timeframe="1d", ex=None, limit=500):
     data = ex.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
@@ -348,48 +347,29 @@ def indicator(df):
                          'KrenelEstimate': est})
 
 def get_quote_from_asset():
-    ticker = "C:EURUSD"
+    # Set the ticker as 'EURUSD=X'
+    # forex_data = yf.download('EURUSD=X', start='2019-01-02', end='2021-12-31')
+    # Set the index to a datetime object
+    # forex_data.index = pd.to_datetime(forex_data.index)
+    # Display the last five rows
+    # forex_data.tail()
 
-    # List Aggregates (Bars)
-    bars = client.get_aggs(ticker=ticker, multiplier=15, timespan="minute", from_="2020-01-01", to="2023-04-01")
-    
-    list_to_import = []
+    # Set the ticker as 'EURUSD=X'
+    forex_data_minute = yf.download('USDJPY=X', period='60d', interval='15m')
+    # Set the index to a datetime object
+    forex_data_minute.index = pd.to_datetime(forex_data_minute.index)
+    # Display the last five rows
+    forex_data_minute.tail()
 
-    for bar in bars:
-        print(bar)
-        timestamp_to_date = datetime.fromtimestamp(bar.timestamp/1000)
-        object_to_import = { "date": timestamp_to_date, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close, "volume": bar.volume }
-        list_to_import.append(object_to_import)
+    forex_data_array = []
 
-    df = pd.DataFrame(list_to_import)
+    for index in range(len(forex_data_minute.Open.values)):
+        object_to_import = { "date": forex_data_minute.index.values[index], "open": forex_data_minute.Open.values[index], "high": forex_data_minute.High.values[index], "low": forex_data_minute.Low.values[index], "close": forex_data_minute.Close.values[index], "volume": forex_data_minute.Volume.values[index] }
+        forex_data_array.append(object_to_import)
 
-    return df
+    forex_data_minute = pd.DataFrame(forex_data_array)
 
-    # bar = client.get_last_forex_quote(from_="EUR",to="USD")
-    # print(bar)
-
-    # Get Last Trade
-    # trade = client.get_last_trade(ticker=ticker)
-    # print(trade)
-
-    # List Trades
-    # trades = client.list_trades(ticker=ticker, timestamp="2023-04-01")
-    # for trade in trades:
-    #     print(trade)
-
-    # Get Last Quote
-    # quote = client.get_last_quote(ticker=ticker)
-    # print(quote)
-
-    # List Quotes
-    quotes_array = []
-
-    quotes = client.list_quotes(ticker=ticker, timestamp="2023-03-31")
-    for quote in quotes:
-        quotes_array.append(quote)
-        print(quote)
-
-    # print("Tes")
+    return forex_data_minute
 
 if __name__ == "__main__":
     
@@ -403,6 +383,7 @@ if __name__ == "__main__":
     print(f"Running Indicator{'.'*30}")
     print("="*120)
 
+    # out = indicator(df)
     out = indicator(df_data)
     # print("Saving results to results.csv")
     # out.to_csv('results.csv', index=False)

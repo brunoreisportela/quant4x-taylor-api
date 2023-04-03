@@ -129,7 +129,12 @@ def regime_filter(open_, high, low, close, src, threshold, useRegimeFilter):
     for i in range(1, len(close)):
         value1.append( 0.2 * (src[i] - src[i-1]) + 0.8 * value1[i-1])
         value2.append(0.1 * (high[i] - low[i]) + 0.8 * value2[i-1])
-        omega = abs(value1[i] / value2[i])
+
+        if value1[i] > 0 and value2[i] > 0:
+            omega = abs(value1[i] / value2[i])
+        else:
+            omega = 0
+
         alpha = (-math.pow(omega,2) + math.sqrt(math.pow(omega, 4) + 16 * math.pow(omega,2))) / 8 
         klmf.append(alpha * src[i] + (1 - alpha) * klmf[i-1])
         absCurveSlope.append(abs(klmf[i] - klmf[i-1]))

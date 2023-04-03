@@ -16,13 +16,13 @@ class Sentiment:
             u'symbol' : u'UKOIL',
             u'screener' : u'cfd',
             u'exchange' : u'FX',
-            u'interval' : u'INTERVAL_2_HOURS'
+            u'interval' : u'INTERVAL_1_HOUR'
         },
         {
             u'symbol' : u'SPX',
             u'screener' : u'america',
             u'exchange' : u'SP',
-            u'interval' : u'INTERVAL_2_HOURS'
+            u'interval' : u'INTERVAL_1_HOUR'
         },
         {
             u'symbol' : u'GBPUSD',
