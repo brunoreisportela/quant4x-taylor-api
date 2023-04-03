@@ -16,13 +16,13 @@ class Sentiment:
             u'symbol' : u'UKOIL',
             u'screener' : u'cfd',
             u'exchange' : u'FX',
-            u'interval' : u'INTERVAL_1_DAY'
+            u'interval' : u'INTERVAL_2_HOURS'
         },
         {
             u'symbol' : u'SPX',
             u'screener' : u'america',
             u'exchange' : u'SP',
-            u'interval' : u'INTERVAL_1_DAY'
+            u'interval' : u'INTERVAL_2_HOURS'
         },
         {
             u'symbol' : u'GBPUSD',
@@ -62,6 +62,9 @@ class Sentiment:
 
             if symbol[u'interval'] == "INTERVAL_1_DAY":
                 interval_to_use = Interval.INTERVAL_1_DAY
+
+            if symbol[u'interval'] == "INTERVAL_2_HOURS":
+                interval_to_use = Interval.INTERVAL_2_HOURS
 
             instrument = TA_Handler(
                 symbol  = symbol[u'symbol'],
