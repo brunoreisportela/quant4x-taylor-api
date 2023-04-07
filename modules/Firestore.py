@@ -1,13 +1,9 @@
 # from .Whatsapp import *
-import os
 import requests
-import json
-
 import firebase_admin
+
 from firebase_admin import credentials
 from firebase_admin import firestore
-
-
 from datetime import datetime, timedelta
 
 class Firestore:

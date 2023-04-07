@@ -24,28 +24,28 @@ maytapi = MayTapi()
 talk = Talk(firestore = firestore)
 
 @app.route("/")
-def service():
+def get_service():
     return "Echo"
 
 @app.route("/echo")
-def echo():
+def get_echo():
     return "Echo"
 
 @app.route("/accounts", methods=['GET'])
-def accounts():
+def get_accounts():
     return json.dumps(firestore.get_accounts())
 
 @app.route("/sentiment", methods=['GET'])
-def sentiment():
+def get_sentiment():
     index = request.args["index"]
     return symbol_sentiment.get_status(index)
 
 @app.route("/products/performance", methods=['GET'])
-def products_performance():
+def get_products_performance():
     return json.dumps(firestore.get_products_performance())
 
 @app.route("/question", methods=['GET'])
-def question():
+def get_question():
     question = request.args["question"]
 
     if len(question) > 1:
@@ -54,7 +54,7 @@ def question():
         return json.dumps("No answer obtained due no question was made.")
     
 @app.route("/whatsapp/send_message", methods=['POST'])
-def whatsapp_send_message():
+def post_whatsapp_send_message():
     payload = request.form["payload"]
 
     return maytapi.sendMessage(payload)
