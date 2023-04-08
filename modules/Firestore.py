@@ -17,9 +17,9 @@ class Firestore:
         doc = lorentzian.get()
 
         if doc.exists:
-            return doc.to_dict()
+            return doc.to_dict()["direction"]
         else:
-            return None
+            return "neutral"
 
     def get_first_day_week(self, dt):
         # This is for getting from an specific date --- Test only ---
