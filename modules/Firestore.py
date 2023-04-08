@@ -11,6 +11,16 @@ class Firestore:
     cred = credentials.Certificate(u'quant4x-firebase-adminsdk-lf6g9-2b0a26729e.json')
     db = None
 
+    def get_lorentzian(self, symbol_translate):
+        lorentzian = self.db.collection(u'lorentzian').document(symbol_translate)
+
+        doc = lorentzian.get()
+
+        if doc.exists:
+            return doc.to_dict()
+        else:
+            return None
+
     def get_first_day_week(self, dt):
         # This is for getting from an specific date --- Test only ---
         # day = '06/04/2022'

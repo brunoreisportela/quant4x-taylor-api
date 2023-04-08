@@ -40,6 +40,11 @@ def get_sentiment():
     index = request.args["index"]
     return symbol_sentiment.get_status(index)
 
+@app.route("/lorentzian", methods=['GET'])
+def get_lorentzian():
+    symbol_translate = request.args["symbol"]
+    return firestore.get_lorentzian(symbol_translate)
+
 @app.route("/products/performance", methods=['GET'])
 def get_products_performance():
     return json.dumps(firestore.get_products_performance())
