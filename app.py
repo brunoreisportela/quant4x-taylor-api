@@ -1,4 +1,6 @@
 import json
+import os
+import yfinance as yf
 
 # print(f"SYS PATH: {sys.path}")
 # sudo lsof -i -P -n | grep LISTEN
@@ -11,8 +13,11 @@ from modules import Whatsapp
 from modules import Firestore
 from modules import Sentiment
 from modules import MayTapi
+from modules import NewsReader
 
 app = Flask(__name__)
+
+os.environ["OPENAI_API_KEY"] = "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"
 
 CORS(app)
 
@@ -22,6 +27,7 @@ symbol_sentiment = Sentiment()
 maytapi = MayTapi()
 
 talk = Talk(firestore = firestore)
+newsReader = NewsReader()
 
 @app.route("/")
 def get_service():
@@ -55,6 +61,18 @@ def get_question():
 
     if len(question) > 1:
         return json.dumps(talk.get_response(question))
+    else:
+        return json.dumps("No answer obtained due no question was made.")
+    
+@app.route("/news", methods=['GET'])
+def get_news():
+    index = int(request.args["index"])
+
+    # yfi = yf.Ticker("GBPUSD=X")
+
+    if index >= 0:
+        return json.dumps(newsReader.get_feed())
+        # return json.dumps(newsReader.get_response(yfi.news[index]["title"]))
     else:
         return json.dumps("No answer obtained due no question was made.")
     
