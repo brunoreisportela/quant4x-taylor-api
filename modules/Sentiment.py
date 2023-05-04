@@ -2,7 +2,6 @@ import json
 import logging
 from tradingview_ta import TA_Handler, Interval, Exchange
 
-
 class Sentiment:
 
     symbols = [
@@ -10,19 +9,19 @@ class Sentiment:
             u'symbol' : u'GC1!',
             u'screener' : u'america',
             u'exchange' : u'COMEX',
-            u'interval' : u'INTERVAL_1_HOUR'
+            u'interval' : u'INTERVAL_30_MINUTES'
         },
         {
             u'symbol' : u'UKOIL',
             u'screener' : u'cfd',
             u'exchange' : u'FX',
-            u'interval' : u'INTERVAL_1_HOUR'
+            u'interval' : u'INTERVAL_30_MINUTES'
         },
         {
             u'symbol' : u'SPX',
             u'screener' : u'america',
             u'exchange' : u'SP',
-            u'interval' : u'INTERVAL_1_HOUR'
+            u'interval' : u'INTERVAL_30_MINUTES'
         },
         {
             u'symbol' : u'GBPUSD',
@@ -60,11 +59,17 @@ class Sentiment:
 
             interval_to_use = Interval.INTERVAL_15_MINUTES
 
-            if symbol[u'interval'] == "INTERVAL_1_DAY":
-                interval_to_use = Interval.INTERVAL_1_DAY
+            if symbol[u'interval'] == "INTERVAL_30_MINUTES":
+                interval_to_use = Interval.INTERVAL_30_MINUTES
+
+            if symbol[u'interval'] == "INTERVAL_1_HOUR":
+                interval_to_use = Interval.INTERVAL_1_HOUR
 
             if symbol[u'interval'] == "INTERVAL_2_HOURS":
                 interval_to_use = Interval.INTERVAL_2_HOURS
+
+            if symbol[u'interval'] == "INTERVAL_1_DAY":
+                interval_to_use = Interval.INTERVAL_1_DAY
 
             instrument = TA_Handler(
                 symbol  = symbol[u'symbol'],
