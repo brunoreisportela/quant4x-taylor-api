@@ -18,7 +18,7 @@ from modules import NewsReader
 
 app = Flask(__name__)
 
-os.environ["OPENAI_API_KEY"] = "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"
+# os.environ["OPENAI_API_KEY"] = "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"
 
 CORS(app)
 
