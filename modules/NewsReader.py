@@ -15,23 +15,53 @@ class NewsReader:
         self.pre_prompt = "Please respond buy, strongly_buy, sell, strongly_sell or neutral to the given news:"
         
     def get_feed(self):
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0'
-        }
-
+        entries = []
+        
         ticker = 'GBPUSD=X'
 
         rssfeedurl = 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=%s&region=US&lang=en-US'%ticker
 
         NewsFeed = feedparser.parse(rssfeedurl)
-        type(NewsFeed)
         NewsFeed.keys()
-        len(NewsFeed.entries)
-        NewsFeed.entries[0]
+        
+        range_max = len(NewsFeed.entries)
 
-        entries = []
+        if range_max > 3:
+            range_max = 3
 
-        for i in range(len(NewsFeed.entries)):
+        for i in range(range_max):
+            message = f'{NewsFeed.entries[i].title} {NewsFeed.entries[i].summary}'
+            entries.append({"news": message, "result": self.get_response(message)})
+
+        ticker = 'EURUSD=X'
+
+        rssfeedurl = 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=%s&region=US&lang=en-US'%ticker
+
+        NewsFeed = feedparser.parse(rssfeedurl)
+        NewsFeed.keys()
+        
+        range_max = len(NewsFeed.entries)
+
+        if range_max > 3:
+            range_max = 3
+
+        for i in range(range_max):
+            message = f'{NewsFeed.entries[i].title} {NewsFeed.entries[i].summary}'
+            entries.append({"news": message, "result": self.get_response(message)})
+
+        ticker = 'GC=F'
+
+        rssfeedurl = 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=%s&region=US&lang=en-US'%ticker
+
+        NewsFeed = feedparser.parse(rssfeedurl)
+        NewsFeed.keys()
+        
+        range_max = len(NewsFeed.entries)
+
+        if range_max > 3:
+            range_max = 3
+
+        for i in range(range_max):
             message = f'{NewsFeed.entries[i].title} {NewsFeed.entries[i].summary}'
             entries.append({"news": message, "result": self.get_response(message)})
 
