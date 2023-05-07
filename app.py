@@ -1,9 +1,12 @@
 import json
+import os
+import yfinance as yf
 
 # print(f"SYS PATH: {sys.path}")
 # sudo lsof -i -P -n | grep LISTEN
 
-from flask import Flask,request
+from flask import Flask,request,render_template
+from flask_table import Table, Col
 from flask_cors import CORS
 
 from modules import Talk
@@ -11,8 +14,11 @@ from modules import Whatsapp
 from modules import Firestore
 from modules import Sentiment
 from modules import MayTapi
+from modules import NewsReader
 
 app = Flask(__name__)
+
+# os.environ["OPENAI_API_KEY"] = "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"
 
 CORS(app)
 
@@ -22,6 +28,11 @@ symbol_sentiment = Sentiment()
 maytapi = MayTapi()
 
 talk = Talk(firestore = firestore)
+newsReader = NewsReader()
+
+class ItemTable(Table):
+    news = Col('news')
+    result = Col('result')
 
 @app.route("/")
 def get_service():
@@ -58,6 +69,14 @@ def get_question():
     else:
         return json.dumps("No answer obtained due no question was made.")
     
+@app.route("/news", methods=['GET'])
+def get_news():
+    # yfi = yf.Ticker("GBPUSD=X")
+    table = ItemTable(newsReader.get_feed())
+    return table.__html__()
+    # return render_template("news.html", table=table)
+    # return json.dumps(newsReader.get_response(yfi.news[index]["title"]))
+
 @app.route("/whatsapp/send_message", methods=['POST'])
 def post_whatsapp_send_message():
     payload = request.form["payload"]
