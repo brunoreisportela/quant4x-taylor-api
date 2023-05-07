@@ -9,43 +9,43 @@ class Sentiment:
             u'symbol' : u'GC1!',
             u'screener' : u'america',
             u'exchange' : u'COMEX',
-            u'interval' : u'INTERVAL_30_MINUTES'
+            u'interval' : u'INTERVAL_1_DAY'
         },
         {
             u'symbol' : u'UKOIL',
             u'screener' : u'cfd',
             u'exchange' : u'FX',
-            u'interval' : u'INTERVAL_30_MINUTES'
+            u'interval' : u'INTERVAL_1_DAY'
         },
         {
             u'symbol' : u'SPX',
             u'screener' : u'america',
             u'exchange' : u'SP',
-            u'interval' : u'INTERVAL_30_MINUTES'
+            u'interval' : u'INTERVAL_1_DAY'
         },
         {
             u'symbol' : u'GBPUSD',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_15_MINUTES'
+            u'interval' : u'INTERVAL_1_DAY'
         },
         {
             u'symbol' : u'EURUSD',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_15_MINUTES'
+            u'interval' : u'INTERVAL_1_DAY'
         },
         {
             u'symbol' : u'USDJPY',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_15_MINUTES'
+            u'interval' : u'INTERVAL_1_DAY'
         },
         {
             u'symbol' : u'USDCAD',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_15_MINUTES'
+            u'interval' : u'INTERVAL_1_DAY'
         },
     ]
 
