@@ -69,7 +69,7 @@ class NewsReader:
 
     def get_response(self, input):
 
-        # input = input.replace("\"", "\n")
+        input = input.replace("\"", "\n")
 
         response = openai.Completion.create(
             model="text-davinci-003",
@@ -77,6 +77,13 @@ class NewsReader:
             max_tokens=800,
             temperature=0
         )
+
+        # response = openai.ChatCompletion.create(
+        #     model="gpt-3.5-turbo",
+        #     messages=[
+        #         {"role": "user", "content": f"{self.pre_prompt}\n {input}\n"}
+        #     ]
+        # )
 
         if len(response.choices) > 0:
             return response.choices[0].text.replace("\n","")
