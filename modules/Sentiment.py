@@ -9,43 +9,43 @@ class Sentiment:
             u'symbol' : u'GC1!',
             u'screener' : u'america',
             u'exchange' : u'COMEX',
-            u'interval' : u'INTERVAL_1_DAY'
+            u'interval' : u'INTERVAL_1_WEEK'
         },
         {
             u'symbol' : u'UKOIL',
             u'screener' : u'cfd',
             u'exchange' : u'FX',
-            u'interval' : u'INTERVAL_1_DAY'
+            u'interval' : u'INTERVAL_1_WEEK'
         },
         {
             u'symbol' : u'SPX',
             u'screener' : u'america',
             u'exchange' : u'SP',
-            u'interval' : u'INTERVAL_1_DAY'
+            u'interval' : u'INTERVAL_1_WEEK'
         },
         {
             u'symbol' : u'GBPUSD',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_1_DAY'
+            u'interval' : u'INTERVAL_1_WEEK'
         },
         {
             u'symbol' : u'EURUSD',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_1_DAY'
+            u'interval' : u'INTERVAL_1_WEEK'
         },
         {
             u'symbol' : u'USDJPY',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_1_DAY'
+            u'interval' : u'INTERVAL_1_WEEK'
         },
         {
             u'symbol' : u'USDCAD',
             u'screener' : u'forex',
             u'exchange' : u'FX_IDC',
-            u'interval' : u'INTERVAL_1_DAY'
+            u'interval' : u'INTERVAL_1_WEEK'
         },
     ]
 
@@ -70,6 +70,9 @@ class Sentiment:
 
             if symbol[u'interval'] == "INTERVAL_1_DAY":
                 interval_to_use = Interval.INTERVAL_1_DAY
+
+            if symbol[u'interval'] == "INTERVAL_1_WEEK":
+                interval_to_use = Interval.INTERVAL_1_WEEK
 
             instrument = TA_Handler(
                 symbol  = symbol[u'symbol'],
