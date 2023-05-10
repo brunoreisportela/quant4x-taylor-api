@@ -50,7 +50,7 @@ class Sentiment:
     ]
 
     def get_status(self, index):
-
+        
         recommendation = "NEUTRAL"
 
         try:
