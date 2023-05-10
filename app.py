@@ -71,11 +71,13 @@ def get_question():
     
 @app.route("/news", methods=['GET'])
 def get_news():
-    # yfi = yf.Ticker("GBPUSD=X")
-    table = ItemTable(newsReader.get_feed())
-    return table.__html__()
-    # return render_template("news.html", table=table)
-    # return json.dumps(newsReader.get_response(yfi.news[index]["title"]))
+    headers = ["symbol", 'news', 'result']
+
+    return render_template(
+        'news.html',
+        headers=headers,
+        tableData=newsReader.get_feed()
+    )
 
 @app.route("/whatsapp/send_message", methods=['POST'])
 def post_whatsapp_send_message():
