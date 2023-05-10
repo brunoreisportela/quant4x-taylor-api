@@ -71,28 +71,13 @@ def get_question():
     
 @app.route("/news", methods=['GET'])
 def get_news():
-    headers = ['news', 'result']
-
-    tableData = [
-        {'fruit':'apple', 'price':4, 'country':'singapore'},
-        {'fruit':'orange', 'price':5, 'country':'singapore'},
-        {'fruit':'pear', 'price':6, 'country':'singapore'},
-        {'fruit':'apple', 'price':7, 'country':'malaysia'},
-        {'fruit':'orange', 'price':8, 'country':'malaysia'},
-        {'fruit':'pear', 'price':9, 'country':'malaysia'},
-    ]
+    headers = ["symbol", 'news', 'result']
 
     return render_template(
         'news.html',
         headers=headers,
         tableData=newsReader.get_feed()
     )
-
-    # yfi = yf.Ticker("GBPUSD=X")
-    table = ItemTable(newsReader.get_feed())
-    return table.__html__()
-    # return render_template("news.html", table=table)
-    # return json.dumps(newsReader.get_response(yfi.news[index]["title"]))
 
 @app.route("/whatsapp/send_message", methods=['POST'])
 def post_whatsapp_send_message():

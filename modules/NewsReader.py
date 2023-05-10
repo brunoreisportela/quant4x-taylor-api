@@ -31,7 +31,7 @@ class NewsReader:
 
         for i in range(range_max):
             message = f'{NewsFeed.entries[i].title} {NewsFeed.entries[i].summary}'
-            entries.append({"news": message, "result": self.get_response("GBPUSD", message)})
+            entries.append({"symbol": "GBPUSD", "news": message, "result": self.get_response("GBPUSD", message)})
 
         ticker = 'EURUSD=X'
 
@@ -47,7 +47,7 @@ class NewsReader:
 
         for i in range(range_max):
             message = f'{NewsFeed.entries[i].title} {NewsFeed.entries[i].summary}'
-            entries.append({"news": message, "result": self.get_response("EURUSD", message)})
+            entries.append({"symbol": "EURUSD", "news": message, "result": self.get_response("EURUSD", message)})
 
         ticker = 'GC=F'
 
@@ -63,7 +63,7 @@ class NewsReader:
 
         for i in range(range_max):
             message = f'{NewsFeed.entries[i].title} {NewsFeed.entries[i].summary}'
-            entries.append({"news": message, "result": self.get_response("GOLD", message)})
+            entries.append({"symbol": "GOLD", "news": message, "result": self.get_response("GOLD", message)})
 
         return entries
 
