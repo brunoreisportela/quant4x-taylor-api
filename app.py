@@ -76,8 +76,14 @@ def get_news():
     return render_template(
         'news.html',
         headers=headers,
-        tableData=newsReader.get_feed()
+        tableData=newsReader.get_feed_from_FX_street()
     )
+
+    # return render_template(
+    #     'news.html',
+    #     headers=headers,
+    #     tableData=newsReader.get_feed()
+    # )
 
 @app.route("/whatsapp/send_message", methods=['POST'])
 def post_whatsapp_send_message():
