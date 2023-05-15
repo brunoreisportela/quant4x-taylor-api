@@ -85,14 +85,18 @@ class Firestore:
             balance = self.get_balance_from_list(balances, doc_dict[u'name'])
             profit_loss = 0
             equity = 0
+            drawdown = 0
+
 
             for account_id in doc_dict[u'accounts']:
                 account = self.get_last_account_by_name(account_id, fmt_first_day)
                 # print(account)
 
                 if account != None and u'profit_loss' in account:
-                    profit_loss += account[u'profit_loss']
-                    equity += account[u'equity'] - account[u'balance']
+                    balance = account[u'balance']
+                    profit_loss = account[u'profit_loss']
+                    drawdown = account[u'drawdown']
+                    equity = account[u'equity'] - balance
 
             percent = 0
 
@@ -109,6 +113,9 @@ class Firestore:
             product_dict = {}
             product_dict[u'name'] = doc_dict[u'name']
             product_dict[u'profit_loss'] = profit_loss
+            product_dict[u'drawdown'] = drawdown
+            product_dict[u'balance'] = balance
+            product_dict[u'equity'] = equity
             product_dict[u'percent'] = percent
 
             products_list.append(product_dict)
