@@ -6,6 +6,9 @@ import time
 import json
 import logging
 
+# command to create one executable file
+# pyinstaller --onefile --windowed quant4x-monitoring.py
+
 from os import walk
 from os import path
 from datetime import datetime, timedelta
@@ -48,7 +51,7 @@ def read_file(path):
         f = open(path, "r")
 
         data = json.load(f)
-        
+
         dt = datetime.today()
 
         first_day_week = get_first_day_week(dt)
