@@ -22,56 +22,33 @@ db = firestore.client()
 parser = argparse.ArgumentParser()
 
 # for windows
-# parser.add_argument("-p", "--path", default="C:\\Users\\Extreme PC\\Documents\\node\\quant4x-dashboard\\python", help="Set MT4 main path")
-
-# for mac
-parser.add_argument("-p", "--path", default="C:\\Users\\babablacksheep\\AppData\\Roaming\\MetaQuotes\\Terminal", help="Set MT4 main path")
+parser.add_argument("-p", "--path", default="C:\\Users\\Extreme PC\\Documents\\node\\quant4x-dashboard\\python", help="Set MT4 main path")
 
 args = parser.parse_args()
 
 mt_path = args.path
 
 def get_first_day_week(dt):
-    # This is for getting from an specific date --- Test only ---
-    # day = '06/04/2022'
-    # dt = datetime.strptime(day, '%d/%m/%Y')
-
-    # This is to get from the actual date -- Prod ---
     dt = datetime.today()
-
     start = dt - timedelta(days=dt.weekday()+1)
-    end = start + timedelta(days=7)
-
-    # print(start)
-    # print(end)
-
     return start
 
+def convert_to_date(date_string):
+    dt = datetime.strptime(date_string, '%Y.%m.%d %H:%M:%S')
+    return dt
+
 def get_last_day_week(dt):
-    # This is for getting from an specific date --- Test only ---
-    # day = '06/04/2022'
-    # dt = datetime.strptime(day, '%d/%m/%Y')
-
-    # This is to get from the actual date -- Prod ---
     dt = datetime.today()
-
     start = dt - timedelta(days=dt.weekday()+1)
     end = start + timedelta(days=7)
-
-    # print(start)
-    # print(end)
-
     return end    
-
 
 def read_file(path):
     try:
         f = open(path, "r")
 
         data = json.load(f)
-
-        # day = '06/04/2022'
-        # dt = datetime.strptime(day, '%d/%m/%Y')
+        
         dt = datetime.today()
 
         first_day_week = get_first_day_week(dt)
@@ -83,7 +60,6 @@ def read_file(path):
         current_profit = 0.0
 
         for i in data['transactions']:
-            # print(i)
             transactions += 1
             transaction_close_date = datetime.strptime(
                 i["close_time"], '%Y.%m.%d %H:%M:%S')
@@ -103,7 +79,7 @@ def read_file(path):
         # print(prior_profit)
         # print(current_profit)
         # print(data["kpi"]["balance"])
-
+    
         id = data['mt_account_id']
         fmt_first_day = first_day_week.strftime("%m_%d_%Y")
         fmt_last_day = last_day_week.strftime("%m_%d_%Y")
@@ -122,7 +98,8 @@ def read_file(path):
             u'end_scope': last_day_week.strftime("%m/%d/%Y"),
             u'machine_name': data["info"]["machine_name"],
             u'product_name': data["info"]["product_name"],
-            u'profit_loss': current_profit
+            u'profit_loss': current_profit,
+            u'transactions': data['transactions']
         })
 
     except ValueError:
@@ -136,13 +113,10 @@ def search_files():
                 # for windows
                 path_to_check = dir_path+"\\track_taylor.txt"
 
-                # for mac
-                # path_to_check = dir_path+"/track_taylor.txt"
-
                 if path.exists(path_to_check) == True:
                     read_file(path_to_check)
 
-            time.sleep(1800.0)
+            time.sleep(60.0)
 
     except KeyboardInterrupt:
         print("Program finished by user.")
@@ -151,7 +125,8 @@ def search_files():
 
 if __name__ == "__main__":
     # to test
-    # read_file("track_taylor.txt")
+    read_file("track_taylor.txt")
+    pass
 
     try:
         search_files()

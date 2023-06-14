@@ -22,34 +22,17 @@ class Firestore:
             return "neutral"
 
     def get_first_day_week(self, dt):
-        # This is for getting from an specific date --- Test only ---
-        # day = '06/04/2022'
-        # dt = datetime.strptime(day, '%d/%m/%Y')
-
-        # This is to get from the actual date -- Prod ---
         dt = datetime.today()
 
         start = dt - timedelta(days=dt.weekday()+1)
-        end = start + timedelta(days=7)
-
-        # print(start)
-        # print(end)
 
         return start
 
     def get_last_day_week(self, dt):
-        # This is for getting from an specific date --- Test only ---
-        # day = '06/04/2022'
-        # dt = datetime.strptime(day, '%d/%m/%Y')
-
-        # This is to get from the actual date -- Prod ---
         dt = datetime.today()
 
         start = dt - timedelta(days=dt.weekday()+1)
         end = start + timedelta(days=5)
-
-        # print(start)
-        # print(end)
 
         return end
     
@@ -148,6 +131,18 @@ class Firestore:
             print(u'Error on getting balance data')
 
         return balances
+    
+    def get_clients(self):
+
+        results = self.db.collection('clients').get()
+
+        clients = []
+
+        for doc in results:
+            doc_dict = doc.to_dict()
+            clients.append(doc_dict)
+
+        return clients
 
     def get_last_account_by_name(self, account_id, fmt_first_day):
         accounts = self.db.collection(u'accounts')
@@ -159,6 +154,53 @@ class Firestore:
             account_dict = doc.to_dict()
 
         return account_dict
+    
+    def convert_to_date(date_string):
+        dt = datetime.strptime(date_string, '%Y.%m.%d %H:%M:%S')
+        return dt
+
+    def get_account(self, account_id, from_date, to_date):
+
+        results = self.db.collection('accounts').where('account_id', '==', account_id).order_by('start_scope', direction=firestore.Query.DESCENDING).limit(1).get()
+
+        products = []
+
+        from_date_time = datetime.strptime(from_date, '%d/%m/%Y')
+        to_date_time = datetime.strptime(to_date, '%d/%m/%Y')
+
+        for doc in results:
+            doc_dict = doc.to_dict()
+            total_profit_loss = 0.0
+
+            if u'transactions' in doc_dict:
+                transactions = doc_dict[u'transactions']
+
+                for transaction in transactions:
+                    profit = transaction['profit']
+                    swap = transaction['swap']
+
+                    transaction_close_date = datetime.strptime(
+                        transaction["close_time"], '%Y.%m.%d %H:%M:%S')
+
+                    if transaction_close_date >= from_date_time and transaction_close_date <= to_date_time and transaction["type"] != 0 and transaction["type"] != 1:
+                        total_profit_loss += profit+(swap)
+
+            decay = doc_dict[u'equity']-doc_dict[u'balance']
+            decay_percent = decay / doc_dict[u'balance']
+
+            doc_dict[u'decay'] = decay
+            doc_dict[u'decay_percent'] = decay_percent
+
+            doc_dict[u'profit_loss'] = total_profit_loss
+
+            doc_dict.pop(u'transactions')
+            doc_dict.pop(u'start_scope')
+            doc_dict.pop(u'end_scope')
+            doc_dict.pop(u'machine_name')
+            
+            products.append(doc_dict)
+
+        return products
     
     def get_accounts(self):
 

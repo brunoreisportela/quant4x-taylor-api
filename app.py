@@ -46,6 +46,10 @@ def get_echo():
 def get_accounts():
     return json.dumps(firestore.get_accounts())
 
+@app.route("/clients", methods=['GET'])
+def get_clients():
+    return json.dumps(firestore.get_clients())
+
 @app.route("/sentiment", methods=['GET'])
 def get_sentiment():
     index = request.args["index"]
@@ -69,6 +73,13 @@ def get_question():
     else:
         return json.dumps("No answer obtained due no question was made.")
     
+@app.route("/account", methods=['GET'])
+def get_account():
+    account_id = request.args["account_id"]
+    from_date = request.args["from_date"]
+    to_date = request.args["to_date"]
+    return json.dumps(firestore.get_account(account_id, from_date, to_date))
+    
 @app.route("/news", methods=['GET'])
 def get_news():
     headers = ["symbol", 'news', 'result']
@@ -78,12 +89,6 @@ def get_news():
         headers=headers,
         tableData=newsReader.get_feed_from_FX_street()
     )
-
-    # return render_template(
-    #     'news.html',
-    #     headers=headers,
-    #     tableData=newsReader.get_feed()
-    # )
 
 @app.route("/whatsapp/send_message", methods=['POST'])
 def post_whatsapp_send_message():
