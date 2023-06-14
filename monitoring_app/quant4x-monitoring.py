@@ -128,8 +128,8 @@ def search_files():
 
 if __name__ == "__main__":
     # to test
-    read_file("track_taylor.txt")
-    pass
+    # read_file("track_taylor.txt")
+    # pass
 
     try:
         search_files()
