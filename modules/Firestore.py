@@ -1,6 +1,7 @@
 # from .Whatsapp import *
 import requests
 import firebase_admin
+import json
 
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -131,18 +132,6 @@ class Firestore:
             print(u'Error on getting balance data')
 
         return balances
-    
-    def get_clients(self):
-
-        results = self.db.collection('clients').get()
-
-        clients = []
-
-        for doc in results:
-            doc_dict = doc.to_dict()
-            clients.append(doc_dict)
-
-        return clients
 
     def get_last_account_by_name(self, account_id, fmt_first_day):
         accounts = self.db.collection(u'accounts')
@@ -155,11 +144,38 @@ class Firestore:
 
         return account_dict
     
-    def convert_to_date(date_string):
+    def get_now_flat_date(self):
+        dt = datetime.now().strftime("%d/%m/%Y")
+        return dt
+    
+    def convert_to_date(self, date_string):
         dt = datetime.strptime(date_string, '%Y.%m.%d %H:%M:%S')
         return dt
 
-    def get_account(self, account_id, from_date, to_date):
+    def get_clients(self):
+
+        results = self.db.collection('clients').get()
+
+        clients = []
+
+        for doc in results:
+            doc_dict = doc.to_dict()
+
+            doc_accounts_array = doc_dict["accounts"]
+
+            accounts = []
+
+            for account in doc_accounts_array:
+                account = self.get_account(account, to_date=self.get_now_flat_date())
+                accounts.append(account)
+
+            # clients["accounts"] = json.dumps(accounts)
+            doc_dict["accounts"] = accounts
+            clients.append(doc_dict)
+
+        return clients
+
+    def get_account(self, account_id, from_date = "01/01/1970", to_date = "01/01/1970"):
 
         results = self.db.collection('accounts').where('account_id', '==', account_id).order_by('start_scope', direction=firestore.Query.DESCENDING).limit(1).get()
 

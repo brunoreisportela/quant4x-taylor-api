@@ -7,7 +7,7 @@ import json
 import logging
 
 # command to create one executable file
-# pyinstaller --onefile --windowed quant4x-monitoring.py
+# PyInstaller --onefile --windowed quant4x-monitoring.py
 
 from os import walk
 from os import path
