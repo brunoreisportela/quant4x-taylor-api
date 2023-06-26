@@ -87,9 +87,11 @@ class Firestore:
             profit_loss = profit_loss + equity
 
             if profit_loss > 0:
-                profit_loss = profit_loss - ( profit_loss * 0.08)
+                profit_loss = profit_loss 
+                # - ( profit_loss * 0.08)
             elif profit_loss < 0:
-                profit_loss = profit_loss + ( profit_loss * 0.08)
+                profit_loss = profit_loss 
+                # + ( profit_loss * 0.08)
 
             if profit_loss != 0 and balance != 0:
                 percent += ( profit_loss / balance ) * 100
