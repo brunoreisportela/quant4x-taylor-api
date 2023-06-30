@@ -53,6 +53,10 @@ class Firestore:
         # Update products active deposits
 
         balances = self.get_product_balance()
+
+        total_week_profit = 0.0
+        total_week_balance = 0.0
+        avg_accounts = 0
         
         # sync accounts data with the accounts in products
         products = self.db.collection(u'products')
@@ -105,6 +109,17 @@ class Firestore:
             product_dict[u'percent'] = percent
 
             products_list.append(product_dict)
+
+            avg_accounts += 1
+
+            total_week_profit += profit_loss
+            total_week_balance += balance
+
+        avg_profit_percent = (total_week_profit / balance) * 100
+        avg_profit = total_week_profit
+
+        return_object['avg_profit_percent'] = avg_profit_percent
+        return_object['week_profit'] = avg_profit
 
         return_object['is_live'] = self.get_is_live(first_day_week, last_day_week)
         return_object['products'] = products_list
