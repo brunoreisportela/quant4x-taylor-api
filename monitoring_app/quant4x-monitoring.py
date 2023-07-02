@@ -5,6 +5,8 @@ import time
 
 import json
 import logging
+import tkinter as tk
+import datetime
 
 # command to create one executable file
 # PyInstaller --onefile --windowed quant4x-monitoring.py
@@ -30,6 +32,8 @@ parser.add_argument("-p", "--path", default="C:\\Users\\Extreme PC\\Documents\\n
 args = parser.parse_args()
 
 mt_path = args.path
+
+window = tk.Tk()
 
 def get_first_day_week(dt):
     dt = datetime.today()
@@ -111,29 +115,58 @@ def read_file(path):
 
 def search_files():
     try:
-        while True:
-            for (dir_path, dir_names, file_names) in walk(mt_path):
-                # for windows
-                path_to_check = dir_path+"\\track_taylor.txt"
+        # while True:
+        for (dir_path, dir_names, file_names) in walk(mt_path):
+            # for windows
+            path_to_check = dir_path+"\\track_taylor.txt"
 
-                if path.exists(path_to_check) == True:
-                    read_file(path_to_check)
+            if path.exists(path_to_check) == True:
+                read_file(path_to_check)
 
-            time.sleep(60.0)
+            # time.sleep(60.0)
 
     except KeyboardInterrupt:
         print("Program finished by user.")
         pass
 
+def update_dashboard(title_label):
+
+    try:
+        search_files()
+        
+    except Exception as e:
+        logging.critical(e, exc_info=True)  # log exception info at CRITICAL log level
+        search_files()
+        pass
+
+    # Schedule the next update after 1 second (1000 milliseconds)
+
+    current_time = datetime.now()
+    time_string = current_time.strftime("%H:%M:%S")  # Format as HH:MM:SS
+
+    title_label.configure(text=time_string)
+
+    window.after(30000, update_dashboard, title_label)
 
 if __name__ == "__main__":
     # to test
     # read_file("track_taylor.txt")
     # pass
+    window.title("Quant4x Monitoring")
+    window.configure(width=800, height=600)
+    window.configure(bg='lightgray')
 
-    try:
-        search_files()
-    except Exception as e:
-        logging.critical(e, exc_info=True)  # log exception info at CRITICAL log level
-        search_files()
-        pass
+    # move window center
+    winWidth = window.winfo_reqwidth()
+    winwHeight = window.winfo_reqheight()
+    posRight = int(window.winfo_screenwidth() / 2 - winWidth / 2)
+    posDown = int(window.winfo_screenheight() / 2 - winwHeight / 2)
+    window.geometry("+{}+{}".format(posRight, posDown))
+
+    # Create a title label
+    title_label = tk.Label(window, text="Cool Dashboard", font=("Arial", 14))
+    title_label.pack(pady=20)
+
+    update_dashboard(title_label)
+
+    window.mainloop()
