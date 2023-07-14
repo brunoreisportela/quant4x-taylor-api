@@ -64,6 +64,16 @@ def get_lorentzian():
 def get_products_performance():
     return json.dumps(firestore.get_products_performance())
 
+@app.route("/products/performance/code", methods=['GET'])
+def get_products_performance_code():
+    code = request.args["code"]
+    return json.dumps(firestore.get_products_performance_code(code))
+
+@app.route("/percent/performance/code", methods=['GET'])
+def get_percent_performance_code():
+    code = request.args["code"]
+    return json.dumps(firestore.get_percent_performance_code(code))
+
 @app.route("/question", methods=['GET'])
 def get_question():
     question = request.args["question"]

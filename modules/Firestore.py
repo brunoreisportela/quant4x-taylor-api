@@ -46,6 +46,70 @@ class Firestore:
                 return balance[u'balance']
         
         return 0.0
+    
+    def get_products_performance_code(self, code):
+
+        clients = self.db.collection(u'clients').where(u'code', u'==', code).get()
+        
+        accounts = []
+
+        client_dict = {}
+
+        for doc in clients:
+            doc_dict = doc.to_dict()
+
+            client_dict = doc_dict
+
+            total_profit_loss = 0.0
+            total_balance = 0.0
+
+            for account in doc_dict[u'accounts']:
+                account_from_data = self.get_account_by_account_id(account)
+
+                total_profit_loss += account_from_data[u'profit_loss']
+                total_balance += account_from_data[u'balance']
+
+                accounts.append( account_from_data )
+
+            client_dict[u'total_profit_loss'] = total_profit_loss
+            client_dict[u'total_balance'] = total_balance
+            client_dict[u'total_to_take'] = abs(total_balance)+abs(total_profit_loss)
+            client_dict[u'accounts'] = accounts
+            client_dict[u'total_profit_percent'] = round((client_dict["total_profit_loss"]/client_dict["total_to_take"]) * 100, 2)
+
+        return client_dict
+    
+    def get_percent_performance_code(self, code):
+
+        clients = self.db.collection(u'clients').where(u'code', u'==', code).get()
+        
+        accounts = []
+
+        client_dict = {}
+
+        for doc in clients:
+            doc_dict = doc.to_dict()
+
+            client_dict = doc_dict
+
+            total_profit_loss = 0.0
+            total_balance = 0.0
+
+            for account in doc_dict[u'accounts']:
+                account_from_data = self.get_account_by_account_id(account)
+
+                total_profit_loss += account_from_data[u'profit_loss']
+                total_balance += account_from_data[u'balance']
+
+                accounts.append( account_from_data )
+
+            client_dict[u'total_profit_loss'] = total_profit_loss
+            client_dict[u'total_balance'] = total_balance
+            client_dict[u'total_to_take'] = abs(total_balance)+abs(total_profit_loss)
+            client_dict[u'accounts'] = accounts
+            client_dict[u'total_profit_percent'] = round((client_dict["total_profit_loss"]/client_dict["total_to_take"]) * 100, 2)
+
+        return client_dict[u'total_profit_percent'] 
 
     def get_products_performance(self):
         products_list = []
@@ -274,6 +338,40 @@ class Firestore:
 
             if self.findKeyInArray(products, doc_dict[u'account_id'], 'account_id') == False:
                 products.append(account_dict)
+
+
+        return products
+    
+    def get_account_by_account_id(self, account_id):
+
+        accounts = self.db.collection(u'accounts').where(u'account_id', u'==', account_id)
+        results = accounts.order_by(u'start_scope', direction=firestore.Query.DESCENDING).get()
+
+        products = []
+
+        for doc in results:
+            doc_dict = doc.to_dict()
+
+            history = []
+
+            history_dict = {}
+            history_dict[u'start_scope'] = doc_dict[u'start_scope']
+            history_dict[u'end_scope'] = doc_dict[u'end_scope']
+            history_dict[u'profit_loss'] = doc_dict[u'profit_loss']
+            history_dict[u'balance'] = doc_dict[u'balance']
+            
+            if u'equity' in doc_dict:
+                history_dict[u'equity'] = doc_dict[u'equity']
+
+            history.append(history_dict)
+
+            doc_dict[u'profit_loss'] = history[len(history)-1][u'profit_loss']
+
+            doc_dict[u'history'] = history
+
+            if self.findKeyInArray(products, doc_dict[u'account_id'], 'account_id') == False:
+                # products.append(doc_dict)
+                return doc_dict
 
 
         return products
