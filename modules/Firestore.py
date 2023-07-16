@@ -77,7 +77,19 @@ class Firestore:
             client_dict[u'accounts'] = accounts
             client_dict[u'total_profit_percent'] = round((client_dict["total_profit_loss"]/client_dict["total_to_take"]) * 100, 2)
 
+        self.save_client_performance(code, client_dict)
+
         return client_dict
+    
+    def save_client_performance(self, code, doc_dict):
+        clients = self.db.collection(u'clients').where(u'code', u'==', code).get()
+        
+        for doc in clients:
+            # Update the document(s) here
+            doc_dict.pop("accounts")
+
+            document_ref = self.db.collection(u'clients').document(doc.id)
+            document_ref.update(doc_dict)
     
     def get_percent_performance_code(self, code):
 
@@ -108,6 +120,8 @@ class Firestore:
             client_dict[u'total_to_take'] = abs(total_balance)+abs(total_profit_loss)
             client_dict[u'accounts'] = accounts
             client_dict[u'total_profit_percent'] = round((client_dict["total_profit_loss"]/client_dict["total_to_take"]) * 100, 2)
+
+        self.save_client_performance(code, client_dict)
 
         return client_dict[u'total_profit_percent'] 
 
