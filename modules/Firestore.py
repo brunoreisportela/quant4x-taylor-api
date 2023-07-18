@@ -272,7 +272,7 @@ class Firestore:
             accounts = []
 
             for account in doc_accounts_array:
-                account = self.get_account(account, to_date=self.get_now_flat_date())
+                # account = self.get_account(account, to_date=self.get_now_flat_date())
                 accounts.append(account)
 
             # clients["accounts"] = json.dumps(accounts)
