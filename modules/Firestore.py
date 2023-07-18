@@ -66,17 +66,22 @@ class Firestore:
             for account in doc_dict[u'accounts']:
                 account_from_data = self.get_account_by_account_id(account)
 
-                total_profit_loss += account_from_data[u'profit_loss']
-                total_balance += account_from_data[u'balance']
+                if 'profit_loss' in account_from_data:
+                    total_profit_loss += account_from_data[u'profit_loss']
+                    total_balance += account_from_data[u'balance']
 
-                accounts.append( account_from_data )
+                    accounts.append( account_from_data )
 
             client_dict[u'total_profit_loss'] = total_profit_loss
             client_dict[u'total_balance'] = total_balance
             client_dict[u'total_to_take'] = abs(total_balance)+abs(total_profit_loss)
             client_dict[u'accounts'] = accounts
-            client_dict[u'total_profit_percent'] = round((client_dict["total_profit_loss"]/client_dict["total_to_take"]) * 100, 2)
 
+            if client_dict["total_profit_loss"] != 0 and client_dict["total_to_take"] != 0:
+                client_dict[u'total_profit_percent'] = round((client_dict["total_profit_loss"]/client_dict["total_to_take"]) * 100, 2)
+            else:
+                client_dict[u'total_profit_percent'] = 0.0
+                
         self.save_client_performance(code, client_dict)
 
         return client_dict
@@ -110,16 +115,22 @@ class Firestore:
             for account in doc_dict[u'accounts']:
                 account_from_data = self.get_account_by_account_id(account)
 
-                total_profit_loss += account_from_data[u'profit_loss']
-                total_balance += account_from_data[u'balance']
+                if 'profit_loss' in account_from_data:
+                    total_profit_loss += account_from_data[u'profit_loss']
+                    total_balance += account_from_data[u'balance']
 
-                accounts.append( account_from_data )
+                    accounts.append( account_from_data )
 
             client_dict[u'total_profit_loss'] = total_profit_loss
             client_dict[u'total_balance'] = total_balance
             client_dict[u'total_to_take'] = abs(total_balance)+abs(total_profit_loss)
             client_dict[u'accounts'] = accounts
-            client_dict[u'total_profit_percent'] = round((client_dict["total_profit_loss"]/client_dict["total_to_take"]) * 100, 2)
+
+            if client_dict["total_profit_loss"] != 0 and client_dict["total_to_take"] != 0:
+                client_dict[u'total_profit_percent'] = round((client_dict["total_profit_loss"]/client_dict["total_to_take"]) * 100, 2)
+            else:
+                client_dict[u'total_profit_percent'] = 0.0
+
 
         self.save_client_performance(code, client_dict)
 
