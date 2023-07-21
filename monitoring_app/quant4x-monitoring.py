@@ -8,6 +8,9 @@ import logging
 import tkinter as tk
 import datetime
 
+import psycopg2
+import psycopg2.extras
+
 # command to create one executable file
 # PyInstaller --onefile --windowed quant4x-monitoring.py
 
@@ -18,6 +21,9 @@ from datetime import datetime, timedelta
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+
+conn = None
+cursor = None
 
 cred = credentials.Certificate("quant4x-firebase-adminsdk-lf6g9-2b0a26729e.json")
 
@@ -149,6 +155,15 @@ def update_dashboard(title_label):
     window.after(30000, update_dashboard, title_label)
 
 if __name__ == "__main__":
+
+    conn = psycopg2.connect(database="defaultdb",
+            host="quant4x-admin-database-do-user-3044858-0.b.db.ondigitalocean.com",
+            user="doadmin",
+            password="AVNS_KmHOAPDB_osaTG-XvN9",
+            port="25060")
+
+    cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+    
     # to test
     # read_file("track_taylor.txt")
     # pass
