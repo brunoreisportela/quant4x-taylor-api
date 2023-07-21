@@ -6,6 +6,16 @@ class DBController:
     conn = None
     cursor = None
 
+    def get_client_by_code(self, code):
+        self.cursor.execute(f"SELECT * FROM clients AS cli INNER JOIN accounts AS acc ON acc.client_code = cli.code WHERE cli.code = {code}")
+
+        cursor_result = self.cursor.fetchone()
+
+        if cursor_result == None:
+            return None
+        else:
+            return cursor_result
+        
     def set_user_code(self, email, code):
 
         sql = f"UPDATE users SET code = '{code}' WHERE email = '{email}'"

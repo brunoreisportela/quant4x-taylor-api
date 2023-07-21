@@ -1,6 +1,5 @@
-import json
 import os
-import yfinance as yf
+import simplejson as json
 
 # print(f"SYS PATH: {sys.path}")
 # sudo lsof -i -P -n | grep LISTEN
@@ -15,6 +14,7 @@ from modules import Firestore
 from modules import Sentiment
 from modules import MayTapi
 from modules import NewsReader
+from modules import DBController
 
 app = Flask(__name__)
 
@@ -22,12 +22,13 @@ app = Flask(__name__)
 
 CORS(app)
 
-whatsapp = Whatsapp()
-firestore = Firestore()
-symbol_sentiment = Sentiment()
-maytapi = MayTapi()
+# whatsapp = Whatsapp()
+# firestore = Firestore()
+# symbol_sentiment = Sentiment()
+# maytapi = MayTapi()
+dbController = DBController()
 
-talk = Talk(firestore = firestore)
+# talk = Talk(firestore = firestore)
 newsReader = NewsReader()
 
 class ItemTable(Table):
@@ -42,66 +43,72 @@ def get_service():
 def get_echo():
     return "Echo"
 
-@app.route("/accounts", methods=['GET'])
-def get_accounts():
-    return json.dumps(firestore.get_accounts())
+# @app.route("/accounts", methods=['GET'])
+# def get_accounts():
+#     return json.dumps(firestore.get_accounts())
 
-@app.route("/clients", methods=['GET'])
-def get_clients():
-    return json.dumps(firestore.get_clients())
+# @app.route("/clients", methods=['GET'])
+# def get_clients():
+#     return json.dumps(firestore.get_clients())
 
-@app.route("/sentiment", methods=['GET'])
-def get_sentiment():
-    index = request.args["index"]
-    return symbol_sentiment.get_status(index)
+# @app.route("/sentiment", methods=['GET'])
+# def get_sentiment():
+#     index = request.args["index"]
+#     return symbol_sentiment.get_status(index)
 
-@app.route("/lorentzian", methods=['GET'])
-def get_lorentzian():
-    symbol_translate = request.args["symbol"]
-    return firestore.get_lorentzian(symbol_translate)
+# @app.route("/lorentzian", methods=['GET'])
+# def get_lorentzian():
+#     symbol_translate = request.args["symbol"]
+#     return firestore.get_lorentzian(symbol_translate)
 
-@app.route("/products/performance", methods=['GET'])
-def get_products_performance():
-    return json.dumps(firestore.get_products_performance())
+# @app.route("/products/performance", methods=['GET'])
+# def get_products_performance():
+#     return json.dumps(firestore.get_products_performance())
 
-@app.route("/products/performance/code", methods=['GET'])
-def get_products_performance_code():
-    code = request.args["code"]
-    return json.dumps(firestore.get_products_performance_code(code))
+# @app.route("/products/performance/code", methods=['GET'])
+# def get_products_performance_code():
+#     code = request.args["code"]
+#     return json.dumps(firestore.get_products_performance_code(code))
 
-@app.route("/percent/performance/code", methods=['GET'])
-def get_percent_performance_code():
-    code = request.args["code"]
-    return json.dumps(firestore.get_percent_performance_code(code))
+# @app.route("/percent/performance/code", methods=['GET'])
+# def get_percent_performance_code():
+#     code = request.args["code"]
+#     return json.dumps(firestore.get_percent_performance_code(code))
 
-@app.route("/question", methods=['GET'])
-def get_question():
-    question = request.args["question"]
+# @app.route("/question", methods=['GET'])
+# def get_question():
+#     question = request.args["question"]
 
-    if len(question) > 1:
-        return json.dumps(talk.get_response(question))
-    else:
-        return json.dumps("No answer obtained due no question was made.")
+#     if len(question) > 1:
+#         return json.dumps(talk.get_response(question))
+#     else:
+#         return json.dumps("No answer obtained due no question was made.")
     
-@app.route("/account", methods=['GET'])
-def get_account():
-    account_id = request.args["account_id"]
-    from_date = request.args["from_date"]
-    to_date = request.args["to_date"]
-    return json.dumps(firestore.get_account(account_id, from_date, to_date))
+# @app.route("/account", methods=['GET'])
+# def get_account():
+#     account_id = request.args["account_id"]
+#     from_date = request.args["from_date"]
+#     to_date = request.args["to_date"]
+#     return json.dumps(firestore.get_account(account_id, from_date, to_date))
     
-@app.route("/news", methods=['GET'])
-def get_news():
-    headers = ["symbol", 'news', 'result']
+# @app.route("/news", methods=['GET'])
+# def get_news():
+#     headers = ["symbol", 'news', 'result']
 
-    return render_template(
-        'news.html',
-        headers=headers,
-        tableData=newsReader.get_feed_from_FX_street()
-    )
+#     return render_template(
+#         'news.html',
+#         headers=headers,
+#         tableData=newsReader.get_feed_from_FX_street()
+#     )
 
-@app.route("/whatsapp/send_message", methods=['POST'])
-def post_whatsapp_send_message():
-    payload = request.form["payload"]
+# @app.route("/whatsapp/send_message", methods=['POST'])
+# def post_whatsapp_send_message():
+#     payload = request.form["payload"]
 
-    return maytapi.sendMessage(payload)
+#     return maytapi.sendMessage(payload)
+
+
+@app.route("/client/code", methods=['GET'])
+def get_client_code():
+    code = request.args["code"]
+    return json.dumps(dbController.get_client_by_code(code))
