@@ -63,6 +63,23 @@ class DBController:
         else:
             return cursor_result
         
+    def get_profit_percentage_by_code(self, code):
+        
+        profit = 0.0
+        balance = 0.0
+
+        for result in self.get_positions_by_code(code):
+            profit += result["profit_loss"]
+            balance += result["balance"]
+
+        total_to_take = abs(balance)+abs(profit)
+        total_profit_percent = round((profit/(abs(balance)+abs(profit))) * 100, 2)
+
+        return ""
+
+        # abs(total_balance)+abs(total_profit_loss)
+        # round((client_dict["total_profit_loss"]/client_dict["total_to_take"]) * 100, 2)
+        
     def get_positions_by_code(self, code):        
 
         # dt = datetime.today()
