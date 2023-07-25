@@ -89,7 +89,7 @@ prompt-toolkit==3.0.38
 proto-plus==1.22.2
 protobuf==4.21.12
 psutil==5.9.4
-psycopg2==2.9.6
+psycopg2-binary
 ptyprocess==0.7.0
 pure-eval==0.2.2
 pyasn1==0.4.8
@@ -105,8 +105,6 @@ pyparsing==3.0.9
 python-dateutil==2.8.2
 python-dotenv==0.21.0
 pytz==2023.3
-pywin32==306
-pywin32-ctypes==0.2.1
 pyzmq==25.0.2
 requests==2.28.1
 rfc3986==1.5.0

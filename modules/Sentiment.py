@@ -1,6 +1,6 @@
 import json
 import logging
-from tradingview_ta import TA_Handler, Interval, Exchange
+# from tradingview_ta import TA_Handler, Interval, Exchange
 
 class Sentiment:
 
