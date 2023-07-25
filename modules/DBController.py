@@ -102,6 +102,19 @@ class DBController:
         return_object['is_live'] = self.get_is_live(first_day_week, last_day_week)
         return_object['products'] = cursor_result
 
+        total_week_profit = 0
+        total_week_balance = 0
+
+        for result in cursor_result:
+            total_week_profit += result["profit_loss"]
+            total_week_balance += result["balance"]
+
+        avg_profit_percent = (total_week_profit / total_week_balance) * 100
+        avg_profit = total_week_profit
+
+        return_object['avg_profit_percent'] = avg_profit_percent
+        return_object['week_profit'] = avg_profit
+
         if return_object == None:
             return None
         else:
