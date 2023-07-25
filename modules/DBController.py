@@ -1,5 +1,6 @@
 import psycopg2
 import psycopg2.extras
+from datetime import datetime, timedelta
 
 class DBController:
 
@@ -36,11 +37,81 @@ class DBController:
         
         return ""
     
+    def get_first_day_week(self, dt):
+        dt = datetime.today()
+
+        start = dt - timedelta(days=dt.weekday()+1)
+
+        return start
+    
+    def get_last_day_week(self, dt):
+        dt = datetime.today()
+
+        start = dt - timedelta(days=dt.weekday()+1)
+        end = start + timedelta(days=5)
+
+        return end
+    
     def get_user_code(self, email, code):
 
         self.cursor.execute(f"SELECT * FROM users WHERE email = '{email}'")
 
         cursor_result = self.cursor.fetchone()
+
+        if cursor_result == None:
+            return None
+        else:
+            return cursor_result
+        
+    def get_positions_by_code(self, code):        
+
+        # dt = datetime.today()
+        # first_day_week = self.get_first_day_week(dt)
+
+        self.cursor.execute(f"""
+
+                        SELECT * FROM accounts as acc
+                        INNER JOIN clients_accounts cli_acc 
+                            ON cli_acc.account_id = acc.id
+                            AND cli_acc.client_code = {code};
+
+                    """)
+
+        cursor_result = self.cursor.fetchall()
+
+        if cursor_result == None:
+            return None
+        else:
+            return cursor_result
+
+    def get_positions_pl(self, code, account_id, fmt_first_day):        
+
+        dt = datetime.today()
+
+        first_day_week = self.get_first_day_week(dt)
+        
+        fmt_first_day = first_day_week.strftime("%Y-%m-%d")
+
+        self.cursor.execute(f"""
+
+                                SELECT account_id, sum(PL) as pl FROM 
+                                (
+
+                                    SELECT pos.account_id, (sum(pos.commission)+sum(profit)+sum(swap)) as PL from positions pos 
+                                        INNER JOIN clients_accounts cli_acc ON cli_acc.account_id = pos.account_id
+                                        INNER JOIN accounts acc on acc.id = cli_acc.account_id
+                                        WHERE cli_acc.client_code = {code} 
+                                            AND pos.close_time >= TO_TIMESTAMP('{fmt_first_day}','YYYY-MM-DD')
+                                            AND pos.type != 6
+                                            AND pos.account_id = '{account_id}'
+                                        GROUP BY pos.ticket, pos.account_id
+
+                                ) 
+                                as positions GROUP BY account_id;
+
+                            """)
+
+        cursor_result = self.cursor.fetchall()
 
         if cursor_result == None:
             return None
