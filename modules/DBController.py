@@ -101,44 +101,44 @@ class DBController:
 
         return_object['is_live'] = self.get_is_live(first_day_week, last_day_week)
 
-        total_week_profit = 0
-        total_week_balance = 0
+        # total_week_profit = 0
+        # total_week_balance = 0
 
-        products = []
+        # products = []
 
-        for result in cursor_result:
+        # for result in cursor_result:
 
-            product_dict = {}
+            # product_dict = {}
 
-            percent = 0
-            profit_loss = result[u'profit_loss']
-            balance = result[u'balance']
+            # percent = 0
+            # profit_loss = result[u'profit_loss']
+            # balance = result[u'balance']
 
-            if profit_loss != 0 and balance != 0:
-                percent += ( profit_loss / balance ) * 100
+            # if profit_loss != 0 and balance != 0:
+            #     percent += ( profit_loss / balance ) * 100
 
-            product_dict[u'name'] = result[u'product_name']
-            product_dict[u'profit_loss'] = profit_loss
-            product_dict[u'drawdown'] = result[u'drawdown']
-            product_dict[u'balance'] = result[u'balance']
-            product_dict[u'equity'] = result[u'equity']
-            product_dict[u'percent'] = percent
+            # product_dict[u'name'] = result[u'product_name']
+            # product_dict[u'profit_loss'] = profit_loss
+            # product_dict[u'drawdown'] = result[u'drawdown']
+            # product_dict[u'balance'] = result[u'balance']
+            # product_dict[u'equity'] = result[u'equity']
+            # product_dict[u'percent'] = percent
 
-            products.append(product_dict)
+            # products.append(result)
 
-            total_week_profit += profit_loss
-            total_week_balance += balance
+            # total_week_profit += profit_loss
+            # total_week_balance += balance
 
-        return_object['products'] = products
+        return_object['products'] = cursor_result
 
-        avg_profit_percent = (total_week_profit / total_week_balance) * 100
-        avg_profit = total_week_profit
+        # avg_profit_percent = (total_week_profit / total_week_balance) * 100
+        # avg_profit = total_week_profit
 
-        return_object['avg_profit_percent'] = avg_profit_percent
-        return_object['week_profit'] = avg_profit
+        # return_object['avg_profit_percent'] = avg_profit_percent
+        # return_object['week_profit'] = avg_profit
 
-        return_object['balance'] = total_week_balance
-        return_object['profit_loss'] = total_week_profit
+        # return_object['balance'] = total_week_balance
+        # return_object['profit_loss'] = total_week_profit
 
         if return_object == None:
             return None
