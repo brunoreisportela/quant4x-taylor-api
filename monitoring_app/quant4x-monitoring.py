@@ -226,7 +226,7 @@ def search_files():
             if path.exists(path_to_check) == True:
                 read_file(path_to_check)
 
-            # time.sleep(60.0)
+            time.sleep(60.0)
 
     except KeyboardInterrupt:
         print("Program finished by user.")
