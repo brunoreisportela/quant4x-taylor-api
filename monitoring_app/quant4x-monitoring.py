@@ -7,6 +7,8 @@ import json
 import logging
 import tkinter as tk
 import datetime
+import psycopg2
+import psycopg2.extras
 
 # command to create one executable file
 # PyInstaller --onefile --windowed quant4x-monitoring.py
@@ -15,14 +17,14 @@ from os import walk
 from os import path
 from datetime import datetime, timedelta
 
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+# import firebase_admin
+# from firebase_admin import credentials
+# from firebase_admin import firestore
 
-cred = credentials.Certificate("quant4x-firebase-adminsdk-lf6g9-2b0a26729e.json")
+# cred = credentials.Certificate("quant4x-firebase-adminsdk-lf6g9-2b0a26729e.json")
 
-firebase_admin.initialize_app(cred)
-db = firestore.client()
+# firebase_admin.initialize_app(cred)
+# db = firestore.client()
 
 parser = argparse.ArgumentParser()
 
@@ -34,6 +36,9 @@ args = parser.parse_args()
 mt_path = args.path
 
 window = tk.Tk()
+
+conn = None
+cursor = None
 
 def get_first_day_week(dt):
     dt = datetime.today()
@@ -48,7 +53,99 @@ def get_last_day_week(dt):
     dt = datetime.today()
     start = dt - timedelta(days=dt.weekday()+1)
     end = start + timedelta(days=7)
-    return end    
+    return end
+
+def add_or_update_account(account):
+    try:
+
+        # doc_ref = db.collection(u'accounts').document(date_scope)
+        # doc_ref.set({
+        #     u'account_id': f"{id}",
+        #     u'drawdown': data["kpi"]["drawn_down"],
+        #     u'balance': data["kpi"]["balance"],
+        #     u'equity': data["kpi"]["equity"],
+        #     u'start_scope': first_day_week.strftime("%m/%d/%Y"),
+        #     u'end_scope': last_day_week.strftime("%m/%d/%Y"),
+        #     u'machine_name': data["info"]["machine_name"],
+        #     u'product_name': data["info"]["product_name"],
+        #     u'profit_loss': current_profit,
+        #     u'transactions': data['transactions']
+        # })
+
+        cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        sql = f"""INSERT INTO accounts(
+                    id,
+                    balance, 
+                    drawdown, 
+                    equity, 
+                    product_name, 
+                    profit_loss)
+                    VALUES (
+                        '{account['mt_account_id']}',  
+                        '{account["kpi"]["balance"]}', 
+                        '{account["kpi"]["drawn_down"]}', 
+                        '{account["kpi"]["equity"]}', 
+                        '{account["info"]["product_name"]}', 
+                        '{account['current_profit']}'
+                        ) ON CONFLICT ON CONSTRAINT accounts_pkey DO
+                    UPDATE 
+                       SET 
+                           balance='{account["kpi"]["balance"]}', 
+                           drawdown='{account["kpi"]["drawn_down"]}', 
+                           equity='{account["kpi"]["equity"]}', 
+                           product_name='{account["info"]["product_name"]}', 
+                           profit_loss='{account['current_profit']}';"""
+
+        cursor.execute(sql)
+
+        conn.commit()
+
+        cursor.close
+
+    except Exception as error:
+        print ("Oops! An exception has occured:", error)
+        print ("Exception TYPE:", type(error))
+        return None
+
+def add_position(account_id, position):
+    try:
+
+        cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        sql = f"""INSERT INTO public.positions(
+                    account_id, 
+                    ticket, 
+                    close_price, 
+                    close_time, 
+                    commission, 
+                    profit, 
+                    size, 
+                    swap, 
+                    symbol, 
+                    type)
+                    VALUES (
+                        '{account_id}', 
+                        '{position["ticket"]}', 
+                        '{position["close_price"]}',
+                        '{position["close_time"]}', 
+                        '{position["commission"]}',
+                        '{position["profit"]}',
+                        '{position["size"]}',
+                        '{position["swap"]}', 
+                        '{position["symbol"]}', 
+                        '{position["type"]}');"""
+        
+        cursor.execute(sql)
+
+        conn.commit()
+
+        cursor.close
+
+    except:
+        # print("Failure on sending position")
+        return None
+
 
 def read_file(path):
     try:
@@ -66,6 +163,8 @@ def read_file(path):
         prior_profit = 0.0
         current_profit = 0.0
 
+        account_id = data['mt_account_id']
+
         for i in data['transactions']:
             transactions += 1
             transaction_close_date = datetime.strptime(
@@ -73,7 +172,6 @@ def read_file(path):
 
             if i["type"] != 0 and i["type"] != 1:
                 deposits += i['profit']+(i['swap'])
-
             else:
                 if transaction_close_date < first_day_week:
                     prior_profit += i['profit']+(i['swap'])
@@ -81,33 +179,38 @@ def read_file(path):
                 if transaction_close_date >= first_day_week:
                     current_profit += i['profit']+(i['swap'])
 
+            add_position(account_id, i)
+
         # print(transactions)
         # print(deposits)
         # print(prior_profit)
         # print(current_profit)
         # print(data["kpi"]["balance"])
     
-        id = data['mt_account_id']
+        id = account_id
+        data["current_profit"] = current_profit
         fmt_first_day = first_day_week.strftime("%m_%d_%Y")
         fmt_last_day = last_day_week.strftime("%m_%d_%Y")
 
         date_scope = f"{data['mt_account_id']}-{fmt_first_day}-{fmt_last_day}"
 
         print( f"Account: {id} | date signature: {date_scope}" )
+
+        add_or_update_account(data)
         
-        doc_ref = db.collection(u'accounts').document(date_scope)
-        doc_ref.set({
-            u'account_id': f"{id}",
-            u'drawdown': data["kpi"]["drawn_down"],
-            u'balance': data["kpi"]["balance"],
-            u'equity': data["kpi"]["equity"],
-            u'start_scope': first_day_week.strftime("%m/%d/%Y"),
-            u'end_scope': last_day_week.strftime("%m/%d/%Y"),
-            u'machine_name': data["info"]["machine_name"],
-            u'product_name': data["info"]["product_name"],
-            u'profit_loss': current_profit,
-            u'transactions': data['transactions']
-        })
+        # doc_ref = db.collection(u'accounts').document(date_scope)
+        # doc_ref.set({
+        #     u'account_id': f"{id}",
+        #     u'drawdown': data["kpi"]["drawn_down"],
+        #     u'balance': data["kpi"]["balance"],
+        #     u'equity': data["kpi"]["equity"],
+        #     u'start_scope': first_day_week.strftime("%m/%d/%Y"),
+        #     u'end_scope': last_day_week.strftime("%m/%d/%Y"),
+        #     u'machine_name': data["info"]["machine_name"],
+        #     u'product_name': data["info"]["product_name"],
+        #     u'profit_loss': current_profit,
+        #     u'transactions': data['transactions']
+        # })
 
     except ValueError:
         print("Failure on opening a file")
@@ -149,9 +252,19 @@ def update_dashboard(title_label):
     window.after(30000, update_dashboard, title_label)
 
 if __name__ == "__main__":
+    conn = psycopg2.connect(database="defaultdb",
+                    host="quant4x-admin-database-do-user-3044858-0.b.db.ondigitalocean.com",
+                    user="doadmin",
+                    password="AVNS_KmHOAPDB_osaTG-XvN9",
+                    port="25060")
+    
+    conn.autocommit = True
+    
+    cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
     # to test
     # read_file("track_taylor.txt")
     # pass
+    
     window.title("Quant4x Monitoring")
     window.configure(width=800, height=600)
     window.configure(bg='lightgray')
