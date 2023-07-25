@@ -137,6 +137,8 @@ class DBController:
         return_object['avg_profit_percent'] = avg_profit_percent
         return_object['week_profit'] = avg_profit
 
+        return_object['balance'] = total_week_balance
+
         if return_object == None:
             return None
         else:
