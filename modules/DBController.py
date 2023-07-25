@@ -82,8 +82,9 @@ class DBController:
         
     def get_positions_by_code(self, code):        
 
-        # dt = datetime.today()
-        # first_day_week = self.get_first_day_week(dt)
+        dt = datetime.today()
+        first_day_week = self.get_first_day_week(dt)
+        last_day_week = self.get_last_day_week(dt)
 
         self.cursor.execute(f"""
 
@@ -96,10 +97,26 @@ class DBController:
 
         cursor_result = self.cursor.fetchall()
 
-        if cursor_result == None:
+        return_object = {}
+
+        return_object['is_live'] = self.get_is_live(first_day_week, last_day_week)
+        return_object['products'] = cursor_result
+
+        if return_object == None:
             return None
         else:
-            return cursor_result
+            return return_object
+        
+    def get_is_live(self, first_day_week, last_day_week):
+        now_est = datetime.now()
+        
+        first_day_week_adjusted = first_day_week.replace(hour=20, minute=00)
+        last_day_week_adjusted = last_day_week.replace(hour=22, minute=00)
+        
+        if now_est > first_day_week_adjusted and now_est < last_day_week_adjusted:
+            return True
+        else:
+            return False        
 
     def get_positions_pl(self, code, account_id, fmt_first_day):        
 
