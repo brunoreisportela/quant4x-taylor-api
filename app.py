@@ -1,5 +1,5 @@
 import os
-import simplejson as json
+import json as simplejson
 
 # print(f"SYS PATH: {sys.path}")
 # sudo lsof -i -P -n | grep LISTEN
