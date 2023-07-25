@@ -11,7 +11,7 @@ import psycopg2
 import psycopg2.extras
 
 # command to create one executable file
-# PyInstaller --onefile --windowed quant4x-monitoring.py
+# PyInstaller --onefile quant4x-monitoring.py
 
 from os import walk
 from os import path
@@ -72,8 +72,6 @@ def add_or_update_account(account):
         #     u'transactions': data['transactions']
         # })
 
-        cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
         sql = f"""INSERT INTO accounts(
                     id,
                     balance, 
@@ -101,8 +99,6 @@ def add_or_update_account(account):
 
         conn.commit()
 
-        cursor.close
-
     except Exception as error:
         print ("Oops! An exception has occured:", error)
         print ("Exception TYPE:", type(error))
@@ -110,8 +106,6 @@ def add_or_update_account(account):
 
 def add_position(account_id, position):
     try:
-
-        cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         sql = f"""INSERT INTO public.positions(
                     account_id, 
@@ -139,8 +133,6 @@ def add_position(account_id, position):
         cursor.execute(sql)
 
         conn.commit()
-
-        cursor.close
 
     except:
         # print("Failure on sending position")
@@ -221,12 +213,14 @@ def search_files():
         # while True:
         for (dir_path, dir_names, file_names) in walk(mt_path):
             # for windows
-            path_to_check = dir_path+"\\track_taylor.txt"
+            path_to_check = dir_path+"\\Files\\track_taylor.txt"
+
+            # print(f"File {path_to_check}")
 
             if path.exists(path_to_check) == True:
                 read_file(path_to_check)
 
-            time.sleep(60.0)
+            # time.sleep(60.0)
 
     except KeyboardInterrupt:
         print("Program finished by user.")
@@ -235,6 +229,8 @@ def search_files():
 def update_dashboard(title_label):
 
     try:
+        print("Searching file")
+
         search_files()
         
     except Exception as e:
@@ -258,7 +254,7 @@ if __name__ == "__main__":
                     password="AVNS_KmHOAPDB_osaTG-XvN9",
                     port="25060")
     
-    conn.autocommit = True
+    # conn.autocommit = True
     
     cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
     # to test
@@ -279,6 +275,8 @@ if __name__ == "__main__":
     # Create a title label
     title_label = tk.Label(window, text="Cool Dashboard", font=("Arial", 14))
     title_label.pack(pady=20)
+
+    print("Dash Started")
 
     update_dashboard(title_label)
 
