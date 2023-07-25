@@ -7,6 +7,16 @@ class DBController:
     cursor = None
 
     def get_client_by_code(self, code):
+        self.cursor.execute(f"SELECT * FROM clients AS cli WHERE cli.code = {code}")
+
+        cursor_result = self.cursor.fetchone()
+
+        if cursor_result == None:
+            return None
+        else:
+            return cursor_result
+        
+    def get_client_accounts_by_code(self, code):
         self.cursor.execute(f"SELECT * FROM clients AS cli INNER JOIN accounts AS acc ON acc.client_code = cli.code WHERE cli.code = {code}")
 
         cursor_result = self.cursor.fetchone()
