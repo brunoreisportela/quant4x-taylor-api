@@ -10,7 +10,6 @@ from flask_cors import CORS
 
 from modules import Talk
 from modules import Whatsapp
-from modules import Firestore
 from modules import Sentiment
 from modules import MayTapi
 from modules import NewsReader
