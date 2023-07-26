@@ -98,12 +98,17 @@ class DBController:
 
         account = {}
 
-        account["id"] = cursor_result["id"]
-        account["balance"] = float(cursor_result["balance"])
-        account["drawdown"] = float(cursor_result["drawdown"])
-        account["equity"] = float(cursor_result["equity"])
-        account["product_name"] = cursor_result["product_name"]
-        account["profit_loss"] = float(cursor_result["profit_loss"])
+        if cursor_result != None:
+
+            account["id"] = cursor_result["id"]
+            account["balance"] = float(cursor_result["balance"])
+            account["drawdown"] = float(cursor_result["drawdown"])
+            account["equity"] = float(cursor_result["equity"])
+            account["product_name"] = cursor_result["product_name"]
+            account["profit_loss"] = float(cursor_result["profit_loss"])
+        else:
+            print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
+            
 
         return account
     
