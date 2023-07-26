@@ -68,6 +68,11 @@ def get_products_performance():
 def get_products_performance_code_local():
     return dbController.get_performance_by_code(1)
 
+@app.route("/update/accounts/kpi", methods=['GET'])
+def update_accounts_kpi():
+    code = request.args["code"]
+    return dbController.update_accounts_kpi(code)
+
 @app.route("/products/performance/code", methods=['GET'])
 def get_products_performance_code():
     code = request.args["code"]

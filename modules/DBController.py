@@ -80,6 +80,49 @@ class DBController:
         else:
             return cursor_result
         
+    def update_accounts_kpi(self, code):
+        
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT * FROM accounts as acc
+                        INNER JOIN clients_accounts cli_acc 
+                            ON cli_acc.account_id = acc.id
+                            AND cli_acc.client_code = {code};
+                    """)
+
+        cursor_result = cursor.fetchall()
+
+        cursor.close()
+
+        week_profit_loss = 0.0
+        week_balance = 0.0
+
+        for account in cursor_result:
+            week_profit_loss += float(account["profit_loss"])
+            week_balance += float(account["balance"])
+
+        if week_balance != 0.0 and week_profit_loss != 0.0:
+            week_profit_percent = round((week_profit_loss/(abs(week_balance)+abs(week_profit_loss))) * 100, 2)
+        else:
+            week_profit_percent = 0.0
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        sql = f"""UPDATE clients 
+                SET week_balance = '{week_balance}', 
+                week_profit_loss = '{week_profit_loss}',
+                week_profit_percent = '{week_profit_percent}'
+                WHERE code = '{code}'"""
+        
+        cursor.execute(sql)
+
+        self.conn.commit()
+
+        cursor.close()
+
+        return ""
+        
     def get_profit_percentage_by_code(self, code):
         
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
@@ -169,41 +212,7 @@ class DBController:
         if now_est > first_day_week_adjusted and now_est < last_day_week_adjusted:
             return True
         else:
-            return False        
-
-    # def get_positions_pl(self, code, account_id, fmt_first_day):        
-
-    #     dt = datetime.today()
-
-    #     first_day_week = self.get_first_day_week(dt)
-        
-    #     fmt_first_day = first_day_week.strftime("%Y-%m-%d")
-
-    #     self.cursor.execute(f"""
-
-    #                             SELECT account_id, sum(PL) as pl FROM 
-    #                             (
-
-    #                                 SELECT pos.account_id, (sum(pos.commission)+sum(profit)+sum(swap)) as PL from positions pos 
-    #                                     INNER JOIN clients_accounts cli_acc ON cli_acc.account_id = pos.account_id
-    #                                     INNER JOIN accounts acc on acc.id = cli_acc.account_id
-    #                                     WHERE cli_acc.client_code = {code} 
-    #                                         AND pos.close_time >= TO_TIMESTAMP('{fmt_first_day}','YYYY-MM-DD')
-    #                                         AND pos.type != 6
-    #                                         AND pos.account_id = '{account_id}'
-    #                                     GROUP BY pos.ticket, pos.account_id
-
-    #                             ) 
-    #                             as positions GROUP BY account_id;
-
-    #                         """)
-
-    #     cursor_result = self.cursor.fetchall()
-
-    #     if cursor_result == None:
-    #         return None
-    #     else:
-    #         return cursor_result
+            return False
 
     def __init__(self, *args, **kwargs):
 
