@@ -80,46 +80,63 @@ class DBController:
         else:
             return cursor_result
         
-    def update_accounts_kpi(self, code):
-        
+    def update_accounts_kpi(self):
+
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
-                        SELECT * FROM accounts as acc
-                        INNER JOIN clients_accounts cli_acc 
-                            ON cli_acc.account_id = acc.id
-                            AND cli_acc.client_code = {code};
+                        SELECT * FROM clients;
                     """)
-
-        cursor_result = cursor.fetchall()
-
-        cursor.close()
-
-        week_profit_loss = 0.0
-        week_balance = 0.0
-
-        for account in cursor_result:
-            week_profit_loss += float(account["profit_loss"])
-            week_balance += float(account["balance"])
-
-        if week_balance != 0.0 and week_profit_loss != 0.0:
-            week_profit_percent = round((week_profit_loss/(abs(week_balance)+abs(week_profit_loss))) * 100, 2)
-        else:
-            week_profit_percent = 0.0
-
-        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
-        sql = f"""UPDATE clients 
-                SET week_balance = '{week_balance}', 
-                week_profit_loss = '{week_profit_loss}',
-                week_profit_percent = '{week_profit_percent}'
-                WHERE code = '{code}'"""
         
-        cursor.execute(sql)
-
-        self.conn.commit()
+        clients_result = cursor.fetchall()
 
         cursor.close()
+
+        clients_codes = []
+
+        for client in clients_result:
+            clients_codes.append(client["code"])
+
+        for code in clients_codes:
+
+            cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+            cursor.execute(f"""
+                            SELECT * FROM accounts as acc
+                            INNER JOIN clients_accounts cli_acc 
+                                ON cli_acc.account_id = acc.id
+                                AND cli_acc.client_code = {code};
+                        """)
+
+            cursor_result = cursor.fetchall()
+
+            cursor.close()
+
+            week_profit_loss = 0.0
+            week_balance = 0.0
+
+            for account in cursor_result:
+                week_profit_loss += float(account["profit_loss"])
+                week_balance += float(account["balance"])
+
+            if week_balance != 0.0 and week_profit_loss != 0.0:
+                week_profit_percent = round((week_profit_loss/(abs(week_balance)+abs(week_profit_loss))) * 100, 2)
+            else:
+                week_profit_percent = 0.0
+
+            cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+            sql = f"""UPDATE clients 
+                    SET week_balance = '{week_balance}', 
+                    week_profit_loss = '{week_profit_loss}',
+                    week_profit_percent = '{week_profit_percent}'
+                    WHERE code = '{code}'"""
+            
+            cursor.execute(sql)
+
+            self.conn.commit()
+
+            cursor.close()
 
         return ""
         
