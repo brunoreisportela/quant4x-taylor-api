@@ -1,8 +1,4 @@
-import os
 import argparse
-import sys
-import time
-
 import json
 import logging
 import tkinter as tk
@@ -29,7 +25,6 @@ mt_path = args.path
 window = tk.Tk()
 
 conn = None
-cursor = None
 
 def get_first_day_week(dt):
     dt = datetime.today()
@@ -48,6 +43,8 @@ def get_last_day_week(dt):
 
 def add_or_update_account(account):
     try:
+        cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
         sql = f"""INSERT INTO accounts(
                     id,
                     balance, 
@@ -75,6 +72,8 @@ def add_or_update_account(account):
 
         conn.commit()
 
+        cursor.close()
+
     except Exception as error:
         print ("Oops! An exception has occured:", error)
         print ("Exception TYPE:", type(error))
@@ -82,6 +81,7 @@ def add_or_update_account(account):
 
 def add_position(account_id, position):
     try:
+        cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         sql = f"""INSERT INTO public.positions(
                     account_id, 
@@ -109,6 +109,8 @@ def add_position(account_id, position):
         cursor.execute(sql)
 
         conn.commit()
+        
+        cursor.close()
 
     except:
         return None
@@ -168,7 +170,7 @@ def search_files():
         # while True:
         for (dir_path, dir_names, file_names) in walk(mt_path):
             # for windows
-            path_to_check = dir_path+"\\Files\\track_taylor.txt"
+            path_to_check = dir_path+"\\track_taylor.txt"
 
             # print(f"File {path_to_check}")
 
@@ -200,22 +202,9 @@ def update_dashboard(title_label):
 
     title_label.configure(text=time_string)
 
-    window.after(30000, update_dashboard, title_label)
+    window.after(10000, update_dashboard, title_label)
 
-if __name__ == "__main__":
-    conn = psycopg2.connect(database="defaultdb",
-                    host="quant4x-admin-database-do-user-3044858-0.b.db.ondigitalocean.com",
-                    user="doadmin",
-                    password="AVNS_KmHOAPDB_osaTG-XvN9",
-                    port="25060")
-    
-    # conn.autocommit = True
-    
-    cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-    # to test
-    # read_file("track_taylor.txt")
-    # pass
-    
+def create_app():
     window.title("Quant4x Monitoring")
     window.configure(width=800, height=600)
     window.configure(bg='lightgray')
@@ -236,3 +225,24 @@ if __name__ == "__main__":
     update_dashboard(title_label)
 
     window.mainloop()
+
+if __name__ == "__main__":
+    conn = psycopg2.connect(database="defaultdb",
+                    host="quant4x-admin-database-do-user-3044858-0.b.db.ondigitalocean.com",
+                    user="doadmin",
+                    password="AVNS_KmHOAPDB_osaTG-XvN9",
+                    port="25060")
+    
+    # conn.autocommit = True
+    # to test
+    # read_file("track_taylor.txt")
+    # pass
+
+    try:
+        create_app()
+    except:
+        print("APP FAILED")
+        create_app()
+        
+
+    
