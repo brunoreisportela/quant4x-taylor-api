@@ -1,5 +1,6 @@
 import os
-import json as simplejson
+# import json as simplejson
+import json
 
 # print(f"SYS PATH: {sys.path}")
 # sudo lsof -i -P -n | grep LISTEN
@@ -65,17 +66,17 @@ def get_products_performance():
     return get_products_performance_code_local()
 
 def get_products_performance_code_local():
-    return dbController.get_positions_by_code("1")
+    return dbController.get_performance_by_code(1)
 
 @app.route("/products/performance/code", methods=['GET'])
 def get_products_performance_code():
     code = request.args["code"]
-    return dbController.get_positions_by_code("1")
+    return dbController.get_performance_by_code(code)
 
-# @app.route("/percent/performance/code", methods=['GET'])
-# def get_percent_performance_code():
-#     code = request.args["code"]
-#     return json.dumps(firestore.get_percent_performance_code(code))
+@app.route("/percent/performance/code", methods=['GET'])
+def get_percent_performance_code():
+    code = request.args["code"]
+    return json.dumps(dbController.get_profit_percentage_by_code(code))
 
 # @app.route("/question", methods=['GET'])
 # def get_question():
