@@ -69,6 +69,44 @@ class DBController:
 
         return end
     
+    def get_accounts(self, code):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""SELECT distinct(account_id) FROM accounts acc 
+		                        INNER JOIN clients_accounts cli_acc ON cli_acc.client_code = {code};""")
+
+        cursor_result = cursor.fetchall()
+
+        cursor.close()
+
+        accounts = []
+
+        for result in cursor_result:
+            account = self.get_account(result["account_id"])
+            accounts.append(account)
+
+        return accounts
+        
+    def get_account(self, id):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""SELECT * FROM accounts where id = '{id}';""")
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        account = {}
+
+        account["id"] = cursor_result["id"]
+        account["balance"] = float(cursor_result["balance"])
+        account["drawdown"] = float(cursor_result["drawdown"])
+        account["equity"] = float(cursor_result["equity"])
+        account["product_name"] = cursor_result["product_name"]
+        account["profit_loss"] = float(cursor_result["profit_loss"])
+
+        return account
+    
     def get_clients(self):
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
@@ -89,6 +127,8 @@ class DBController:
             client_dict["week_balance"] = float(client["week_balance"])
             client_dict["week_profit_loss"] = float(client["week_profit_loss"])
             client_dict["week_profit_percent"] = float(client["week_profit_percent"])
+
+            client_dict["accounts"] = self.get_accounts(client["code"])
 
             clients.append(client_dict)
 

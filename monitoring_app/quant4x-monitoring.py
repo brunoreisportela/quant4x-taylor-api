@@ -17,15 +17,6 @@ from os import walk
 from os import path
 from datetime import datetime, timedelta
 
-# import firebase_admin
-# from firebase_admin import credentials
-# from firebase_admin import firestore
-
-# cred = credentials.Certificate("quant4x-firebase-adminsdk-lf6g9-2b0a26729e.json")
-
-# firebase_admin.initialize_app(cred)
-# db = firestore.client()
-
 parser = argparse.ArgumentParser()
 
 # for windows
@@ -57,21 +48,6 @@ def get_last_day_week(dt):
 
 def add_or_update_account(account):
     try:
-
-        # doc_ref = db.collection(u'accounts').document(date_scope)
-        # doc_ref.set({
-        #     u'account_id': f"{id}",
-        #     u'drawdown': data["kpi"]["drawn_down"],
-        #     u'balance': data["kpi"]["balance"],
-        #     u'equity': data["kpi"]["equity"],
-        #     u'start_scope': first_day_week.strftime("%m/%d/%Y"),
-        #     u'end_scope': last_day_week.strftime("%m/%d/%Y"),
-        #     u'machine_name': data["info"]["machine_name"],
-        #     u'product_name': data["info"]["product_name"],
-        #     u'profit_loss': current_profit,
-        #     u'transactions': data['transactions']
-        # })
-
         sql = f"""INSERT INTO accounts(
                     id,
                     balance, 
@@ -135,7 +111,6 @@ def add_position(account_id, position):
         conn.commit()
 
     except:
-        # print("Failure on sending position")
         return None
 
 
@@ -173,12 +148,6 @@ def read_file(path):
 
             add_position(account_id, i)
 
-        # print(transactions)
-        # print(deposits)
-        # print(prior_profit)
-        # print(current_profit)
-        # print(data["kpi"]["balance"])
-    
         id = account_id
         data["current_profit"] = current_profit
         fmt_first_day = first_day_week.strftime("%m_%d_%Y")
@@ -189,20 +158,6 @@ def read_file(path):
         print( f"Account: {id} | date signature: {date_scope}" )
 
         add_or_update_account(data)
-        
-        # doc_ref = db.collection(u'accounts').document(date_scope)
-        # doc_ref.set({
-        #     u'account_id': f"{id}",
-        #     u'drawdown': data["kpi"]["drawn_down"],
-        #     u'balance': data["kpi"]["balance"],
-        #     u'equity': data["kpi"]["equity"],
-        #     u'start_scope': first_day_week.strftime("%m/%d/%Y"),
-        #     u'end_scope': last_day_week.strftime("%m/%d/%Y"),
-        #     u'machine_name': data["info"]["machine_name"],
-        #     u'product_name': data["info"]["product_name"],
-        #     u'profit_loss': current_profit,
-        #     u'transactions': data['transactions']
-        # })
 
     except ValueError:
         print("Failure on opening a file")

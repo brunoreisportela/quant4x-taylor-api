@@ -9,27 +9,23 @@ from flask import Flask,request,render_template
 from flask_table import Table, Col
 from flask_cors import CORS
 
-from modules import Talk
-from modules import Whatsapp
-from modules import Sentiment
-from modules import MayTapi
-from modules import NewsReader
+# from modules import Talk
+# from modules import Whatsapp
+# from modules import Sentiment
+# from modules import MayTapi
+# from modules import NewsReader
 from modules import DBController
 
 app = Flask(__name__)
-
-# os.environ["OPENAI_API_KEY"] = "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"
-
 CORS(app)
 
 # whatsapp = Whatsapp()
-# firestore = Firestore()
 # symbol_sentiment = Sentiment()
 # maytapi = MayTapi()
 dbController = DBController()
 
 # talk = Talk(firestore = firestore)
-newsReader = NewsReader()
+# newsReader = NewsReader()
 
 class ItemTable(Table):
     news = Col('news')
@@ -111,7 +107,6 @@ def get_percent_performance_code():
 # @app.route("/whatsapp/send_message", methods=['POST'])
 # def post_whatsapp_send_message():
 #     payload = request.form["payload"]
-
 #     return maytapi.sendMessage(payload)
 
 
