@@ -47,9 +47,9 @@ def get_echo():
 # def get_accounts():
 #     return json.dumps(firestore.get_accounts())
 
-# @app.route("/clients", methods=['GET'])
-# def get_clients():
-#     return json.dumps(firestore.get_clients())
+@app.route("/clients", methods=['GET'])
+def get_clients():
+    return json.dumps(dbController.get_clients())
 
 # @app.route("/sentiment", methods=['GET'])
 # def get_sentiment():

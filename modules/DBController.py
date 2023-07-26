@@ -1,7 +1,6 @@
 import psycopg2
 import psycopg2.extras
 from datetime import datetime, timedelta
-from decimal import *
 
 class DBController:
 
@@ -16,10 +15,15 @@ class DBController:
 
         cursor.close()
 
-        if cursor_result == None:
-            return None
-        else:
-            return cursor_result
+        client_dict = {}
+
+        client_dict["code"] = cursor_result["code"]
+        client_dict["name"] = cursor_result["name"]
+        client_dict["week_balance"] = float(cursor_result["week_balance"])
+        client_dict["week_profit_loss"] = float(cursor_result["week_profit_loss"])
+        client_dict["week_profit_percent"] = float(cursor_result["week_profit_percent"])
+
+        return client_dict
         
     def get_client_accounts_by_code(self, code):
 
@@ -65,20 +69,30 @@ class DBController:
 
         return end
     
-    def get_user_code(self, email, code):
+    def get_clients(self):
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        cursor.execute(f"SELECT * FROM users WHERE email = '{email}'")
+        cursor.execute(f"SELECT * FROM clients")
 
-        cursor_result = cursor.fetchone()
+        cursor_result = cursor.fetchall()
 
         cursor.close()
 
-        if cursor_result == None:
-            return None
-        else:
-            return cursor_result
+        clients = []
+
+        for client in cursor_result:
+            client_dict = {}
+
+            client_dict["code"] = client["code"]
+            client_dict["name"] = client["name"]
+            client_dict["week_balance"] = float(client["week_balance"])
+            client_dict["week_profit_loss"] = float(client["week_profit_loss"])
+            client_dict["week_profit_percent"] = float(client["week_profit_percent"])
+
+            clients.append(client_dict)
+
+        return clients
         
     def update_accounts_kpi(self):
 
