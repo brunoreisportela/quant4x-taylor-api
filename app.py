@@ -12,7 +12,7 @@ from flask_cors import CORS
 # from modules import Talk
 # from modules import Whatsapp
 # from modules import Sentiment
-# from modules import MayTapi
+from modules import MayTapi
 # from modules import NewsReader
 from modules import DBController
 
@@ -21,7 +21,7 @@ CORS(app)
 
 # whatsapp = Whatsapp()
 # symbol_sentiment = Sentiment()
-# maytapi = MayTapi()
+maytapi = MayTapi()
 dbController = DBController()
 
 # talk = Talk(firestore = firestore)
@@ -111,10 +111,10 @@ def get_percent_performance_code():
 #         tableData=newsReader.get_feed_from_FX_street()
 #     )
 
-# @app.route("/whatsapp/send_message", methods=['POST'])
-# def post_whatsapp_send_message():
-#     payload = request.form["payload"]
-#     return maytapi.sendMessage(payload)
+@app.route("/whatsapp/send_message", methods=['POST'])
+def post_whatsapp_send_message():
+    payload = request.form["payload"]
+    return maytapi.sendMessage(payload)
 
 
 @app.route("/client/code", methods=['GET'])
