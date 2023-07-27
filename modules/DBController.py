@@ -112,7 +112,7 @@ class DBController:
 
         return account
     
-    def get_clients(self):
+    def get_clients(self, is_scope_report = False, start_date = None, end_date = None):
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
@@ -135,9 +135,50 @@ class DBController:
 
             client_dict["accounts"] = self.get_accounts(client["code"])
 
+            client_dict["scope_profit"] = 0.0
+            client_dict["scope_transactions"] = 0
+            client_dict["scope_profit_percent"] = 0
+
+            if is_scope_report:
+                for account in client_dict["accounts"]:
+                    account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
+                    account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
+
+                    client_dict["scope_profit"] += account["kpis"]["profit_loss"]
+                    client_dict["scope_transactions"] += account["kpis"]["transactions"]
+                    client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
+
             clients.append(client_dict)
 
         return clients
+    
+    def get_positions_kpis(self, account_id, start_date, end_date):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""SELECT sum(profit) as profit_loss, count(ticket) as transactions FROM positions pos
+                                WHERE pos.account_id = '{account_id}' 
+                                    AND pos.close_time > TO_TIMESTAMP('{start_date}','DD/MM/YYYY')
+                                    AND pos.close_time < TO_TIMESTAMP('{end_date}','DD/MM/YYYY')
+                                    AND pos.type != 6;""")
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        kpi = {}
+
+        if cursor_result != None:
+            if cursor_result["profit_loss"] == None or cursor_result["transactions"] == None:
+
+                kpi["profit_loss"] = 0.0
+                kpi["transactions"] = 0.0
+
+                return kpi
+            
+            kpi["profit_loss"] = float(cursor_result["profit_loss"])
+            kpi["transactions"] = int(cursor_result["transactions"])
+
+        return kpi
         
     def update_accounts_kpi(self):
 

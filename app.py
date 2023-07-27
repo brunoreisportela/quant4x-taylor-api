@@ -47,6 +47,13 @@ def get_echo():
 def get_clients():
     return json.dumps(dbController.get_clients())
 
+@app.route("/clients/report/scope", methods=['GET'])
+def get_clients_report_scope():
+    start_date = request.args["start_date"]
+    end_date = request.args["end_date"]
+
+    return json.dumps(dbController.get_clients(True, start_date, end_date))
+
 # @app.route("/sentiment", methods=['GET'])
 # def get_sentiment():
 #     index = request.args["index"]
