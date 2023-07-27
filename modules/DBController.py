@@ -141,12 +141,14 @@ class DBController:
 
             if is_scope_report:
                 for account in client_dict["accounts"]:
-                    account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
-                    account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
 
-                    client_dict["scope_profit"] += account["kpis"]["profit_loss"]
-                    client_dict["scope_transactions"] += account["kpis"]["transactions"]
-                    client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
+                    if "id" in account:
+                        account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
+                        account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
+
+                        client_dict["scope_profit"] += account["kpis"]["profit_loss"]
+                        client_dict["scope_transactions"] += account["kpis"]["transactions"]
+                        client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
 
             clients.append(client_dict)
 
@@ -262,7 +264,10 @@ class DBController:
             profit_loss += float(account["profit_loss"])
             balance += float(account["balance"])
 
-        total_profit_percent = round((profit_loss/(abs(balance)+abs(profit_loss))) * 100, 2)
+        if profit_loss != 0 and balance != 0:
+            total_profit_percent = round((profit_loss/(abs(balance)+abs(profit_loss))) * 100, 2)
+        else:
+            total_profit_percent = 0
 
         return total_profit_percent
     
