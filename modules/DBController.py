@@ -1,5 +1,6 @@
 import psycopg2
 import psycopg2.extras
+import requests
 from datetime import datetime, timedelta
 
 class DBController:
@@ -197,9 +198,14 @@ class DBController:
         clients_codes = []
 
         for client in clients_result:
-            clients_codes.append(client["code"])
+            client_code = {"code": client["code"], "week_profit_loss": client["week_profit_loss"], "week_balance": client["week_balance"]}
+            clients_codes.append(client_code)
 
-        for code in clients_codes:
+        for client_code in clients_codes:
+
+            client_code_code = client_code["code"]
+            client_code_week_profit_loss = client_code["week_profit_loss"]
+            client_code_week_balance = client_code["week_balance"]
 
             cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
@@ -207,7 +213,7 @@ class DBController:
                             SELECT * FROM accounts as acc
                             INNER JOIN clients_accounts cli_acc 
                                 ON cli_acc.account_id = acc.id
-                                AND cli_acc.client_code = {code};
+                                AND cli_acc.client_code = {client_code_code};
                         """)
 
             cursor_result = cursor.fetchall()
@@ -232,7 +238,7 @@ class DBController:
                     SET week_balance = '{week_balance}', 
                     week_profit_loss = '{week_profit_loss}',
                     week_profit_percent = '{week_profit_percent}'
-                    WHERE code = '{code}'"""
+                    WHERE code = '{client_code_code}'"""
             
             cursor.execute(sql)
 
@@ -240,8 +246,36 @@ class DBController:
 
             cursor.close()
 
+            # SEND MESSAGE TO TELEGRAM IF PROFIT CHANGED
+            if week_balance != client_code_week_balance:
+                
+                if client_code_code == 1:
+                    # self.send_message_to_telegram(client_code_code, week_profit_loss, week_profit_percent)
+                    difference = round(float(week_balance) - float(client_code_week_balance),2)
+                    difference_in_percent = round((difference/(abs(float(client_code_week_balance))+abs(difference))) * 100, 2)
+
+                    if difference_in_percent > 0:
+                        # message_to_send = f"""--Taylor Update--\n🟢 ${round(difference),2} ( {difference_in_percent}% )\n💰 Total balance: ${round(week_balance,2)}"""
+                        message_to_send = f"""🟢 ${difference} - 💰Total balance: ${round(week_balance,2)}"""
+                        self.send_telegram_message(message_to_send)
+                        
+                    elif difference_in_percent < 0:
+                        # message_to_send = f"""--Taylor Update--\n🔴 -${round(difference,2)} ( -{difference_in_percent}% )\n💰 Total balance: ${round(week_balance,2)}"""
+                        message_to_send = f"""🔴 -${difference} - 💰Total balance: ${round(week_balance,2)}"""
+                        self.send_telegram_message(message_to_send)
+                    
+                    # print(f"Difference is {difference} in percent {difference_in_percent}")
+                    # print(f"Profit changed for client {client_code_code} from {client_code_week_profit_loss} to {week_profit_loss}")
+
         return ""
-        
+    
+    def send_telegram_message(self, message):
+        url = f"https://api.telegram.org/bot6399749106:AAGBlCwbzHmlaGiqhiO9yfAWk_JFRQy5lzE/sendMessage?chat_id=-1001755698269&text={message}"
+
+        x = requests.get(url)
+        # print(x.status_code)
+        return x.status_code
+
     def get_profit_percentage_by_code(self, code):
         
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
