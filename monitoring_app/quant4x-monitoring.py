@@ -25,6 +25,7 @@ mt_path = args.path
 window = tk.Tk()
 
 conn = None
+cursor = None
 
 def get_first_day_week(dt):
     dt = datetime.today()
@@ -43,8 +44,6 @@ def get_last_day_week(dt):
 
 def add_or_update_account(account):
     try:
-        cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
         sql = f"""INSERT INTO accounts(
                     id,
                     balance, 
@@ -72,8 +71,6 @@ def add_or_update_account(account):
 
         conn.commit()
 
-        cursor.close()
-
     except Exception as error:
         print ("Oops! An exception has occured:", error)
         print ("Exception TYPE:", type(error))
@@ -81,8 +78,6 @@ def add_or_update_account(account):
 
 def add_position(account_id, position):
     try:
-        cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
         sql = f"""INSERT INTO public.positions(
                     account_id, 
                     ticket, 
@@ -109,8 +104,6 @@ def add_position(account_id, position):
         cursor.execute(sql)
 
         conn.commit()
-        
-        cursor.close()
 
     except:
         return None
@@ -202,7 +195,7 @@ def update_dashboard(title_label):
 
     title_label.configure(text=time_string)
 
-    window.after(10000, update_dashboard, title_label)
+    window.after(5000, update_dashboard, title_label)
 
 def create_app():
     window.title("Quant4x Monitoring")
@@ -233,10 +226,12 @@ if __name__ == "__main__":
                     password="AVNS_KmHOAPDB_osaTG-XvN9",
                     port="25060")
     
-    # conn.autocommit = True
+    conn.autocommit = True
     # to test
     # read_file("track_taylor.txt")
     # pass
+
+    cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
     try:
         create_app()
