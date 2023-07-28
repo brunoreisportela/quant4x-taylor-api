@@ -306,7 +306,7 @@ class DBController:
         # The Taylor's official chat_id = -1001712753849
         # The Taylor's Group performance report chat_id = -1001755698269
 
-        url = f"https://api.telegram.org/bot6399749106:AAGBlCwbzHmlaGiqhiO9yfAWk_JFRQy5lzE/sendMessage?chat_id=-1001755698269&text={message}"
+        url = f"https://api.telegram.org/bot6399749106:AAGBlCwbzHmlaGiqhiO9yfAWk_JFRQy5lzE/sendMessage?chat_id=-1001712753849&text={message}"
 
         x = requests.get(url)
         return x.status_code
