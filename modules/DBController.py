@@ -3,9 +3,13 @@ import psycopg2.extras
 import requests
 from datetime import datetime, timedelta
 
+from modules import Talk
+
 class DBController:
 
     conn = None
+
+    talk = Talk()
 
     def get_client_by_code(self, code):
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
@@ -256,24 +260,55 @@ class DBController:
 
                     if difference_in_percent > 0:
                         # message_to_send = f"""--Taylor Update--\n🟢 ${round(difference),2} ( {difference_in_percent}% )\n💰 Total balance: ${round(week_balance,2)}"""
-                        message_to_send = f"""🟢 ${difference} - 💰Total balance: ${round(week_balance,2)}"""
-                        self.send_telegram_message(message_to_send)
+                        # message_to_send = f"""🟢 ${difference} - 💰Total balance: ${round(week_balance,2)}"""
+                        # self.send_telegram_message(message_to_send)
+
+                        question = f"""You can make a joke eventually. Please also keep the emojis to make it looking cool. 
+                        May you create a message presenting the numbers in the first person of the pronoun with max 50 characters? 
+                        🟢 Total earned with the trade was +${difference} 💰 After this gain the current Taylor's balance is: ${round(week_balance,2)}"""
+
+                        self.taylor_says_telegram(question)
                         
                     elif difference_in_percent < 0:
                         # message_to_send = f"""--Taylor Update--\n🔴 -${round(difference,2)} ( -{difference_in_percent}% )\n💰 Total balance: ${round(week_balance,2)}"""
-                        message_to_send = f"""🔴 -${difference} - 💰Total balance: ${round(week_balance,2)}"""
-                        self.send_telegram_message(message_to_send)
-                    
-                    # print(f"Difference is {difference} in percent {difference_in_percent}")
-                    # print(f"Profit changed for client {client_code_code} from {client_code_week_profit_loss} to {week_profit_loss}")
+                        # message_to_send = f"""🔴 -${difference} - 💰Total balance: ${round(week_balance,2)}"""
+                        # self.send_telegram_message(message_to_send)
+
+                        question = f"""Please keep the emojis. There is nothing positive about the balance when there is a loss in the capital. May you create a message, presenting the numbers in the first person of the pronoun with max 50 characters? 
+                        🔴 Total earned with the trade was -${difference} 💰 After this loss the current Taylor's balance is: ${round(week_balance,2)}"""
+
+                        self.taylor_says_telegram(question)
 
         return ""
     
+    def taylor_says_telegram(self, message):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT * FROM ai_controller WHERE channel = 'telegram';
+                    """)
+        
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result["is_active"] == False:
+            return ""
+
+        talk_response = self.talk.get_response(message)
+        self.send_telegram_message(talk_response)
+    
+        return ""
+    
     def send_telegram_message(self, message):
+        # To get the list of updates
+        # https://api.telegram.org/bot6399749106:AAGBlCwbzHmlaGiqhiO9yfAWk_JFRQy5lzE/getUpdates
+        # The Taylor's official chat_id = -1001712753849
+        # The Taylor's Group performance report chat_id = -1001755698269
+
         url = f"https://api.telegram.org/bot6399749106:AAGBlCwbzHmlaGiqhiO9yfAWk_JFRQy5lzE/sendMessage?chat_id=-1001755698269&text={message}"
 
         x = requests.get(url)
-        # print(x.status_code)
         return x.status_code
 
     def get_profit_percentage_by_code(self, code):

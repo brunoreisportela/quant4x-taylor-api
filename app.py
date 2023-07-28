@@ -24,7 +24,7 @@ CORS(app)
 maytapi = MayTapi()
 dbController = DBController()
 
-# talk = Talk(firestore = firestore)
+# talk = Talk()
 # newsReader = NewsReader()
 
 class ItemTable(Table):
@@ -115,6 +115,12 @@ def get_percent_performance_code():
 def post_whatsapp_send_message():
     payload = request.form["payload"]
     return maytapi.sendMessage(payload)
+
+
+@app.route("/taylor/says", methods=['POST'])
+def taylor_says():
+    message = request.form["message"]
+    return dbController.taylor_says_telegram(message)
 
 
 @app.route("/client/code", methods=['GET'])
