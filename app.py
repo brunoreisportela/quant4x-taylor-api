@@ -33,7 +33,7 @@ class ItemTable(Table):
 
 @app.route("/")
 def get_service():
-    return "Echo"
+    return get_echo()
 
 @app.route("/echo")
 def get_echo():
@@ -67,6 +67,10 @@ def get_clients_report_scope():
 @app.route("/products/performance", methods=['GET'])
 def get_products_performance():
     return get_products_performance_code_local()
+
+@app.route("/bot/message/from/group", methods=['GET'])
+def get_bot_message_from_group():
+    return dbController.get_bot_message_from_group()
 
 def get_products_performance_code_local():
     return dbController.get_performance_by_code(1)

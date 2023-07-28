@@ -11,6 +11,12 @@ class DBController:
 
     talk = Talk()
 
+    telegram_bot_name = "@taylor_capital_ai_bot"
+    telegram_bot_token = "6472164866:AAGWkjcO3vcQDomz0wd3Lf6uoJZlgRrM_8E"
+    # The Taylor's official chat_id = -1001712753849
+    # The Taylor's Group performance report chat_id = -1001755698269
+    telegram_chat_id = "-1001712753849"
+
     def get_client_by_code(self, code):
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
@@ -281,7 +287,80 @@ class DBController:
 
         return ""
     
+    def get_bot_message_from_group(self):
+
+        url = f"https://api.telegram.org/bot{self.telegram_bot_token}/getUpdates"
+
+        response = requests.get(url)
+
+        response_json = response.json()
+
+        if len( response_json["result"] ) == 0:
+            return ""
+
+        messages_filtered_by_chat_id = []
+
+        for result in response_json["result"]:
+            
+            if "message" in result:
+                if str(result["message"]["chat"]["id"]) == self.telegram_chat_id:
+                    messages_filtered_by_chat_id.append(result["message"])
+
+        latest_result = messages_filtered_by_chat_id[-1]
+
+        text = latest_result["text"]
+
+        if text.find(f"{self.telegram_bot_name}") >= 0:
+
+            channel_id = latest_result["chat"]["id"]
+            chat_id = latest_result["message_id"]
+            from_user = latest_result["from"]["username"]
+            text = latest_result["text"]
+            is_taylor = False
+
+            cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+            cursor.execute(f"""
+                            SELECT * FROM assistant_messages 
+                                WHERE channel_id = '{channel_id}'
+                                  AND chat_id = '{chat_id}' AND 
+                                  user_name = '{from_user}';
+                        """)
+            
+            cursor_result = cursor.fetchone()
+
+            cursor.close()
+
+            # Stopping if the question was already made.
+            if cursor_result != None:
+                return ""
+            
+            talk_response = self.taylor_says_telegram(text)
+
+            try:
+                cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+                
+                sql = """INSERT INTO public.assistant_messages(
+                            channel_id, chat_id, user_name, message, is_taylor, updated)
+                            VALUES (%s, %s, %s, %s, %s, NOW());"""
+                
+                cursor.execute(sql, (channel_id, chat_id, from_user, text, is_taylor))
+
+                self.conn.commit()
+
+                cursor.close()
+
+            except Exception as e:
+                print(str(e))
+
+                self.conn.rollback()
+
+            return talk_response
+
+        return ""
+
     def taylor_says_telegram(self, message):
+
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
@@ -294,19 +373,16 @@ class DBController:
 
         if cursor_result["is_active"] == False:
             return ""
-
+        
+        self.talk.prepare_on_demand_prompt( self.get_performance_by_code(1) )
         talk_response = self.talk.get_response(message)
+
         self.send_telegram_message(talk_response)
     
-        return ""
+        return talk_response
     
     def send_telegram_message(self, message):
-        # To get the list of updates
-        # https://api.telegram.org/bot6399749106:AAGBlCwbzHmlaGiqhiO9yfAWk_JFRQy5lzE/getUpdates
-        # The Taylor's official chat_id = -1001712753849
-        # The Taylor's Group performance report chat_id = -1001755698269
-
-        url = f"https://api.telegram.org/bot6399749106:AAGBlCwbzHmlaGiqhiO9yfAWk_JFRQy5lzE/sendMessage?chat_id=-1001712753849&text={message}"
+        url = f"https://api.telegram.org/bot{self.telegram_bot_token}/sendMessage?chat_id={self.telegram_chat_id}&text={message}"
 
         x = requests.get(url)
         return x.status_code
@@ -412,5 +488,7 @@ class DBController:
                         user="doadmin",
                         password="AVNS_KmHOAPDB_osaTG-XvN9",
                         port="25060")
+        
+        self.conn.autocommit = True
 
         super().__init__(*args, **kwargs)
