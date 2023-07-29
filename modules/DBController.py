@@ -11,6 +11,8 @@ class DBController:
 
     talk = Talk()
 
+    latest_telegram_message_read = ""
+
     telegram_bot_name = "@taylor_capital_ai_bot"
     telegram_bot_token = "6472164866:AAGWkjcO3vcQDomz0wd3Lf6uoJZlgRrM_8E"
     # The Taylor's official chat_id = -1001712753849
@@ -310,50 +312,14 @@ class DBController:
 
         text = latest_result["text"]
 
+        if self.latest_telegram_message_read == text:
+            return ""
+    
+        self.latest_telegram_message_read = text
+
         if text.find(f"{self.telegram_bot_name}") >= 0:
-
-            channel_id = latest_result["chat"]["id"]
-            chat_id = latest_result["message_id"]
-            from_user = latest_result["from"]["username"]
-            text = latest_result["text"]
-            is_taylor = False
-
-            cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
-            cursor.execute(f"""
-                            SELECT * FROM assistant_messages 
-                                WHERE channel_id = '{channel_id}'
-                                  AND chat_id = '{chat_id}' AND 
-                                  user_name = '{from_user}';
-                        """)
-            
-            cursor_result = cursor.fetchone()
-
-            cursor.close()
-
-            # Stopping if the question was already made.
-            if cursor_result != None:
-                return ""
             
             talk_response = self.taylor_says_telegram(text)
-
-            try:
-                cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-                
-                sql = """INSERT INTO public.assistant_messages(
-                            channel_id, chat_id, user_name, message, is_taylor, updated)
-                            VALUES (%s, %s, %s, %s, %s, NOW());"""
-                
-                cursor.execute(sql, (channel_id, chat_id, from_user, text, is_taylor))
-
-                self.conn.commit()
-
-                cursor.close()
-
-            except Exception as e:
-                print(str(e))
-
-                self.conn.rollback()
 
             return talk_response
 

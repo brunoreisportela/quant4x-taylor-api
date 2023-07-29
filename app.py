@@ -70,7 +70,10 @@ def get_products_performance():
 
 @app.route("/bot/message/from/group", methods=['GET'])
 def get_bot_message_from_group():
-    return dbController.get_bot_message_from_group()
+    try:
+        return dbController.get_bot_message_from_group()
+    except:
+        return ""
 
 def get_products_performance_code_local():
     return dbController.get_performance_by_code(1)
