@@ -271,7 +271,7 @@ class DBController:
                         # message_to_send = f"""🟢 ${difference} - 💰Total balance: ${round(week_balance,2)}"""
                         # self.send_telegram_message(message_to_send)
 
-                        question = f"""You can make a joke eventually. Please also keep the emojis to make it looking cool. 
+                        question = f"""Please keep the emojis to make it looking cool and make a very short joke in context with the message at end. 
                         May you create a message presenting the numbers in the first person of the pronoun with max 50 characters? 
                         🟢 Total earned with the trade was +${difference} 💰 After this gain the current Taylor's balance is: ${round(week_balance,2)}"""
 
