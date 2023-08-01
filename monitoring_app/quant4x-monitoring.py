@@ -1,10 +1,10 @@
 import argparse
 import json
-import logging
-import tkinter as tk
 import datetime
 import psycopg2
 import psycopg2.extras
+
+import time
 
 # command to create one executable file
 # PyInstaller --onefile quant4x-monitoring.py
@@ -21,8 +21,6 @@ parser.add_argument("-p", "--path", default="C:\\Users\\Extreme PC\\Documents\\n
 args = parser.parse_args()
 
 mt_path = args.path
-
-window = tk.Tk()
 
 conn = None
 cursor = None
@@ -43,181 +41,128 @@ def get_last_day_week(dt):
     return end
 
 def add_or_update_account(account):
-    try:
-        sql = f"""INSERT INTO accounts(
-                    id,
-                    balance, 
-                    drawdown, 
-                    equity, 
-                    product_name, 
-                    profit_loss)
-                    VALUES (
-                        '{account['mt_account_id']}',  
-                        '{account["kpi"]["balance"]}', 
-                        '{account["kpi"]["drawn_down"]}', 
-                        '{account["kpi"]["equity"]}', 
-                        '{account["info"]["product_name"]}', 
-                        '{account['current_profit']}'
-                        ) ON CONFLICT ON CONSTRAINT accounts_pkey DO
-                    UPDATE 
-                       SET 
-                           balance='{account["kpi"]["balance"]}', 
-                           drawdown='{account["kpi"]["drawn_down"]}', 
-                           equity='{account["kpi"]["equity"]}', 
-                           product_name='{account["info"]["product_name"]}', 
-                           profit_loss='{account['current_profit']}';"""
+    sql = f"""INSERT INTO accounts(
+                id,
+                balance, 
+                drawdown, 
+                equity, 
+                product_name, 
+                profit_loss)
+                VALUES (
+                    '{account['mt_account_id']}',  
+                    '{account["kpi"]["balance"]}', 
+                    '{account["kpi"]["drawn_down"]}', 
+                    '{account["kpi"]["equity"]}', 
+                    '{account["info"]["product_name"]}', 
+                    '{account['current_profit']}'
+                    ) ON CONFLICT ON CONSTRAINT accounts_pkey DO
+                UPDATE 
+                    SET 
+                        balance='{account["kpi"]["balance"]}', 
+                        drawdown='{account["kpi"]["drawn_down"]}', 
+                        equity='{account["kpi"]["equity"]}', 
+                        product_name='{account["info"]["product_name"]}', 
+                        profit_loss='{account['current_profit']}';"""
 
-        cursor.execute(sql)
+    cursor.execute(sql)
 
-        conn.commit()
-
-    except Exception as error:
-        print ("Oops! An exception has occured:", error)
-        print ("Exception TYPE:", type(error))
-        return None
+    conn.commit()
 
 def add_position(account_id, position):
-    try:
-        sql = f"""INSERT INTO public.positions(
-                    account_id, 
-                    ticket, 
-                    close_price, 
-                    close_time, 
-                    commission, 
-                    profit, 
-                    size, 
-                    swap, 
-                    symbol, 
-                    type)
-                    VALUES (
-                        '{account_id}', 
-                        '{position["ticket"]}', 
-                        '{position["close_price"]}',
-                        '{position["close_time"]}', 
-                        '{position["commission"]}',
-                        '{position["profit"]}',
-                        '{position["size"]}',
-                        '{position["swap"]}', 
-                        '{position["symbol"]}', 
-                        '{position["type"]}');"""
-        
-        cursor.execute(sql)
 
-        conn.commit()
+    sql = f"""INSERT INTO public.positions(
+                account_id, 
+                ticket, 
+                close_price, 
+                close_time, 
+                commission, 
+                profit, 
+                size, 
+                swap, 
+                symbol, 
+                type)
+                VALUES (
+                    '{account_id}', 
+                    '{position["ticket"]}', 
+                    '{position["close_price"]}',
+                    '{position["close_time"]}', 
+                    '{position["commission"]}',
+                    '{position["profit"]}',
+                    '{position["size"]}',
+                    '{position["swap"]}', 
+                    '{position["symbol"]}', 
+                    '{position["type"]}');"""
+    
+    cursor.execute(sql)
 
-    except:
-        return None
+    conn.commit()
 
 
 def read_file(path):
-    try:
-        f = open(path, "r")
 
-        data = json.load(f)
+    f = open(path, "r")
 
-        dt = datetime.today()
+    data = json.load(f)
 
-        first_day_week = get_first_day_week(dt)
-        last_day_week = get_last_day_week(dt)
+    dt = datetime.today()
 
-        transactions = 0
-        deposits = 0.0
-        prior_profit = 0.0
-        current_profit = 0.0
+    first_day_week = get_first_day_week(dt)
+    last_day_week = get_last_day_week(dt)
 
-        account_id = data['mt_account_id']
+    transactions = 0
+    deposits = 0.0
+    prior_profit = 0.0
+    current_profit = 0.0
 
-        for i in data['transactions']:
-            transactions += 1
-            transaction_close_date = datetime.strptime(
-                i["close_time"], '%Y.%m.%d %H:%M:%S')
+    account_id = data['mt_account_id']
 
-            if i["type"] != 0 and i["type"] != 1:
-                deposits += i['profit']+(i['swap'])
-            else:
-                if transaction_close_date < first_day_week:
-                    prior_profit += i['profit']+(i['swap'])
+    for i in data['transactions']:
+        transactions += 1
+        transaction_close_date = datetime.strptime(
+            i["close_time"], '%Y.%m.%d %H:%M:%S')
 
-                if transaction_close_date >= first_day_week:
-                    current_profit += i['profit']+(i['swap'])
+        if i["type"] != 0 and i["type"] != 1:
+            deposits += i['profit']+(i['swap'])
+        else:
+            if transaction_close_date < first_day_week:
+                prior_profit += i['profit']+(i['swap'])
 
-            add_position(account_id, i)
+            if transaction_close_date >= first_day_week:
+                current_profit += i['profit']+(i['swap'])
 
-        id = account_id
-        data["current_profit"] = current_profit
-        fmt_first_day = first_day_week.strftime("%m_%d_%Y")
-        fmt_last_day = last_day_week.strftime("%m_%d_%Y")
+        add_position(account_id, i)
 
-        date_scope = f"{data['mt_account_id']}-{fmt_first_day}-{fmt_last_day}"
+    id = account_id
+    data["current_profit"] = current_profit
+    fmt_first_day = first_day_week.strftime("%m_%d_%Y")
+    fmt_last_day = last_day_week.strftime("%m_%d_%Y")
 
-        print( f"Account: {id} | date signature: {date_scope}" )
+    date_scope = f"{data['mt_account_id']}-{fmt_first_day}-{fmt_last_day}"
 
-        add_or_update_account(data)
+    print( f"Account: {id} | date signature: {date_scope}" )
 
-    except ValueError:
-        print("Failure on opening a file")
+    add_or_update_account(data)
 
 
 def search_files():
-    try:
-        # while True:
-        for (dir_path, dir_names, file_names) in walk(mt_path):
-            # for windows
-            path_to_check = dir_path+"\\track_taylor.txt"
 
-            # print(f"File {path_to_check}")
+    # while True:
+    for (dir_path, dir_names, file_names) in walk(mt_path):
+        # for windows
+        path_to_check = dir_path+"\\track_taylor.txt"
 
-            if path.exists(path_to_check) == True:
-                read_file(path_to_check)
-
-            # time.sleep(60.0)
-
-    except KeyboardInterrupt:
-        print("Program finished by user.")
-        pass
-
-def update_dashboard(title_label):
-
-    try:
-        print("Searching file")
-
-        search_files()
+        if path.exists(path_to_check) == True:
+            read_file(path_to_check)
         
-    except Exception as e:
-        logging.critical(e, exc_info=True)  # log exception info at CRITICAL log level
-        search_files()
-        pass
-
-    # Schedule the next update after 1 second (1000 milliseconds)
-
-    current_time = datetime.now()
-    time_string = current_time.strftime("%H:%M:%S")  # Format as HH:MM:SS
-
-    title_label.configure(text=time_string)
-
-    window.after(5000, update_dashboard, title_label)
-
 def create_app():
-    window.title("Quant4x Monitoring")
-    window.configure(width=800, height=600)
-    window.configure(bg='lightgray')
-
-    # move window center
-    winWidth = window.winfo_reqwidth()
-    winwHeight = window.winfo_reqheight()
-    posRight = int(window.winfo_screenwidth() / 2 - winWidth / 2)
-    posDown = int(window.winfo_screenheight() / 2 - winwHeight / 2)
-    window.geometry("+{}+{}".format(posRight, posDown))
-
-    # Create a title label
-    title_label = tk.Label(window, text="Cool Dashboard", font=("Arial", 14))
-    title_label.pack(pady=20)
-
-    print("Dash Started")
-
-    update_dashboard(title_label)
-
-    window.mainloop()
+    while True:
+        current_time = datetime.now()
+        time_string = current_time.strftime("%H:%M:%S")  # Format as HH:MM:SS
+        
+        print(f"Execution Time: {time_string}" )
+        
+        search_files()
+        time.sleep(60)
 
 if __name__ == "__main__":
     conn = psycopg2.connect(database="defaultdb",
@@ -227,6 +172,7 @@ if __name__ == "__main__":
                     port="25060")
     
     conn.autocommit = True
+
     # to test
     # read_file("track_taylor.txt")
     # pass
@@ -235,9 +181,12 @@ if __name__ == "__main__":
 
     try:
         create_app()
-    except:
-        print("APP FAILED")
+    except Exception as e:
+        print(f"APP FAILED - {e}")
         create_app()
+    except KeyboardInterrupt:
+        print("Program finished by user.")
+    pass
         
 
     
