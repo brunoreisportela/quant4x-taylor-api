@@ -41,6 +41,7 @@ def get_last_day_week(dt):
     return end
 
 def add_or_update_account(account):
+    
     sql = f"""INSERT INTO accounts(
                 id,
                 balance, 
@@ -80,7 +81,8 @@ def add_position(account_id, position):
                 size, 
                 swap, 
                 symbol, 
-                type)
+                type,
+                updated_at)
                 VALUES (
                     '{account_id}', 
                     '{position["ticket"]}', 
@@ -91,7 +93,12 @@ def add_position(account_id, position):
                     '{position["size"]}',
                     '{position["swap"]}', 
                     '{position["symbol"]}', 
-                    '{position["type"]}');"""
+                    '{position["type"]}',
+                    'now()')
+                ON CONFLICT ON CONSTRAINT positions_pkey DO
+                    UPDATE 
+                        SET 
+                            updated_at='now()';"""
     
     cursor.execute(sql)
 
@@ -187,6 +194,8 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("Program finished by user.")
     pass
+
+    input("Press Enter to exit...")
         
 
     

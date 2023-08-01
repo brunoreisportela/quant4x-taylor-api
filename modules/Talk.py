@@ -88,7 +88,7 @@ class Talk:
         messages = [ # Change the prompt parameter to the messages parameter
             {'role': 'system', 'content': f"{self.pre_prompt} - {self.stats_notes}\n {input}\n"},
         ],
-            temperature = 0  
+            temperature = 1  
         )
 
         if len(completion['choices']) > 0:
