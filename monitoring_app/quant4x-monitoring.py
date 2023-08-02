@@ -22,6 +22,8 @@ args = parser.parse_args()
 
 mt_path = args.path
 
+print(f"MT4 Path: {mt_path}")
+
 conn = None
 cursor = None
 
@@ -162,23 +164,26 @@ def search_files():
             read_file(path_to_check)
         
 def create_app():
-    while True:
-        current_time = datetime.now()
-        time_string = current_time.strftime("%H:%M:%S")  # Format as HH:MM:SS
-        
-        print(f"Execution Time: {time_string}" )
-        
-        search_files()
-        time.sleep(60)
+    # while True:
+    current_time = datetime.now()
+    time_string = current_time.strftime("%H:%M:%S")  # Format as HH:MM:SS
+    
+    print(f"Execution Time: {time_string}" )
+    
+    search_files()
+    time.sleep(60)
 
 if __name__ == "__main__":
-    conn = psycopg2.connect(database="defaultdb",
-                    host="quant4x-admin-database-do-user-3044858-0.b.db.ondigitalocean.com",
-                    user="doadmin",
-                    password="AVNS_KmHOAPDB_osaTG-XvN9",
-                    port="25060")
-    
-    conn.autocommit = True
+
+    if conn == None:
+
+        conn = psycopg2.connect(database="defaultdb",
+                        host="quant4x-admin-database-do-user-3044858-0.b.db.ondigitalocean.com",
+                        user="doadmin",
+                        password="AVNS_KmHOAPDB_osaTG-XvN9",
+                        port="25060")
+        
+        conn.autocommit = True
 
     # to test
     # read_file("track_taylor.txt")
@@ -190,12 +195,13 @@ if __name__ == "__main__":
         create_app()
     except Exception as e:
         print(f"APP FAILED - {e}")
-        create_app()
+        # create_app()
     except KeyboardInterrupt:
         print("Program finished by user.")
     pass
 
-    input("Press Enter to exit...")
+    if conn != None:
+        conn.close()
         
 
     
