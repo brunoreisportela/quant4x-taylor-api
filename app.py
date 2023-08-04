@@ -52,10 +52,10 @@ def get_products_performance():
 
 @app.route("/bot/message/from/group", methods=['GET'])
 def get_bot_message_from_group():
-    # try:
-    return dbController.get_bot_message_from_group()
-    # except Exception as e:
-        # return json.dumps({"error": str(e)})
+    try:
+        return dbController.get_bot_message_from_group()
+    except Exception as e:
+        return json.dumps({"error": str(e)})
 
 def get_platform_performance():
     return dbController.get_platform_performance(1)

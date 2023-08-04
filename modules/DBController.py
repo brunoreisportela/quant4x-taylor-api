@@ -169,11 +169,14 @@ class DBController:
 
         clients = []
 
+        start_date_fmt = start_date
+        end_date_fmt = end_date
+
         if start_date is None or end_date is None:
             dt = datetime.today()
             start_date_fmt = self.dateToString(self.get_first_day_week(dt))
             end_date_fmt = self.dateToString(self.get_last_day_week(dt))
-
+        
         for client in cursor_result:
             client_dict = self.get_client_by_code(client["code"], start_date_fmt, end_date_fmt)
             clients.append(client_dict)
@@ -464,7 +467,7 @@ class DBController:
             return False
 
     def __init__(self, *args, **kwargs):
-
+        
         self.conn = psycopg2.connect(database="defaultdb",
                         host="quant4x-admin-database-do-user-3044858-0.b.db.ondigitalocean.com",
                         user="doadmin",
