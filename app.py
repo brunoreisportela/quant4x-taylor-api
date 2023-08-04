@@ -113,7 +113,7 @@ def webhook():
     if wttype == "message":
 
         message = json_data["message"]
-        conversation = json_data["conversation"]
+        conversation = json_data["user"]["phone"]
         _type = message["type"]
         
         if message["fromMe"]:
@@ -124,14 +124,16 @@ def webhook():
             text = message["text"]
             text = text.lower()
 
-            body_str = f"""
-                \{"type": "text","message": {dbController.taylor_get_answer(text)}\}
-                \{"to_number": {conversation}\}
-            """
+            response_from_ai = str(dbController.taylor_get_answer(text))
 
-            body = {"type": "text","message": dbController.taylor_get_answer(text)}
+            # body_str = f"""
+            #     \{"type": "text","message": {response_from_ai}\}
+            #     \{"to_number": {conversation}\}
+            # """
+
+            body = {"type": "text","message": response_from_ai}
             body.update({"to_number": conversation})
-            # body_str = str(body)
+            body_str = str(body)
             
             maytapi.sendMessage(body_str)
     else:

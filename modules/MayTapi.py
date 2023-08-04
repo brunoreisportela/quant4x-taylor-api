@@ -27,7 +27,9 @@ class MayTapi:
         print("webhook ", response.json())
 
     def sendMessage(self, payload):
-        
+
+        payload = payload.replace("'", '"')
+
         payload = json.loads(payload)
 
         print("Request Body", payload, file=sys.stdout, flush=True)
