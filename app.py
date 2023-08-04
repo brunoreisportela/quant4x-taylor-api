@@ -1,11 +1,12 @@
 import os
+import sys
 # import json as simplejson
 import json
 
 # print(f"SYS PATH: {sys.path}")
 # sudo lsof -i -P -n | grep LISTEN
 
-from flask import Flask,request,render_template
+from flask import Flask,request,render_template, jsonify
 from flask_cors import CORS
 from datetime import datetime, timedelta
 
@@ -85,6 +86,11 @@ def taylor_says():
     message = request.form["message"]
     return dbController.taylor_says_telegram(message)
 
+@app.route("/taylor/answer", methods=['POST'])
+def taylor_get_answer():
+    message = request.form["message"]
+    return dbController.taylor_get_answer(message)
+
 
 @app.route("/client/code", methods=['GET'])
 def get_client_code():
@@ -95,3 +101,33 @@ def get_client_code():
     end_date_fmt = dbController.dateToString(dbController.get_last_day_week(dt))
 
     return json.dumps(dbController.get_client_by_code(code, start_date_fmt, end_date_fmt))
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    json_data = request.get_json()
+
+    wttype = json_data["type"]
+
+    if wttype == "message":
+
+        message = json_data["message"]
+        conversation = json_data["conversation"]
+        _type = message["type"]
+        
+        if message["fromMe"]:
+            return
+        
+        if _type == "text":
+            # Handle Messages
+            text = message["text"]
+            text = text.lower()
+
+            body = {"type": "text","message": dbController.taylor_get_answer(message)}
+        
+            body.update({"to_number": conversation})
+            
+            maytapi.sendMessage(body)
+    else:
+        print("Unknow Type:", wttype,  file=sys.stdout, flush=True)
+        
+    return jsonify({"success": True}), 200

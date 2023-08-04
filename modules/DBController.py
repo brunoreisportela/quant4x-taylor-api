@@ -338,6 +338,31 @@ class DBController:
             return talk_response
 
         return ""
+    
+    def taylor_get_answer(self, message):
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT * FROM ai_controller WHERE channel = 'telegram';
+                    """)
+        
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result["is_active"] == False:
+            return ""
+        
+        dt = datetime.today()
+        start_date_fmt = self.dateToString(self.get_first_day_week(dt))
+        end_date_fmt = self.dateToString(self.get_last_day_week(dt))
+
+        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt) )
+        
+        talk_response = self.talk.get_response(message)
+
+        return talk_response
 
     def taylor_says_telegram(self, message):
 
