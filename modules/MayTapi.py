@@ -9,6 +9,23 @@ class MayTapi:
     PHONE_ID = "17195"
     API_TOKEN = "1c619959-6dd6-4d7c-a532-295ee25fa692"
 
+    def setup_webhook(self):
+
+        url = self.INSTANCE_URL + "/" + self.PRODUCT_ID + "/setWebhook"
+
+        print("url", url, file=sys.stdout, flush=True)
+        
+        headers = {
+            "Content-Type": "application/json",
+            "x-maytapi-key": self.API_TOKEN,
+        }
+        
+        body = {"webhook": "https://taylor-api.quant4x.com/webhook"}
+        
+        response = requests.post(url, json=body, headers=headers)
+        
+        print("webhook ", response.json())
+
     def sendMessage(self, payload):
         payload = json.loads(payload)
 
@@ -29,3 +46,5 @@ class MayTapi:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.setup_webhook()

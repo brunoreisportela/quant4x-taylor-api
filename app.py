@@ -122,7 +122,7 @@ def webhook():
             text = message["text"]
             text = text.lower()
 
-            body = {"type": "text","message": dbController.taylor_get_answer(message)}
+            body = {"type": "text","message": dbController.taylor_get_answer(text)}
         
             body.update({"to_number": conversation})
             
