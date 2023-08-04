@@ -112,6 +112,7 @@ class DBController:
         symbols = []
 
         for symbol in cursor_result:
+            symbol = {"symbol": symbol["symbol"], "trades": int(symbol["trades"])}
             symbols.append(symbol)
             
         return symbols
