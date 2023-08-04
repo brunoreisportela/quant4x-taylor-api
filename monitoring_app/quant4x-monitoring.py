@@ -54,9 +54,9 @@ def add_or_update_account(account):
                 profit_loss)
                 VALUES (
                     '{account['mt_account_id']}',  
+                    '{account["trades"]}', 
                     '{account["kpi"]["balance"]}', 
                     '{account["kpi"]["drawn_down"]}', 
-                    '{account["trades"]}', 
                     '{account["kpi"]["equity"]}', 
                     '{account["info"]["product_name"]}', 
                     '{account['current_profit']}'

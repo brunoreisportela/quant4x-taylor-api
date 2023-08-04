@@ -39,10 +39,6 @@ def get_service():
 def get_echo():
     return "Echo"
 
-# @app.route("/accounts", methods=['GET'])
-# def get_accounts():
-#     return json.dumps(firestore.get_accounts())
-
 @app.route("/clients", methods=['GET'])
 def get_clients():
     return json.dumps(dbController.get_clients())
