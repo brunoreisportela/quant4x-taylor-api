@@ -106,6 +106,8 @@ def get_client_code():
 def webhook():
     json_data = request.get_json()
 
+    print(json_data,  file=sys.stdout, flush=True)
+
     wttype = json_data["type"]
 
     if wttype == "message":
