@@ -124,10 +124,14 @@ def webhook():
             text = message["text"]
             text = text.lower()
 
+            body_str = f"""
+                \{"type": "text","message": {dbController.taylor_get_answer(text)}\}
+                \{"to_number": {conversation}\}
+            """
+
             body = {"type": "text","message": dbController.taylor_get_answer(text)}
             body.update({"to_number": conversation})
-
-            body_str = str(body)
+            # body_str = str(body)
             
             maytapi.sendMessage(body_str)
     else:
