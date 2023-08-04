@@ -133,9 +133,8 @@ def webhook():
 
             body = {"type": "text","message": response_from_ai}
             body.update({"to_number": conversation})
-            body_str = str(body)
             
-            maytapi.sendMessage(body_str)
+            maytapi.sendMessage(body)
     else:
         print("Unknow Type:", wttype,  file=sys.stdout, flush=True)
         

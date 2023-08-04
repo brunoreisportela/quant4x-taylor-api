@@ -28,9 +28,8 @@ class MayTapi:
 
     def sendMessage(self, payload):
 
-        payload = payload.replace("'", '"')
-
-        payload = json.loads(payload)
+        if isinstance(payload, str):
+            payload = json.loads(payload)
 
         print("Request Body", payload, file=sys.stdout, flush=True)
         
