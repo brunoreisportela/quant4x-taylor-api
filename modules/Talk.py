@@ -11,6 +11,7 @@ class Talk:
     def prepare(self):
         # Biased example
         self.pre_prompt = """Please call yourself as Taylor AI Assistant, created by Quant4x. 
+                             Please answer with max of 280 characters. 
                              Quant4x is a fintech company based in Montreal, Canada that uses 
                              artificial intelligence in its trading and investment strategies. 
                              
