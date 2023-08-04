@@ -19,39 +19,53 @@ class DBController:
     # The Taylor's Group performance report chat_id = -1001755698269
     telegram_chat_id = "-1001712753849"
 
-    def get_client_by_code(self, code):
+    def dateToString(self, date):
+        formatted_date = date.strftime("%d/%m/%Y")
+        return formatted_date
+    
+    def stringToDate(self, date_str):
+        # Convert the input string to a datetime object
+        date_object = datetime.strptime(date_str, "%d/%m/%Y")  # Adjust the format based on your input string format
+
+        # Convert the date to a string in the desired format
+        formatted_date = date_object.strftime("%d/%m/%Y")
+        return formatted_date
+
+    def get_client_by_code(self, code, start_date = None, end_date = None):
+
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"SELECT * FROM clients AS cli WHERE cli.code = {code}")
 
-        cursor_result = cursor.fetchone()
+        client = cursor.fetchone()
 
         cursor.close()
 
         client_dict = {}
 
-        client_dict["code"] = cursor_result["code"]
-        client_dict["name"] = cursor_result["name"]
-        client_dict["week_balance"] = float(cursor_result["week_balance"])
-        client_dict["week_profit_loss"] = float(cursor_result["week_profit_loss"])
-        client_dict["week_profit_percent"] = float(cursor_result["week_profit_percent"])
+        client_dict["code"] = client["code"]
+        client_dict["name"] = client["name"]
+        client_dict["week_balance"] = float(client["week_balance"])
+        client_dict["week_profit_loss"] = float(client["week_profit_loss"])
+        client_dict["week_profit_percent"] = float(client["week_profit_percent"])
+
+        client_dict["accounts"] = self.get_accounts(client["code"])
+
+        client_dict["scope_profit"] = 0.0
+        client_dict["scope_transactions"] = 0
+        client_dict["scope_profit_percent"] = 0
+
+        for account in client_dict["accounts"]:
+
+            if "id" in account:
+                account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
+                account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
+
+                client_dict["scope_profit"] += account["kpis"]["profit_loss"]
+                client_dict["scope_transactions"] += account["kpis"]["transactions"]
+                client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
 
         return client_dict
-        
-    def get_client_accounts_by_code(self, code):
-
-        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
-        cursor.execute(f"SELECT * FROM clients AS cli INNER JOIN accounts AS acc ON acc.client_code = cli.code WHERE cli.code = {code}")
-
-        cursor_result = cursor.fetchone()
-
-        cursor.close()
-
-        if cursor_result == None:
-            return None
-        else:
-            return cursor_result
         
     def set_user_code(self, email, code):
 
@@ -143,7 +157,7 @@ class DBController:
             
         return account
     
-    def get_clients(self, is_scope_report = False, start_date = None, end_date = None):
+    def get_clients(self, start_date = None, end_date = None):
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
@@ -155,37 +169,19 @@ class DBController:
 
         clients = []
 
+        if start_date is None or end_date is None:
+            dt = datetime.today()
+            start_date_fmt = self.dateToString(self.get_first_day_week(dt))
+            end_date_fmt = self.dateToString(self.get_last_day_week(dt))
+
         for client in cursor_result:
-            client_dict = {}
-
-            client_dict["code"] = client["code"]
-            client_dict["name"] = client["name"]
-            client_dict["week_balance"] = float(client["week_balance"])
-            client_dict["week_profit_loss"] = float(client["week_profit_loss"])
-            client_dict["week_profit_percent"] = float(client["week_profit_percent"])
-
-            client_dict["accounts"] = self.get_accounts(client["code"])
-
-            client_dict["scope_profit"] = 0.0
-            client_dict["scope_transactions"] = 0
-            client_dict["scope_profit_percent"] = 0
-
-            if is_scope_report:
-                for account in client_dict["accounts"]:
-
-                    if "id" in account:
-                        account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
-                        account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
-
-                        client_dict["scope_profit"] += account["kpis"]["profit_loss"]
-                        client_dict["scope_transactions"] += account["kpis"]["transactions"]
-                        client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
-
+            client_dict = self.get_client_by_code(client["code"], start_date_fmt, end_date_fmt)
             clients.append(client_dict)
 
         return clients
     
     def get_positions_kpis(self, account_id, start_date, end_date):
+
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""SELECT sum(profit) as profit_loss, count(ticket) as transactions FROM positions pos
@@ -285,10 +281,6 @@ class DBController:
                     difference_in_percent = round((difference/(abs(float(client_code_week_balance))+abs(difference))) * 100, 2)
 
                     if difference_in_percent > 0:
-                        # message_to_send = f"""--Taylor Update--\n🟢 ${round(difference),2} ( {difference_in_percent}% )\n💰 Total balance: ${round(week_balance,2)}"""
-                        # message_to_send = f"""🟢 ${difference} - 💰Total balance: ${round(week_balance,2)}"""
-                        # self.send_telegram_message(message_to_send)
-
                         question = f"""Please keep the emojis to make it looking cool and make a very short joke in context with the message at end. 
                         May you create a message presenting the numbers in the first person of the pronoun with max 50 characters? 
                         🟢 Total earned with the trade was +${difference} 💰 After this gain the current Taylor's balance is: ${round(week_balance,2)}"""
@@ -296,10 +288,6 @@ class DBController:
                         self.taylor_says_telegram(question)
                         
                     elif difference_in_percent < 0:
-                        # message_to_send = f"""--Taylor Update--\n🔴 -${round(difference,2)} ( -{difference_in_percent}% )\n💰 Total balance: ${round(week_balance,2)}"""
-                        # message_to_send = f"""🔴 -${difference} - 💰Total balance: ${round(week_balance,2)}"""
-                        # self.send_telegram_message(message_to_send)
-
                         question = f"""Please keep the emojis. There is nothing positive about the balance when there is a loss in the capital. May you create a message, presenting the numbers in the first person of the pronoun with max 50 characters? 
                         🔴 Total earned with the trade was -${difference} 💰 After this loss the current Taylor's balance is: ${round(week_balance,2)}"""
 
@@ -322,9 +310,14 @@ class DBController:
 
         for result in response_json["result"]:
             
-            if "message" in result:
+            if "message" in result and "text" in result["message"]:
                 if str(result["message"]["chat"]["id"]) == self.telegram_chat_id:
-                    messages_filtered_by_chat_id.append(result["message"])
+
+                    if "@taylor_capital_ai_bot" in result["message"]["text"]:
+                        messages_filtered_by_chat_id.append(result["message"])
+
+        if len(messages_filtered_by_chat_id) == 0:
+            return ""
 
         latest_result = messages_filtered_by_chat_id[-1]
 
@@ -358,7 +351,11 @@ class DBController:
         if cursor_result["is_active"] == False:
             return ""
         
-        self.talk.prepare_on_demand_prompt( self.get_performance_by_code(1) )
+        dt = datetime.today()
+        start_date_fmt = self.dateToString(self.get_first_day_week(dt))
+        end_date_fmt = self.dateToString(self.get_last_day_week(dt))
+
+        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt) )
         talk_response = self.talk.get_response(message)
 
         self.send_telegram_message(talk_response)
@@ -376,7 +373,7 @@ class DBController:
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
-                        SELECT * FROM accounts as acc
+                        SELECT id, balance, drawdown, equity, product_name, profit_loss, trades FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {code};
@@ -406,7 +403,8 @@ class DBController:
 
         cursor.execute(f"""
 
-                        SELECT * FROM accounts as acc
+                        SELECT id, balance, drawdown, equity, product_name, profit_loss, trades 
+                        FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {code};
@@ -423,7 +421,7 @@ class DBController:
             return cursor_result
         
         
-    def get_performance_by_code(self, code):        
+    def get_platform_performance(self, code):        
 
         dt = datetime.today()
         first_day_week = self.get_first_day_week(dt)
@@ -433,7 +431,7 @@ class DBController:
 
         cursor.execute(f"""
 
-                        SELECT * FROM accounts as acc
+                        SELECT id, balance, drawdown, equity, product_name, profit_loss, trades FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {code};

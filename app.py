@@ -6,8 +6,8 @@ import json
 # sudo lsof -i -P -n | grep LISTEN
 
 from flask import Flask,request,render_template
-from flask_table import Table, Col
 from flask_cors import CORS
+from datetime import datetime, timedelta
 
 # from modules import Talk
 # from modules import Whatsapp
@@ -27,10 +27,6 @@ dbController = DBController()
 # talk = Talk()
 # newsReader = NewsReader()
 
-class ItemTable(Table):
-    news = Col('news')
-    result = Col('result')
-
 @app.route("/")
 def get_service():
     return get_echo()
@@ -45,34 +41,24 @@ def get_clients():
 
 @app.route("/clients/report/scope", methods=['GET'])
 def get_clients_report_scope():
-    start_date = request.args["start_date"]
-    end_date = request.args["end_date"]
+    start_date = dbController.stringToDate(request.args["start_date"])
+    end_date = dbController.stringToDate(request.args["end_date"])
 
-    return json.dumps(dbController.get_clients(True, start_date, end_date))
-
-# @app.route("/sentiment", methods=['GET'])
-# def get_sentiment():
-#     index = request.args["index"]
-#     return symbol_sentiment.get_status(index)
-
-# @app.route("/lorentzian", methods=['GET'])
-# def get_lorentzian():
-#     symbol_translate = request.args["symbol"]
-#     return firestore.get_lorentzian(symbol_translate)
+    return json.dumps(dbController.get_clients(start_date, end_date))
 
 @app.route("/products/performance", methods=['GET'])
 def get_products_performance():
-    return get_products_performance_code_local()
+    return get_platform_performance()
 
 @app.route("/bot/message/from/group", methods=['GET'])
 def get_bot_message_from_group():
-    try:
-        return dbController.get_bot_message_from_group()
-    except:
-        return ""
+    # try:
+    return dbController.get_bot_message_from_group()
+    # except Exception as e:
+        # return json.dumps({"error": str(e)})
 
-def get_products_performance_code_local():
-    return dbController.get_performance_by_code(1)
+def get_platform_performance():
+    return dbController.get_platform_performance(1)
 
 @app.route("/update/accounts/kpi", methods=['GET'])
 def update_accounts_kpi():
@@ -87,32 +73,6 @@ def get_products_performance_code():
 def get_percent_performance_code():
     code = request.args["code"]
     return json.dumps(dbController.get_profit_percentage_by_code(code))
-
-# @app.route("/question", methods=['GET'])
-# def get_question():
-#     question = request.args["question"]
-
-#     if len(question) > 1:
-#         return json.dumps(talk.get_response(question))
-#     else:
-#         return json.dumps("No answer obtained due no question was made.")
-    
-# @app.route("/account", methods=['GET'])
-# def get_account():
-#     account_id = request.args["account_id"]
-#     from_date = request.args["from_date"]
-#     to_date = request.args["to_date"]
-#     return json.dumps(firestore.get_account(account_id, from_date, to_date))
-    
-# @app.route("/news", methods=['GET'])
-# def get_news():
-#     headers = ["symbol", 'news', 'result']
-
-#     return render_template(
-#         'news.html',
-#         headers=headers,
-#         tableData=newsReader.get_feed_from_FX_street()
-#     )
 
 @app.route("/whatsapp/send_message", methods=['POST'])
 def post_whatsapp_send_message():
@@ -129,4 +89,9 @@ def taylor_says():
 @app.route("/client/code", methods=['GET'])
 def get_client_code():
     code = request.args["code"]
-    return json.dumps(dbController.get_client_by_code(code))
+
+    dt = datetime.today()
+    start_date_fmt = dbController.dateToString(dbController.get_first_day_week(dt))
+    end_date_fmt = dbController.dateToString(dbController.get_last_day_week(dt))
+
+    return json.dumps(dbController.get_client_by_code(code, start_date_fmt, end_date_fmt))
