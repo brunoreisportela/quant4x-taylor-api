@@ -125,10 +125,11 @@ def webhook():
             text = text.lower()
 
             body = {"type": "text","message": dbController.taylor_get_answer(text)}
-        
             body.update({"to_number": conversation})
+
+            body_str = str(body)
             
-            maytapi.sendMessage(body)
+            maytapi.sendMessage(body_str)
     else:
         print("Unknow Type:", wttype,  file=sys.stdout, flush=True)
         
