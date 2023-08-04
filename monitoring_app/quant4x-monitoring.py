@@ -46,7 +46,8 @@ def add_or_update_account(account):
     
     sql = f"""INSERT INTO accounts(
                 id,
-                balance, 
+                trades,
+                balance,
                 drawdown, 
                 equity, 
                 product_name, 
@@ -55,12 +56,15 @@ def add_or_update_account(account):
                     '{account['mt_account_id']}',  
                     '{account["kpi"]["balance"]}', 
                     '{account["kpi"]["drawn_down"]}', 
+                    '{account["trades"]}', 
                     '{account["kpi"]["equity"]}', 
                     '{account["info"]["product_name"]}', 
                     '{account['current_profit']}'
                     ) ON CONFLICT ON CONSTRAINT accounts_pkey DO
                 UPDATE 
                     SET 
+                        updated_at='now()',
+                        trades='{account["trades"]}',
                         balance='{account["kpi"]["balance"]}', 
                         drawdown='{account["kpi"]["drawn_down"]}', 
                         equity='{account["kpi"]["equity"]}', 
@@ -106,6 +110,28 @@ def add_position(account_id, position):
 
     conn.commit()
 
+def add_symbol(account_id, symbol):
+
+    sql = f"""INSERT INTO public.symbols(
+                account_id, 
+                symbol, 
+                trades,
+                updated_at)
+                VALUES (
+                    '{account_id}', 
+                    '{symbol["symbol"]}', 
+                    '{symbol["trades"]}',
+                    'now()')
+                ON CONFLICT ON CONSTRAINT symbols_pkey DO
+                    UPDATE 
+                        SET 
+                            trades = '{symbol["trades"]}',
+                            updated_at = 'now()';"""
+    
+    cursor.execute(sql)
+
+    conn.commit()
+
 
 def read_file(path):
 
@@ -125,30 +151,37 @@ def read_file(path):
 
     account_id = data['mt_account_id']
 
-    for i in data['transactions']:
-        transactions += 1
-        transaction_close_date = datetime.strptime(
-            i["close_time"], '%Y.%m.%d %H:%M:%S')
+    if "transactions" in data:
+        for i in data['transactions']:
+            transactions += 1
+            transaction_close_date = datetime.strptime(
+                i["close_time"], '%Y.%m.%d %H:%M:%S')
 
-        if i["type"] != 0 and i["type"] != 1:
-            deposits += i['profit']+(i['swap'])
-        else:
-            if transaction_close_date < first_day_week:
-                prior_profit += i['profit']+(i['swap'])
+            if i["type"] != 0 and i["type"] != 1:
+                deposits += i['profit']+(i['swap'])
+            else:
+                if transaction_close_date < first_day_week:
+                    prior_profit += i['profit']+(i['swap'])
 
-            if transaction_close_date >= first_day_week:
-                current_profit += i['profit']+(i['swap'])
+                if transaction_close_date >= first_day_week:
+                    current_profit += i['profit']+(i['swap'])
 
-        add_position(account_id, i)
+            add_position(account_id, i)
+
+    if "symbols" in data:
+        for i in data['symbols']:
+            add_symbol(account_id, i)
 
     id = account_id
     data["current_profit"] = current_profit
     fmt_first_day = first_day_week.strftime("%m_%d_%Y")
     fmt_last_day = last_day_week.strftime("%m_%d_%Y")
 
+    trades = data["trades"]
+
     date_scope = f"{data['mt_account_id']}-{fmt_first_day}-{fmt_last_day}"
 
-    print( f"Account: {id} | date signature: {date_scope}" )
+    print( f"Account: {id} | date signature: {date_scope} | trades: {trades}" )
 
     add_or_update_account(data)
 

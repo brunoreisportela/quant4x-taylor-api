@@ -99,6 +99,22 @@ class DBController:
             accounts.append(account)
 
         return accounts
+    
+    def get_symbols(self, id):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""SELECT * FROM symbols where account_id = '{id}';""")
+
+        cursor_result = cursor.fetchall()
+
+        cursor.close()
+
+        symbols = []
+
+        for symbol in cursor_result:
+            symbols.append(symbol)
+            
+        return symbols
         
     def get_account(self, id):
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
@@ -117,12 +133,13 @@ class DBController:
             account["balance"] = float(cursor_result["balance"])
             account["drawdown"] = float(cursor_result["drawdown"])
             account["equity"] = float(cursor_result["equity"])
+            account["trades"] = float(cursor_result["trades"])
             account["product_name"] = cursor_result["product_name"]
             account["profit_loss"] = float(cursor_result["profit_loss"])
+            account["symbols"] = self.get_symbols(account["id"])
         else:
             print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
             
-
         return account
     
     def get_clients(self, is_scope_report = False, start_date = None, end_date = None):
