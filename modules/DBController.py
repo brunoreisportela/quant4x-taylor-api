@@ -19,39 +19,61 @@ class DBController:
     # The Taylor's Group performance report chat_id = -1001755698269
     telegram_chat_id = "-1001712753849"
 
-    def get_client_by_code(self, code):
+    def get_client_by_code(self, code, is_scope_report = False, start_date = None, end_date = None):
+
+        if start_date is None or end_date is None:
+            dt = datetime.today()
+            start_date = self.get_first_day_week(dt)
+            end_date = self.get_last_day_week(dt)
+
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"SELECT * FROM clients AS cli WHERE cli.code = {code}")
 
-        cursor_result = cursor.fetchone()
+        client = cursor.fetchone()
 
         cursor.close()
 
         client_dict = {}
 
-        client_dict["code"] = cursor_result["code"]
-        client_dict["name"] = cursor_result["name"]
-        client_dict["week_balance"] = float(cursor_result["week_balance"])
-        client_dict["week_profit_loss"] = float(cursor_result["week_profit_loss"])
-        client_dict["week_profit_percent"] = float(cursor_result["week_profit_percent"])
+        client_dict["code"] = client["code"]
+        client_dict["name"] = client["name"]
+        client_dict["week_balance"] = float(client["week_balance"])
+        client_dict["week_profit_loss"] = float(client["week_profit_loss"])
+        client_dict["week_profit_percent"] = float(client["week_profit_percent"])
+
+        client_dict["accounts"] = self.get_accounts(client["code"])
+
+        client_dict["scope_profit"] = 0.0
+        client_dict["scope_transactions"] = 0
+        client_dict["scope_profit_percent"] = 0
+
+        for account in client_dict["accounts"]:
+
+            if "id" in account:
+                account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
+                account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
+
+                client_dict["scope_profit"] += account["kpis"]["profit_loss"]
+                client_dict["scope_transactions"] += account["kpis"]["transactions"]
+                client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
 
         return client_dict
         
-    def get_client_accounts_by_code(self, code):
+    # def get_client_accounts_by_code(self, code):
 
-        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+    #     cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        cursor.execute(f"SELECT * FROM clients AS cli INNER JOIN accounts AS acc ON acc.client_code = cli.code WHERE cli.code = {code}")
+    #     cursor.execute(f"SELECT * FROM clients AS cli INNER JOIN accounts AS acc ON acc.client_code = cli.code WHERE cli.code = {code}")
 
-        cursor_result = cursor.fetchone()
+    #     cursor_result = cursor.fetchone()
 
-        cursor.close()
+    #     cursor.close()
 
-        if cursor_result == None:
-            return None
-        else:
-            return cursor_result
+    #     if cursor_result == None:
+    #         return None
+    #     else:
+    #         return cursor_result
         
     def set_user_code(self, email, code):
 
@@ -156,31 +178,7 @@ class DBController:
         clients = []
 
         for client in cursor_result:
-            client_dict = {}
-
-            client_dict["code"] = client["code"]
-            client_dict["name"] = client["name"]
-            client_dict["week_balance"] = float(client["week_balance"])
-            client_dict["week_profit_loss"] = float(client["week_profit_loss"])
-            client_dict["week_profit_percent"] = float(client["week_profit_percent"])
-
-            client_dict["accounts"] = self.get_accounts(client["code"])
-
-            client_dict["scope_profit"] = 0.0
-            client_dict["scope_transactions"] = 0
-            client_dict["scope_profit_percent"] = 0
-
-            if is_scope_report:
-                for account in client_dict["accounts"]:
-
-                    if "id" in account:
-                        account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
-                        account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
-
-                        client_dict["scope_profit"] += account["kpis"]["profit_loss"]
-                        client_dict["scope_transactions"] += account["kpis"]["transactions"]
-                        client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
-
+            client_dict = self.get_client_by_code(client["code"], is_scope_report, start_date, end_date)
             clients.append(client_dict)
 
         return clients
@@ -376,7 +374,7 @@ class DBController:
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
-                        SELECT * FROM accounts as acc
+                        SELECT id, balance, drawdown, equity, product_name, profit_loss, trades FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {code};
@@ -400,13 +398,14 @@ class DBController:
 
         return total_profit_percent
     
-    def get_performance_by_code(self, code):        
+    def get_internal_performance_by_code(self, code):        
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
 
-                        SELECT * FROM accounts as acc
+                        SELECT id, balance, drawdown, equity, product_name, profit_loss, trades 
+                        FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {code};
@@ -433,7 +432,7 @@ class DBController:
 
         cursor.execute(f"""
 
-                        SELECT * FROM accounts as acc
+                        SELECT id, balance, drawdown, equity, product_name, profit_loss, trades FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {code};

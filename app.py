@@ -6,7 +6,6 @@ import json
 # sudo lsof -i -P -n | grep LISTEN
 
 from flask import Flask,request,render_template
-from flask_table import Table, Col
 from flask_cors import CORS
 
 # from modules import Talk
@@ -26,10 +25,6 @@ dbController = DBController()
 
 # talk = Talk()
 # newsReader = NewsReader()
-
-class ItemTable(Table):
-    news = Col('news')
-    result = Col('result')
 
 @app.route("/")
 def get_service():
@@ -68,8 +63,8 @@ def get_products_performance():
 def get_bot_message_from_group():
     try:
         return dbController.get_bot_message_from_group()
-    except:
-        return ""
+    except Exception as e:
+        return json.dumps({"error": str(e)})
 
 def get_products_performance_code_local():
     return dbController.get_performance_by_code(1)
@@ -81,7 +76,7 @@ def update_accounts_kpi():
 @app.route("/products/performance/code", methods=['GET'])
 def get_products_performance_code():
     code = request.args["code"]
-    return dbController.get_performance_by_code(code)
+    return dbController.get_internal_performance_by_code(code)
 
 @app.route("/percent/performance/code", methods=['GET'])
 def get_percent_performance_code():
