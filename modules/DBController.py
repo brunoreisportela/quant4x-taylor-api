@@ -31,7 +31,7 @@ class DBController:
         formatted_date = date_object.strftime("%d/%m/%Y")
         return formatted_date
 
-    def get_client_by_code(self, code, start_date = None, end_date = None):
+    def get_client_by_code(self, code, start_date = None, end_date = None, weeks_limit = 0):
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
@@ -58,7 +58,7 @@ class DBController:
         for account in client_dict["accounts"]:
             
             if "id" in account:
-                self.get_weeks_per_account(account)
+                self.get_weeks_per_account(account, weeks_limit)
                 account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
                 account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
 
@@ -68,7 +68,7 @@ class DBController:
 
         return client_dict
     
-    def get_weeks_per_account(self, account):
+    def get_weeks_per_account(self, account, weeks_limit = 0):
 
         account_id = account["id"]
         
@@ -124,7 +124,11 @@ class DBController:
                 weeks_total_commission += float(result["commission"])
                 weeks_total_swap += float(result["swap"])
 
-        account["weeks"] = weeks
+        if weeks_limit > 0:
+            account["weeks"] = weeks[-weeks_limit:]
+        else:
+            account["weeks"] = weeks
+
         account["weeks_count"] = len(weeks)
 
         account["weeks_total_profit"] = weeks_total_profit
@@ -413,7 +417,7 @@ class DBController:
         start_date_fmt = self.dateToString(self.get_first_day_week(dt))
         end_date_fmt = self.dateToString(self.get_last_day_week(dt))
 
-        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt) )
+        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt, 3) )
         
         talk_response = self.talk.get_response(message)
 
@@ -438,7 +442,7 @@ class DBController:
         start_date_fmt = self.dateToString(self.get_first_day_week(dt))
         end_date_fmt = self.dateToString(self.get_last_day_week(dt))
 
-        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt) )
+        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt, 3) )
         talk_response = self.talk.get_response(message)
 
         self.send_telegram_message(talk_response)
