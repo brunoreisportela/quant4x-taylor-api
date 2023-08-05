@@ -56,8 +56,9 @@ class DBController:
         client_dict["scope_profit_percent"] = 0
 
         for account in client_dict["accounts"]:
-
+            
             if "id" in account:
+                self.get_weeks_per_account(account)
                 account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
                 account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
 
@@ -66,6 +67,71 @@ class DBController:
                 client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
 
         return client_dict
+    
+    def get_weeks_per_account(self, account):
+
+        account_id = account["id"]
+        
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""SELECT * FROM positions pos
+                                WHERE pos.account_id = '{account_id}'
+                                    AND pos.type != 6 order by close_time ASC;""")
+
+        cursor_result = cursor.fetchall()
+        
+        cursor.close()
+
+        weeks = []
+
+        current_first_day_week = datetime.now()
+        current_week = {}
+        index = 0
+
+        weeks_total_profit = 0.0
+        weeks_total_commission = 0.0
+        weeks_total_swap = 0.0
+
+        for result in cursor_result:
+
+            first_day_week = self.get_first_day_week(result["close_time"])
+
+            if first_day_week.date() != current_first_day_week.date():
+                current_week = {}
+                current_week["index"] = index
+                current_week["profit"] = float(result["profit"])
+                current_week["commission"] = float(result["commission"])
+                current_week["swap"] = float(result["swap"])
+
+                current_week["start_date"] = self.dateToString(first_day_week)
+                current_week["end_date"] = self.dateToString(self.get_last_day_week(first_day_week))
+
+                current_first_day_week = first_day_week
+                index += 1
+
+                weeks_total_profit += current_week["profit"]
+                weeks_total_commission += current_week["commission"]
+                weeks_total_swap += current_week["swap"]
+
+                weeks.append(current_week)
+
+            else:
+                weeks[len(weeks)-1]["profit"] += float(result["profit"])
+                weeks[len(weeks)-1]["commission"] += float(result["commission"])
+                weeks[len(weeks)-1]["swap"] += float(result["swap"])
+
+                weeks_total_profit += float(result["profit"])
+                weeks_total_commission += float(result["commission"])
+                weeks_total_swap += float(result["swap"])
+
+        account["weeks"] = weeks
+        account["weeks_count"] = len(weeks)
+
+        account["weeks_total_profit"] = weeks_total_profit
+        account["weeks_total_commission"] = weeks_total_commission
+        account["weeks_total_swap"] =  weeks_total_swap
+
+        return account
         
     def set_user_code(self, email, code):
 
@@ -82,19 +148,22 @@ class DBController:
         return ""
     
     def get_first_day_week(self, dt):
-        dt = datetime.today()
+        # dt = datetime.today()
 
         start = dt - timedelta(days=dt.weekday()+1)
 
         return start
     
+    # def get_last_day_week(self, dt):
+    #     # dt = datetime.today()
+
+    #     start = dt - timedelta(days=dt.weekday()+1)
+    #     end = start + timedelta(days=5)
+
+    #     return end
+    
     def get_last_day_week(self, dt):
-        dt = datetime.today()
-
-        start = dt - timedelta(days=dt.weekday()+1)
-        end = start + timedelta(days=5)
-
-        return end
+        return self.get_first_day_week(dt) + timedelta(days=13)
     
     def get_accounts(self, code):
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
