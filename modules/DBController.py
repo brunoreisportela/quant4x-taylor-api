@@ -472,13 +472,20 @@ class DBController:
 
         profit_loss = 0.0
         balance = 0.0
+        equity = 0.0
 
         for account in cursor_result:
             profit_loss += float(account["profit_loss"])
+            equity += float(account["equity"])
             balance += float(account["balance"])
 
+            print(equity)
+            print(balance)
+
         if profit_loss != 0 and balance != 0:
-            total_profit_percent = round((profit_loss/(abs(balance)+abs(profit_loss))) * 100, 2)
+            # total_equity_percent = round((equity/(abs(balance)+abs(equity))) * 100, 2)
+            # total_profit_percent = round((profit_loss/(abs(balance)+abs(profit_loss))) * 100, 2)
+            total_profit_percent = round((equity*100)/balance, 2)-100
         else:
             total_profit_percent = 0
 
