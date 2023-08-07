@@ -484,8 +484,8 @@ class DBController:
 
         if profit_loss != 0 and balance != 0:
             # total_equity_percent = round((equity/(abs(balance)+abs(equity))) * 100, 2)
-            # total_profit_percent = round((profit_loss/(abs(balance)+abs(profit_loss))) * 100, 2)
-            total_profit_percent = round((equity*100)/balance, 2)-100
+            total_profit_percent = round((profit_loss/(abs(balance)+abs(profit_loss))) * 100, 2)
+            # total_profit_percent = round((equity*100)/balance, 2)-100
         else:
             total_profit_percent = 0
 
