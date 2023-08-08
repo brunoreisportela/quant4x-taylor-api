@@ -68,6 +68,36 @@ class DBController:
 
         return client_dict
     
+    def get_positions_summary_until_date(self, account_id, end_date = None):
+        
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""SELECT * FROM positions pos
+                                WHERE pos.account_id = '{account_id}'
+                                    AND pos.close_time <= TO_TIMESTAMP('{end_date}','DD/MM/YYYY')
+                        """)
+
+        cursor_result = cursor.fetchall()
+        
+        cursor.close()
+
+        summary = {}
+
+        profit = 0.0
+        commission = 0.0
+        swap = 0.0
+
+        for result in cursor_result:
+            profit += float(result["profit"])
+            commission += float(result["commission"])
+            swap += float(result["swap"])
+
+        summary["profit"] = profit
+        summary["commission"] = commission
+        summary["swap"] = swap
+            
+        return summary
+
     def get_weeks_per_account(self, account, weeks_limit = 0):
 
         account_id = account["id"]
@@ -151,10 +181,10 @@ class DBController:
         
         return ""
     
-    def get_first_day_week(self, dt):
+    def get_first_day_week(self, dt, offset = 1):
         # dt = datetime.today()
 
-        start = dt - timedelta(days=dt.weekday()+1)
+        start = dt - timedelta(days=dt.weekday()+offset)
 
         return start
     
@@ -474,15 +504,28 @@ class DBController:
         balance = 0.0
         equity = 0.0
 
+        # previous_week_balance = 0.0
+
+        positions_summary = []
+
         for account in cursor_result:
+
+            day_trim = self.dateToString(self.get_first_day_week(datetime.today(), offset=0))
+
+            positions_summary.append(self.get_positions_summary_until_date(account["id"], day_trim))
+            
             profit_loss += float(account["profit_loss"])
             equity += float(account["equity"])
             balance += float(account["balance"])
 
+        positions_balance = 0.0
+
+        for position_summary in positions_summary:
+            positions_balance += position_summary["profit"] + position_summary["commission"] + position_summary["swap"]
+
         if profit_loss != 0 and balance != 0:
-            # total_equity_percent = round((equity/(abs(balance)+abs(equity))) * 100, 2)
-            total_profit_percent = round((profit_loss/(abs(balance)+abs(profit_loss))) * 100, 2)
-            # total_profit_percent = round((equity*100)/balance, 2)-100
+            total_profit_percent = round(((equity * 100)/positions_balance)-100, 2)
+            # total_profit_percent = round((profit_loss/(abs(positions_balance)+abs(profit_loss))) * 100, 2)
         else:
             total_profit_percent = 0
 
