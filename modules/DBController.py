@@ -579,7 +579,11 @@ class DBController:
         return_object = {}
 
         return_object['is_live'] = self.get_is_live(first_day_week, last_day_week)
-        return_object['products'] = cursor_result
+        
+        for account in cursor_result:
+            apply_deduction_5_percent = float(account['profit_loss']) * 0.95
+            account['profit_loss'] = apply_deduction_5_percent
+
 
         if return_object == None:
             return None
