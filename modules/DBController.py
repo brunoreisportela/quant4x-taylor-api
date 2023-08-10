@@ -585,6 +585,8 @@ class DBController:
             account['profit_loss'] = apply_deduction_5_percent
 
 
+        return_object['products'] = cursor_result
+
         if return_object == None:
             return None
         else:
