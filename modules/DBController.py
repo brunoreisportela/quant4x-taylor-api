@@ -584,7 +584,6 @@ class DBController:
             apply_deduction_5_percent = float(account['profit_loss']) * 0.95
             account['profit_loss'] = apply_deduction_5_percent
 
-
         return_object['products'] = cursor_result
 
         if return_object == None:
