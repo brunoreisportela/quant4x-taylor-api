@@ -65,6 +65,21 @@ def get_platform_performance():
 def update_accounts_kpi():
     return dbController.update_accounts_kpi()
 
+@app.route("/accounts/week_start_balance", methods=['GET'])
+def get_week_start_balance_by_account_id():
+    account_id = request.args["account_id"]
+    return json.dumps(dbController.get_week_start_balance_by_account_id(account_id))
+
+@app.route("/accounts/is_live_active", methods=['GET'])
+def get_is_live_active_by_account_id():
+    account_id = request.args["account_id"]
+    return json.dumps(dbController.get_is_live_active_by_account_id(account_id))
+
+@app.route("/accounts/week_target", methods=['GET'])
+def get_week_target_by_account_id():
+    account_id = request.args["account_id"]
+    return json.dumps(dbController.get_week_target_by_account_id(account_id))
+
 @app.route("/products/performance/code", methods=['GET'])
 def get_products_performance_code():
     code = request.args["code"]

@@ -484,6 +484,60 @@ class DBController:
 
         x = requests.get(url)
         return x.status_code
+    
+    def get_week_start_balance_by_account_id(self, account_id):
+        
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT week_start_balance FROM accounts WHERE id = '{account_id}';
+                    """)
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result != None:
+            return float(cursor_result["week_start_balance"])
+        else:
+            print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
+            return 100000
+        
+    def get_is_live_active_by_account_id(self, account_id):
+        
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT is_live_active FROM accounts WHERE id = '{account_id}';
+                    """)
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result != None:
+            return cursor_result["is_live_active"]
+        else:
+            print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
+            return True
+        
+    def get_week_target_by_account_id(self, account_id):
+        
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT week_target FROM accounts WHERE id = '{account_id}';
+                    """)
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result != None:
+            return cursor_result["week_target"]
+        else:
+            print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
+            return 2
 
     def get_profit_percentage_by_code(self, code):
         
