@@ -257,7 +257,7 @@ class DBController:
             account["symbols"] = self.get_symbols(account["id"])
 
             account["week_start_balance"] = float(cursor_result["week_start_balance"])
-            account["week_target"] = cursor_result["week_target"]
+            account["week_target"] = float(cursor_result["week_target"])
             account["is_live_active"] = cursor_result["is_live_active"]
             
         else:
@@ -560,7 +560,7 @@ class DBController:
         cursor.close()
 
         if cursor_result != None:
-            return cursor_result["week_target"]
+            return float(cursor_result["week_target"])
         else:
             print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
             return 2
