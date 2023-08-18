@@ -75,6 +75,11 @@ def get_is_live_active_by_account_id():
     account_id = request.args["account_id"]
     return json.dumps(dbController.get_is_live_active_by_account_id(account_id))
 
+@app.route("/accounts/invest_code", methods=['GET'])
+def get_invest_code_by_account_id():
+    account_id = request.args["account_id"]
+    return json.dumps(dbController.get_invest_code_by_account_id(account_id))
+
 @app.route("/accounts/week_target", methods=['GET'])
 def get_week_target_by_account_id():
     account_id = request.args["account_id"]

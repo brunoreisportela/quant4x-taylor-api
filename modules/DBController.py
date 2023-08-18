@@ -526,6 +526,27 @@ class DBController:
             print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
             return True
         
+    def get_invest_code_by_account_id(self, account_id):
+        
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT code FROM clients 
+                            INNER JOIN clients_accounts as cli_acc 
+                            ON cli_acc.client_code =  clients.code
+                            WHERE cli_acc.account_id = '{account_id}';
+                    """)
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result != None:
+            return cursor_result["code"]
+        else:
+            print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
+            return True
+        
     def get_week_target_by_account_id(self, account_id):
         
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
