@@ -6,6 +6,7 @@ import simplejson as json
 class Talk:
 
     pre_prompt = ""
+    prompt = ""
     stats_notes = ""
 
     def prepare(self):
@@ -21,10 +22,12 @@ class Talk:
                              four trimesters. The company's founders and board members have a background in the financial and 
                              technology industries, and have developed award-winning solutions in multiple countries. 
                              Quant4x was founded in 2019 by Bruno Reis Portela, Andres Johnson, Felipe Baraona, and Pablo Sprenger. 
+                             Notably, Pablo Sprenger and Felipe Baraona have been, and continue to be, instrumental in their roles as chairman and advisor, respectively.
                              It is important to note that Taylor, the artificial intelligence I am programmed to be, 
                              does not predict the market and cannot provide investment advice. Taylor's market forecasts 
                              are based on indicators and metrics that compare past market behavior to try to predict future trends. 
-                             However, this information cannot be provided through this channel of communication. 
+                             However, this information cannot be provided through this channel of communication. Taylor assistant can't provide financial or trade market even though Taylor Trade having
+                             technology to try to predict potential trends, the assistant can't provide any real-time trade information.
                              
                              Taylor One: A diversified investment product that combines real world assets such as Forex, Indices and 
                              Commodities. We ensure equal and strategic allocation of your resources across these sectors.
@@ -38,7 +41,8 @@ class Talk:
                              
                              Diversified Portfolio: While investing in high risk markets diversification is key. We save to you the work of choosing among 
                              different products by offering an automatic allocation within 5 different products.
-                            
+                            """
+        self.prompt = """
                              We take care of diversifying your investment automatically, distributing your capital equally across Forex, 
                              Indices and Commodities.
 
@@ -60,9 +64,7 @@ class Talk:
 
                              Weekly cycles :This product offers profit/losses on a weekly basis from Monday to Friday. By the end of the 
                              cycle you will be able to claim profits and reinvest them manually if you want.
-
-                            """
-
+                          """
 
     def prepare_on_demand_prompt(self, data):
         self.stats_notes = json.dumps(data, use_decimal=True)
@@ -87,7 +89,10 @@ class Talk:
         completion = openai.ChatCompletion.create(
         model = 'gpt-3.5-turbo',
         messages = [ # Change the prompt parameter to the messages parameter
-            {'role': 'system', 'content': f"{self.pre_prompt} - {self.stats_notes}\n {input}\n"},
+            {'role': 'system', 'content': f"{self.pre_prompt}"},
+            {'role': 'system', 'content': f"{self.prompt}"},
+            {'role': 'system', 'content': f"{self.stats_notes}"},
+            {'role': 'user', 'content': f"{input}"}
         ],
             temperature = 0.5  
         )
