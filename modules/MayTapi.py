@@ -2,8 +2,12 @@ import requests
 import json
 import sys
 
+from modules import Talk
+
 class MayTapi:
-        
+
+    talk = Talk()
+
     INSTANCE_URL = "https://api.maytapi.com/api"
     PRODUCT_ID = "19e7fffc-1850-4b18-b276-f0d8f13b0b83"
     PHONE_ID = "17195"
@@ -31,8 +35,10 @@ class MayTapi:
         if isinstance(payload, str):
             payload = json.loads(payload)
 
-        print("Request Body", payload, file=sys.stdout, flush=True)
-        
+        talk_response = self.talk.get_response(f"""Send the following message, rephrasing it, adding some fun, simple and some emojis to it: {payload["message"]}""")
+
+        payload.update({"message": talk_response})
+
         url = self.INSTANCE_URL + "/" + self.PRODUCT_ID + "/" + self.PHONE_ID + "/sendMessage"
 
         headers = {

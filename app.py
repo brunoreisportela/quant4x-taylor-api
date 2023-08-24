@@ -1,32 +1,18 @@
 import os
 import sys
-# import json as simplejson
 import json
-
-# print(f"SYS PATH: {sys.path}")
-# sudo lsof -i -P -n | grep LISTEN
 
 from flask import Flask,request,render_template, jsonify
 from flask_cors import CORS
 from datetime import datetime, timedelta
-
-# from modules import Talk
-# from modules import Whatsapp
-# from modules import Sentiment
 from modules import MayTapi
-# from modules import NewsReader
 from modules import DBController
 
 app = Flask(__name__)
 CORS(app)
 
-# whatsapp = Whatsapp()
-# symbol_sentiment = Sentiment()
 maytapi = MayTapi()
 dbController = DBController()
-
-# talk = Talk()
-# newsReader = NewsReader()
 
 @app.route("/")
 def get_service():
@@ -140,16 +126,11 @@ def webhook():
             return
         
         if _type == "text":
-            # Handle Messages
+            
             text = message["text"]
             text = text.lower()
 
             response_from_ai = str(dbController.taylor_get_answer(text))
-
-            # body_str = f"""
-            #     \{"type": "text","message": {response_from_ai}\}
-            #     \{"to_number": {conversation}\}
-            # """
 
             body = {"type": "text","message": response_from_ai}
             body.update({"to_number": conversation})

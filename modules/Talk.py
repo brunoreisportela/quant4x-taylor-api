@@ -100,7 +100,7 @@ class Talk:
         if len(completion['choices']) > 0:
             return completion['choices'][0]['message']['content']
         else:
-            return "Error: No response could be obtained by Taylor this time."
+            return ""
 
     def __init__(self, *args, **kwargs):
 
