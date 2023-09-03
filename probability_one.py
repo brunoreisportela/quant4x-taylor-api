@@ -4,7 +4,6 @@ none_reward_probability = 0.80
 small_reward_probability = 0.15
 large_reward_probability = 0.05
 
-
 earnings_this_week = float(input("How much earnings did you have this week? "))
 
 credit_cost = earnings_this_week/2
