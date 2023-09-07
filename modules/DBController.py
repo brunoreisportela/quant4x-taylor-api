@@ -166,7 +166,63 @@ class DBController:
         account["weeks_total_swap"] =  weeks_total_swap
 
         return account
+
+    def get_current_time_details(self):
+        now = datetime.now()
+
+        day = now.day
+        month = now.month
+        year = now.year
+        hour = now.hour
+        minute = now.minute
+
+        # if 1 <= minute <= 30:
+        #     minute = 0
+        # elif minute > 30:
+        #     minute = 30
+
+        return day, month, year, hour, minute
+
+    def set_cluster_KPI(self, cluster_info):
         
+        day, month, year, hour, minute = self.get_current_time_details()
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        sql = f"""
+                INSERT INTO public.cluster_kpis(
+                    client_code, 
+                    cluster_id, 
+                    float_dd_percent, 
+                    day, 
+                    month, 
+                    year, 
+                    hour, 
+                    minute
+                )
+                VALUES (
+                    {cluster_info["client_code"]}, 
+                    {cluster_info["cluster_id"]}, 
+                    {cluster_info["float_dd_percent"]}, 
+                    {day}, 
+                    {month}, 
+                    {year}, 
+                    {hour}, 
+                    {minute}
+                )
+                ON CONFLICT ON CONSTRAINT cluster_kpis_pkey DO
+                UPDATE 
+                    SET 
+                        updated_at='now()',
+                        float_dd_percent='{cluster_info["float_dd_percent"]}';
+                """
+        
+        cursor.execute(sql)
+
+        self.conn.commit()
+
+        cursor.close()
+    
     def set_user_code(self, email, code):
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
@@ -564,6 +620,81 @@ class DBController:
         else:
             print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
             return 2
+        
+    def get_clusters_per_client(self, code):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT DISTINCT(cluster_id) FROM accounts as acc
+                        INNER JOIN clients_accounts cli_acc 
+                            ON cli_acc.account_id = acc.id
+                            AND cli_acc.client_code = {code};
+                    """)
+
+        cursor_result = cursor.fetchall()
+
+        cursor.close()   
+
+        clusters = []
+
+        for cluster in cursor_result:
+            clusters.append(cluster)
+
+        return clusters
+
+    def check_latest_percent_from_cluster(self, cluster):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT * FROM cluster_kpis 
+                            WHERE client_code = {cluster["client_code"]} AND 
+                            cluster_id = {cluster["cluster_id"]} 
+                        ORDER BY updated_at DESC LIMIT 1;
+                    """)
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result == None:
+            return 0.0
+
+        return float(cursor_result["float_dd_percent"])
+
+
+    def aggregate_float_dd_KPI_per_cluster(self):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT * FROM clients ORDER BY code ASC;
+                    """)
+
+        cursor_result = cursor.fetchall()
+
+        cursor.close()
+
+        clusters_performance = []
+
+        for client in cursor_result:
+
+            clusters = self.get_clusters_per_client(client["code"])
+            
+            for cluster in clusters:
+                cluster_return = {}
+
+                cluster_return["client_code"] = client["code"]
+                cluster_return["cluster_id"] = cluster["cluster_id"]
+                cluster_return["float_dd_percent"] = self.get_profit_percentage_by_code(client["code"], cluster["cluster_id"])
+
+                latest_percent = self.check_latest_percent_from_cluster(cluster_return)
+
+                if cluster_return["float_dd_percent"] != latest_percent:
+                    self.set_cluster_KPI(cluster_return)
+                    
+                clusters_performance.append(cluster_return)
+
+
+        return clusters_performance
 
     def get_profit_percentage_by_code(self, code, cluster_id = 1):
         
