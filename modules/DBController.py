@@ -666,6 +666,25 @@ class DBController:
 
         return_object['products'] = cursor_result
 
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+
+                        SELECT * FROM platform_panel LIMIT 1;
+
+                    """)
+
+        cursor_result_one = cursor.fetchone()
+
+        if cursor_result_one != None and cursor_result_one['is_override'] == True:
+            return_object['is_live'] = cursor_result_one['is_live']
+
+            if cursor_result_one['is_live'] == False:
+                for product in return_object['products']:
+                    product['profit_loss'] = 0.0
+
+        cursor.close()
+
         if return_object == None:
             return None
         else:
