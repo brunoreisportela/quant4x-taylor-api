@@ -565,7 +565,7 @@ class DBController:
             print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
             return 2
 
-    def get_profit_percentage_by_code(self, code):
+    def get_profit_percentage_by_code(self, code, cluster_id = 1):
         
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
@@ -573,7 +573,7 @@ class DBController:
                         SELECT id, balance, drawdown, equity, product_name, profit_loss, trades FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
-                            AND cli_acc.client_code = {code};
+                            AND cli_acc.client_code = {code} AND acc.cluster_id = {cluster_id};
                     """)
 
         cursor_result = cursor.fetchall()

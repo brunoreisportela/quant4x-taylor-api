@@ -79,7 +79,13 @@ def get_products_performance_code():
 @app.route("/percent/performance/code", methods=['GET'])
 def get_percent_performance_code():
     code = request.args["code"]
-    return json.dumps(dbController.get_profit_percentage_by_code(code))
+
+    cluster_id = 1
+
+    if "cluster_id" in request.args:
+        cluster_id = request.args["cluster_id"]
+
+    return json.dumps(dbController.get_profit_percentage_by_code(code, cluster_id))
 
 @app.route("/whatsapp/send_message", methods=['POST'])
 def post_whatsapp_send_message():
