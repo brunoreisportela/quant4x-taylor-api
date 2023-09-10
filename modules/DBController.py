@@ -619,7 +619,25 @@ class DBController:
             return float(cursor_result["week_target"])
         else:
             print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
-            return 2
+            return 1
+        
+    def get_week_loss_target_by_account_id(self, account_id):
+        
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT week_loss_target FROM accounts WHERE id = '{account_id}';
+                    """)
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result != None:
+            return float(cursor_result["week_loss_target"])
+        else:
+            print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
+            return 20
         
     def get_clusters_per_client(self, code):
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)

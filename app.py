@@ -71,6 +71,11 @@ def get_week_target_by_account_id():
     account_id = request.args["account_id"]
     return json.dumps(dbController.get_week_target_by_account_id(account_id))
 
+@app.route("/accounts/week_loss_target", methods=['GET'])
+def get_week_loss_target_by_account_id():
+    account_id = request.args["account_id"]
+    return json.dumps(dbController.get_week_loss_target_by_account_id(account_id))
+
 @app.route("/kpi/cluster", methods=['GET'])
 def aggregate_float_dd_KPI_per_cluster():
     return json.dumps(dbController.aggregate_float_dd_KPI_per_cluster())
