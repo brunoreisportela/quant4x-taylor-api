@@ -776,6 +776,18 @@ class DBController:
                 dd = round(((balance-equity) * 100) / balance, 2)    
 
         return dd
+    
+    def get_float_balance_by_vars(self, equity, balance ):
+        
+        fbalance = 0
+
+        if equity != 0 and balance != 0:
+            if equity > 0:
+                fbalance = round((equity-balance), 2)
+            else:
+                fbalance = round((balance-equity), 2)    
+
+        return fbalance
 
     def get_performance_by_code(self, code):        
 
@@ -783,7 +795,7 @@ class DBController:
 
         cursor.execute(f"""
 
-                        SELECT id, balance, drawdown, equity, product_name, profit_loss, trades 
+                        SELECT id, balance, drawdown, week_balance_start, equity, product_name, profit_loss, trades 
                         FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
@@ -811,7 +823,7 @@ class DBController:
 
         cursor.execute(f"""
 
-                        SELECT id, balance, drawdown, equity, product_name, profit_loss, trades FROM accounts as acc
+                        SELECT id, balance, drawdown, equity, week_start_balance, product_name, profit_loss, trades FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {code};
@@ -827,7 +839,16 @@ class DBController:
         return_object['is_live'] = self.get_is_live(first_day_week, last_day_week)
         
         for account in cursor_result:
-            apply_deduction_5_percent = float(account['profit_loss']) * 0.95
+            week_start_balance = float(account['week_start_balance'])
+            equity = float(account['equity'])
+
+            fbalance = self.get_float_balance_by_vars(equity, week_start_balance)
+            
+            if fbalance > 0:
+                apply_deduction_5_percent = float(fbalance * 0.95)
+            else:
+                apply_deduction_5_percent = float(fbalance)
+
             account['profit_loss'] = apply_deduction_5_percent
 
         return_object['products'] = cursor_result
