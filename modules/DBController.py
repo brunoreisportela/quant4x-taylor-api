@@ -723,7 +723,7 @@ class DBController:
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
-                        SELECT id, balance, drawdown, equity, product_name, profit_loss, trades FROM accounts as acc
+                        SELECT id, balance, drawdown, equity, product_name, profit_loss, week_start_balance, trades FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {code} AND acc.cluster_id = {cluster_id};
@@ -733,37 +733,50 @@ class DBController:
 
         cursor.close()
 
-        profit_loss = 0.0
         balance = 0.0
         equity = 0.0
 
+        # profit_loss = 0.0
         # previous_week_balance = 0.0
+        # positions_summary = []
 
-        positions_summary = []
+        # for account in cursor_result:
+        #     day_trim = self.dateToString(self.get_first_day_week(datetime.today(), offset=0))
+        #     positions_summary.append(self.get_positions_summary_until_date(account["id"], day_trim))
+        #     profit_loss += float(account["profit_loss"])
+        #     equity += float(account["equity"])
+        #     balance += float(account["week_start_balance"])
+
+        # positions_balance = 0.0
+
+        # for position_summary in positions_summary:
+        #     positions_balance += position_summary["profit"] + position_summary["commission"] + position_summary["swap"]
+
+        # if balance != 0 and dd != 0:
+        #     total_profit_percent = round(((dd * 100)/balance), 2)
+        # else:
+        #     total_profit_percent = 0
 
         for account in cursor_result:
-
-            day_trim = self.dateToString(self.get_first_day_week(datetime.today(), offset=0))
-
-            positions_summary.append(self.get_positions_summary_until_date(account["id"], day_trim))
-            
-            profit_loss += float(account["profit_loss"])
             equity += float(account["equity"])
-            balance += float(account["balance"])
+            balance += float(account["week_start_balance"])
 
-        positions_balance = 0.0
+        dd = self.get_drawdown_by_vars(equity, balance)
 
-        for position_summary in positions_summary:
-            positions_balance += position_summary["profit"] + position_summary["commission"] + position_summary["swap"]
-
-        if profit_loss != 0 and balance != 0:
-            total_profit_percent = round(((equity * 100)/positions_balance)-100, 2)
-            # total_profit_percent = round((profit_loss/(abs(positions_balance)+abs(profit_loss))) * 100, 2)
-        else:
-            total_profit_percent = 0
-
-        return total_profit_percent
+        return dd
     
+    def get_drawdown_by_vars(self, equity, balance ):
+        
+        dd = 0
+
+        if equity != 0 and balance != 0:
+            if equity > 0:
+                dd = round(((equity-balance) * 100) / balance, 2)
+            else:
+                dd = round(((balance-equity) * 100) / balance, 2)    
+
+        return dd
+
     def get_performance_by_code(self, code):        
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
