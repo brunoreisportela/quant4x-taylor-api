@@ -176,10 +176,14 @@ class DBController:
         hour = now.hour
         minute = now.minute
 
-        # if 1 <= minute <= 30:
-        #     minute = 0
-        # elif minute > 30:
-        #     minute = 30
+        if minute > 0 and minute < 15:
+            minute = 0
+        elif minute >= 15 and minute < 30:
+            minute = 15
+        elif minute >= 30 and minute < 45:
+            minute = 30
+        elif minute >= 45:
+            minute = 45
 
         return day, month, year, hour, minute
 
