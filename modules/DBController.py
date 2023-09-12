@@ -735,6 +735,7 @@ class DBController:
 
         balance = 0.0
         equity = 0.0
+        start_balance = 0.0
 
         # profit_loss = 0.0
         # previous_week_balance = 0.0
@@ -760,20 +761,18 @@ class DBController:
         for account in cursor_result:
             equity += float(account["equity"])
             balance += float(account["week_start_balance"])
+            start_balance += float(account["week_start_balance"])
 
-        dd = self.get_drawdown_by_vars(equity, balance)
+        dd = self.get_drawdown_by_vars(equity, balance, start_balance)
 
         return dd
     
-    def get_drawdown_by_vars(self, equity, balance ):
+    def get_drawdown_by_vars(self, equity, balance, start_balance):
         
         dd = 0
 
         if equity != 0 and balance != 0:
-            if equity > 0:
-                dd = round(((equity-balance) * 100) / balance, 2)
-            else:
-                dd = round(((balance-equity) * 100) / balance, 2)    
+            dd = round(((equity-balance) * 100) / balance, 2) 
 
         return dd
     
