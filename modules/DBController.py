@@ -719,12 +719,12 @@ class DBController:
 
         return clusters_performance
     
-    def get_account_setup(self, account_id):
+    def get_account_setup(self, code, account_id):
         
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
-                        SELECT acc.week_target AS acc_take_profit,
+                        SELECT acc.equity, acc.balance, acc.week_start_balance as start_balance,acc.week_target AS acc_take_profit,
                             acc.week_loss_target AS acc_stop_loss, 
                             acc.is_live_active AS acc_is_live_active,
                             clu.take_profit AS clu_take_profit,
@@ -734,11 +734,26 @@ class DBController:
                         WHERE acc.id = '{account_id}';
                     """)
 
-        cursor_result = cursor.fetchall()
+        cursor_result = cursor.fetchone()
 
         cursor.close()
 
-        return json.dumps(cursor_result, use_decimal=True)
+        account = cursor_result
+
+        int_code = int(code)
+
+        account["equity"] = float(cursor_result["equity"])
+        account["balance"] = float(cursor_result["balance"])
+        account["start_balance"] = float(cursor_result["start_balance"])
+        account["acc_take_profit"] = float(cursor_result["acc_take_profit"])
+        account["acc_stop_loss"] = float(cursor_result["acc_stop_loss"])
+        account["acc_is_live_active"] = cursor_result["acc_is_live_active"]
+        account["clu_take_profit"] = float(cursor_result["clu_take_profit"])
+        account["clu_stop_loss"] = float(cursor_result["clu_stop_loss"])
+
+        account["percent"] = self.get_profit_percentage_by_code(int_code)
+
+        return account
 
     def get_profit_percentage_by_code(self, code, cluster_id = 1):
         
