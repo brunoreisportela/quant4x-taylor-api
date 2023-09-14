@@ -2,6 +2,7 @@ import psycopg2
 import psycopg2.extras
 import requests
 from datetime import datetime, timedelta
+import simplejson as json
 
 from modules import Talk
 
@@ -717,6 +718,27 @@ class DBController:
 
 
         return clusters_performance
+    
+    def get_account_setup(self, account_id):
+        
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT acc.week_target AS acc_take_profit,
+                            acc.week_loss_target AS acc_stop_loss, 
+                            acc.is_live_active AS acc_is_live_active,
+                            clu.take_profit AS clu_take_profit,
+                            clu.stop_loss AS clu_stop_loss 
+                        FROM accounts acc 
+                        INNER JOIN clusters clu ON clu.token = acc.cluster_token
+                        WHERE acc.id = '{account_id}';
+                    """)
+
+        cursor_result = cursor.fetchall()
+
+        cursor.close()
+
+        return json.dumps(cursor_result, use_decimal=True)
 
     def get_profit_percentage_by_code(self, code, cluster_id = 1):
         
@@ -736,27 +758,6 @@ class DBController:
         balance = 0.0
         equity = 0.0
         start_balance = 0.0
-
-        # profit_loss = 0.0
-        # previous_week_balance = 0.0
-        # positions_summary = []
-
-        # for account in cursor_result:
-        #     day_trim = self.dateToString(self.get_first_day_week(datetime.today(), offset=0))
-        #     positions_summary.append(self.get_positions_summary_until_date(account["id"], day_trim))
-        #     profit_loss += float(account["profit_loss"])
-        #     equity += float(account["equity"])
-        #     balance += float(account["week_start_balance"])
-
-        # positions_balance = 0.0
-
-        # for position_summary in positions_summary:
-        #     positions_balance += position_summary["profit"] + position_summary["commission"] + position_summary["swap"]
-
-        # if balance != 0 and dd != 0:
-        #     total_profit_percent = round(((dd * 100)/balance), 2)
-        # else:
-        #     total_profit_percent = 0
 
         for account in cursor_result:
             equity += float(account["equity"])
