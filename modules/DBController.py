@@ -719,7 +719,24 @@ class DBController:
 
         return clusters_performance
     
-    def get_account_setup(self, code, account_id):
+    def get_account_setup(self, account_id):
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                                SELECT client_code FROM clients_accounts AS cli_acc
+                                INNER JOIN clients AS cli ON cli.code = cli_acc.client_code
+                                AND cli_acc.account_id = '{account_id}';
+                    """)
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result["client_code"] == None:
+            return None
+
+        int_code  = int(cursor_result["client_code"])
         
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
@@ -739,8 +756,6 @@ class DBController:
         cursor.close()
 
         account = cursor_result
-
-        int_code = int(code)
 
         account["equity"] = float(cursor_result["equity"])
         account["balance"] = float(cursor_result["balance"])

@@ -87,10 +87,9 @@ def get_products_performance_code():
 
 @app.route("/account/setup", methods=['GET'])
 def get_account_setup():
-    code = request.args["code"]
     account_id = request.args["account_id"]
 
-    return json.dumps(dbController.get_account_setup(code, account_id))
+    return json.dumps(dbController.get_account_setup(account_id))
 
 @app.route("/percent/performance/code", methods=['GET'])
 def get_percent_performance_code():
