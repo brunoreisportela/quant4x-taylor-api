@@ -31,6 +31,38 @@ class DBController:
         # Convert the date to a string in the desired format
         formatted_date = date_object.strftime("%d/%m/%Y")
         return formatted_date
+    
+    def get_cluster_data(self, cluster_id, client_code):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""SELECT * FROM cluster_kpis AS clu_kpi
+                            INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
+                            AND clu_kpi.client_code = {client_code};""")
+
+        cursor_result = cursor.fetchall()
+
+        cursor.close()
+
+        cluster_data = []
+
+        for result in cursor_result:
+
+            cluster = {}
+
+            cluster["token"] = result["token"]
+            cluster["take_profit"] = float(result["take_profit"])
+            cluster["stop_loss"] = float(result["stop_loss"])
+            cluster["description"] = result["description"]
+
+            cluster["day"] = result["day"]
+            cluster["month"] = result["month"]
+            cluster["year"] = result["year"]
+            cluster["hour"] = result["hour"]
+            cluster["minute"] = result["minute"]
+
+            cluster_data.append(cluster)
+
+        return cluster_data
 
     def get_client_by_code(self, code, start_date = None, end_date = None, weeks_limit = 0):
 
@@ -51,6 +83,12 @@ class DBController:
         client_dict["week_profit_percent"] = float(client["week_profit_percent"])
 
         client_dict["accounts"] = self.get_accounts(client["code"])
+
+        client_dict["clusters"] = self.get_clusters_per_client(client["code"])
+
+        for (i, cluster) in enumerate(client_dict["clusters"]):
+            data = self.get_cluster_data(cluster["cluster_id"], client_dict["code"])
+            client_dict["clusters"][i]["data"] = data
 
         client_dict["scope_profit"] = 0.0
         client_dict["scope_transactions"] = 0
