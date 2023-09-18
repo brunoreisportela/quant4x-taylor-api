@@ -46,7 +46,6 @@ class DBController:
         cluster_data = []
 
         for result in cursor_result:
-
             cluster = {}
 
             cluster["token"] = result["token"]
