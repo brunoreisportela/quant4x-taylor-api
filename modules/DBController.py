@@ -42,6 +42,7 @@ class DBController:
         cursor_result = cursor.fetchall()
 
         cursor.close()
+        
 
         cluster_data = []
 
