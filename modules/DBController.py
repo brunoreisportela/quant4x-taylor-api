@@ -53,6 +53,7 @@ class DBController:
             cluster["take_profit"] = float(result["take_profit"])
             cluster["stop_loss"] = float(result["stop_loss"])
             cluster["description"] = result["description"]
+            cluster["float_dd_percent"] = float(result["float_dd_percent"])
 
             cluster["day"] = result["day"]
             cluster["month"] = result["month"]
@@ -690,7 +691,7 @@ class DBController:
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = '{account_id}'
                             AND cli_acc.client_code = {code};
-                    """)
+                        """)
 
         cursor_result = cursor.fetchall()
 
