@@ -88,6 +88,12 @@ class DBController:
         client_dict["scope_transactions"] = 0
         client_dict["scope_profit_percent"] = 0
 
+        client_dict["clusters"] = self.get_clusters_per_client(client["code"])
+
+        for (i, cluster) in enumerate(client_dict["clusters"]):
+            data = self.get_cluster_data(cluster["cluster_id"], client_dict["code"])
+            client_dict["clusters"][i]["data"] = data
+
         for account in client_dict["accounts"]:
             
             if "id" in account:
@@ -98,12 +104,6 @@ class DBController:
                 client_dict["scope_profit"] += account["kpis"]["profit_loss"]
                 client_dict["scope_transactions"] += account["kpis"]["transactions"]
                 client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
-
-                account["clusters"] = self.get_clusters_per_client(account["id"], client["code"])
-
-                for (i, cluster) in enumerate(account["clusters"]):
-                    data = self.get_cluster_data(cluster["cluster_id"], client_dict["code"])
-                    account["clusters"][i]["data"] = data
 
         return client_dict
     
@@ -682,14 +682,13 @@ class DBController:
             print(f"AN ACCOUNT ID WAS NOT FOUND IN DETAIL: {id}")
             return 20
         
-    def get_clusters_per_client(self, account_id, code):
+    def get_clusters_per_client(self, code):
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
                         SELECT DISTINCT(cluster_id) FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
-                            ON cli_acc.account_id = '{account_id}'
-                            AND cli_acc.client_code = {code};
+                            ON cli_acc.client_code = {code};
                         """)
 
         cursor_result = cursor.fetchall()
