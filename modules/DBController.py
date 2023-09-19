@@ -65,7 +65,7 @@ class DBController:
 
         return cluster_data
 
-    def get_client_by_code(self, code, start_date = None, end_date = None, weeks_limit = 0):
+    def get_client_by_code(self, code, start_date = None, end_date = None, weeks_limit = 0, load_accounts = True, load_clusters = True):
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
@@ -89,22 +89,24 @@ class DBController:
         client_dict["scope_transactions"] = 0
         client_dict["scope_profit_percent"] = 0
 
-        client_dict["clusters"] = self.get_clusters_per_client(client["code"])
+        if load_clusters:
+            client_dict["clusters"] = self.get_clusters_per_client(client["code"])
 
-        for (i, cluster) in enumerate(client_dict["clusters"]):
-            data = self.get_cluster_data(cluster["cluster_id"], client_dict["code"])
-            client_dict["clusters"][i]["data"] = data
+            for (i, cluster) in enumerate(client_dict["clusters"]):
+                data = self.get_cluster_data(cluster["cluster_id"], client_dict["code"])
+                client_dict["clusters"][i]["data"] = data
 
-        for account in client_dict["accounts"]:
-            
-            if "id" in account:
-                self.get_weeks_per_account(account, weeks_limit)
-                account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
-                account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
+        if load_accounts:
+            for account in client_dict["accounts"]:
+                
+                if "id" in account:
+                    self.get_weeks_per_account(account, weeks_limit)
+                    account["kpis"] = self.get_positions_kpis(account["id"], start_date, end_date)
+                    account["kpis"]["percent"] = round((account["kpis"]["profit_loss"]/(abs(account["balance"])+abs(account["kpis"]["profit_loss"]))) * 100, 2)
 
-                client_dict["scope_profit"] += account["kpis"]["profit_loss"]
-                client_dict["scope_transactions"] += account["kpis"]["transactions"]
-                client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
+                    client_dict["scope_profit"] += account["kpis"]["profit_loss"]
+                    client_dict["scope_transactions"] += account["kpis"]["transactions"]
+                    client_dict["scope_profit_percent"] = round((client_dict["scope_profit"]/(abs(client_dict["week_balance"])+abs(client_dict["scope_profit"]))) * 100, 2)
 
         return client_dict
     
@@ -552,7 +554,7 @@ class DBController:
         start_date_fmt = self.dateToString(self.get_first_day_week(dt))
         end_date_fmt = self.dateToString(self.get_last_day_week(dt))
 
-        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt, 3) )
+        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt, 3, load_accounts=False, load_clusters=False) )
         
         talk_response = self.talk.get_response(message)
 
