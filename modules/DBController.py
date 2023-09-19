@@ -547,7 +547,7 @@ class DBController:
 
             return talk_response
 
-        return ""
+        return self.latest_telegram_message_read
     
     def taylor_get_answer(self, message):        
         dt = datetime.today()
@@ -579,7 +579,7 @@ class DBController:
         start_date_fmt = self.dateToString(self.get_first_day_week(dt))
         end_date_fmt = self.dateToString(self.get_last_day_week(dt))
 
-        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt, 3) )
+        self.talk.prepare_on_demand_prompt( self.get_client_by_code(1, start_date_fmt, end_date_fmt, 3, load_accounts=False, load_clusters=False) )
         talk_response = self.talk.get_response(message)
 
         self.send_telegram_message(talk_response)
