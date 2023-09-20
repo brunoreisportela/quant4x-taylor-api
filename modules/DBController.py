@@ -841,6 +841,42 @@ class DBController:
 
         return dd
     
+    def get_json_setup(self, account_id):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        		SELECT j.name, j.account_id, j.tp as o_tp, j.sl as o_sl, 
+                                            j.product_id, prod.tp, prod.sl, 
+                                            is_live_active as is_active FROM (
+                                    SELECT * FROM clients as cli
+                                    INNER JOIN clients_accounts as cli_acc
+                                        ON cli_acc.client_code = cli.code
+                                    INNER JOIN accounts as acc
+                                        ON cli_acc.account_id = acc.id 
+                                    WHERE acc.id = '{account_id}'
+                                ) as j 
+                                INNER JOIN products prod
+                                ON prod.id = product_id;
+                    """)
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        setup_object = {}
+
+        if cursor_result != None:
+            setup_object["name"] = cursor_result["name"]
+            setup_object["account_id"] = cursor_result["account_id"]
+            setup_object["o_tp"] = float(cursor_result["o_tp"])
+            setup_object["o_sl"] = float(cursor_result["o_sl"])
+            setup_object["product_id"] = cursor_result["product_id"]
+            setup_object["tp"] = float(cursor_result["tp"])
+            setup_object["sl"] = float(cursor_result["sl"])
+            setup_object["is_active"] = cursor_result["is_active"]
+
+        return setup_object
+    
     def get_drawdown_by_vars(self, equity, balance, start_balance):
         
         dd = 0

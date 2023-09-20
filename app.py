@@ -56,6 +56,11 @@ def get_week_start_balance_by_account_id():
     account_id = request.args["account_id"]
     return json.dumps(dbController.get_week_start_balance_by_account_id(account_id))
 
+@app.route("/accounts/setup", methods=['GET'])
+def get_json_setup():
+    account_id = request.args["account_id"]
+    return json.dumps(dbController.get_json_setup(account_id))
+
 @app.route("/accounts/is_live_active", methods=['GET'])
 def get_is_live_active_by_account_id():
     account_id = request.args["account_id"]
