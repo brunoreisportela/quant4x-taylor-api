@@ -846,7 +846,8 @@ class DBController:
 
         cursor.execute(f"""
                         		SELECT j.name, j.account_id, j.tp as o_tp, j.sl as o_sl, 
-                                            j.product_id, prod.tp, prod.sl, 
+                                            j.product_id, prod.tp, prod.sl,
+                                            prod.name as product_name 
                                             is_live_active as is_active FROM (
                                     SELECT * FROM clients as cli
                                     INNER JOIN clients_accounts as cli_acc
@@ -867,6 +868,7 @@ class DBController:
 
         if cursor_result != None:
             setup_object["name"] = cursor_result["name"]
+            setup_object["product_name"] = cursor_result["product_name"]
             setup_object["account_id"] = cursor_result["account_id"]
             setup_object["o_tp"] = float(cursor_result["o_tp"])
             setup_object["o_sl"] = float(cursor_result["o_sl"])
