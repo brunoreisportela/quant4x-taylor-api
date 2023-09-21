@@ -897,6 +897,11 @@ class DBController:
 
         if cursor_result != None:
             setup_object["total_equity"] = float(cursor_result["total_equity"])
+            setup_object["total_balance"] = float(cursor_result["total_balance"])
+        else:
+            setup_object["total_equity"] = 0.0
+            setup_object["total_balance"] = 0.0
+            setup_object["is_active"] = False
 
         return setup_object
     
