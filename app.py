@@ -90,13 +90,7 @@ def get_products_performance_code():
     code = request.args["code"]
     return dbController.get_performance_by_code(code)
 
-@app.route("/account/setup", methods=['GET'])
-def get_account_setup():
-    account_id = request.args["account_id"]
-
-    return json.dumps(dbController.get_account_setup(account_id))
-
-@app.route("/account/setup/set_start_balance", methods=['GET'])
+@app.route("/accounts/setup/set_start_balance", methods=['GET'])
 def set_start_balance():
     account_id = request.args["account_id"]
     balance = request.args["balance"]
