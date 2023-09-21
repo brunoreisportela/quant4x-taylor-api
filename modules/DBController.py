@@ -275,6 +275,8 @@ class DBController:
 
         sql = f"UPDATE accounts SET week_start_balance = '{balance}' WHERE id = '{account_id}'"
         
+        print(f"*****************{account_id}**************{balance}")
+
         cursor.execute(sql)
 
         self.conn.commit()
