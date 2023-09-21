@@ -878,6 +878,7 @@ class DBController:
             setup_object["tp"] = float(cursor_result["tp"])
             setup_object["sl"] = float(cursor_result["sl"])
             setup_object["is_active"] = cursor_result["is_active"]
+            setup_object["start_balance"] = float(cursor_result["week_start_balance"])
 
         return setup_object
     
