@@ -94,8 +94,10 @@ def get_products_performance_code():
 def set_start_balance():
     account_id = request.args["account_id"]
     balance = request.args["balance"]
+    equity = request.args["equity"]
+    start_balance = request.args["start_balance"]
 
-    dbController.set_start_balance(account_id, balance)
+    dbController.set_start_balance(account_id, balance, equity, start_balance)
 
     return ""
 

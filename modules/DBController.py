@@ -269,11 +269,11 @@ class DBController:
 
         cursor.close()
 
-    def set_start_balance(self, account_id, balance):
+    def set_start_balance(self, account_id, balance, equity, start_balance):
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        sql = f"UPDATE accounts SET week_start_balance = '{balance}' WHERE id = '{account_id}'"
+        sql = f"UPDATE accounts SET balance = '{balance}', equity = '{equity}' week_start_balance = '{start_balance}' WHERE id = '{account_id}'"
     
         cursor.execute(sql)
 
@@ -913,10 +913,12 @@ class DBController:
             setup_object["total_equity"] = float(cursor_result["total_equity"])
             setup_object["total_balance"] = float(cursor_result["total_balance"])
 
+            setup_object["o_profit"] = self.get_drawdown_by_vars(setup_object["total_balance"], setup_object["start_balance"])
             setup_object["dd"] = self.get_drawdown_by_vars(setup_object["total_equity"], setup_object["start_balance"])
         else:
             setup_object["total_equity"] = 0.0
             setup_object["total_balance"] = 0.0
+            setup_object["o_profit"] = 0.0
             setup_object["is_active"] = False
 
         return setup_object
