@@ -268,6 +268,20 @@ class DBController:
         self.conn.commit()
 
         cursor.close()
+
+    def set_start_balance(self, account_id, balance):
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        sql = f"UPDATE accounts SET week_start_balance = '{balance}' WHERE id = '{account_id}'"
+        
+        cursor.execute(sql)
+
+        self.conn.commit()
+
+        cursor.close()
+        
+        return ""
     
     def set_user_code(self, email, code):
 
