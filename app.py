@@ -97,7 +97,7 @@ def get_account_setup():
     return json.dumps(dbController.get_account_setup(account_id))
 
 @app.route("/account/setup/set_start_balance", methods=['GET'])
-def get_account_setup():
+def set_start_balance():
     account_id = request.args["account_id"]
     balance = request.args["balance"]
 
