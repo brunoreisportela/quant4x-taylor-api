@@ -884,7 +884,7 @@ class DBController:
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
-                        SELECT SUM(equity) as equity FROM accounts as acc
+                        SELECT SUM(equity) as total_equity, SUM(week_start_balance) as total_balance FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {setup_object["code"]};
@@ -896,7 +896,7 @@ class DBController:
         cursor.close()
 
         if cursor_result != None:
-            setup_object["equity"] = float(cursor_result["equity"])
+            setup_object["total_equity"] = float(cursor_result["total_equity"])
 
         return setup_object
     
