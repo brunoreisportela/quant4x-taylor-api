@@ -101,7 +101,9 @@ def set_start_balance():
     account_id = request.args["account_id"]
     balance = request.args["balance"]
 
-    return json.dumps(dbController.set_start_balance(account_id, balance))
+    dbController.set_start_balance(account_id, balance)
+
+    return ""
 
 @app.route("/percent/performance/code", methods=['GET'])
 def get_percent_performance_code():
