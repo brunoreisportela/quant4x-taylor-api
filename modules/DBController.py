@@ -847,7 +847,7 @@ class DBController:
         cursor.execute(f"""
                         		SELECT j.name, j.account_id, j.tp as o_tp, j.sl as o_sl, 
                                             j.product_id, prod.tp, prod.sl,
-                                            prod.name as product_name 
+                                            prod.name as product_name,
                                             is_live_active as is_active FROM (
                                     SELECT * FROM clients as cli
                                     INNER JOIN clients_accounts as cli_acc
