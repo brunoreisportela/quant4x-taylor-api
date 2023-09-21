@@ -845,20 +845,20 @@ class DBController:
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
-                        		SELECT j.name, j.account_id, j.tp as o_tp, j.sl as o_sl, 
-                                            j.product_id, prod.tp, prod.sl,
-                                            prod.name as product_name,
-                                            j.week_start_balance,
-                                            is_live_active as is_active FROM (
-                                    SELECT * FROM clients as cli
-                                    INNER JOIN clients_accounts as cli_acc
-                                        ON cli_acc.client_code = cli.code
-                                    INNER JOIN accounts as acc
-                                        ON cli_acc.account_id = acc.id 
-                                    WHERE acc.id = '{account_id}'
-                                ) as j 
-                                INNER JOIN products prod
-                                ON prod.id = product_id;
+                        SELECT j.code, j.name, j.account_id, j.tp as o_tp, j.sl as o_sl, 
+                                    j.product_id, prod.tp, prod.sl,
+                                    prod.name as product_name,
+                                    j.week_start_balance,
+                                    is_live_active as is_active FROM (
+                            SELECT * FROM clients as cli
+                            INNER JOIN clients_accounts as cli_acc
+                                ON cli_acc.client_code = cli.code
+                            INNER JOIN accounts as acc
+                                ON cli_acc.account_id = acc.id 
+                            WHERE acc.id = '{account_id}'
+                        ) as j 
+                        INNER JOIN products prod
+                        ON prod.id = product_id;
                     """)
         
 
@@ -869,6 +869,7 @@ class DBController:
         setup_object = {}
 
         if cursor_result != None:
+            setup_object["code"] = cursor_result["code"]
             setup_object["name"] = cursor_result["name"]
             setup_object["product_name"] = cursor_result["product_name"]
             setup_object["account_id"] = cursor_result["account_id"]
@@ -879,6 +880,23 @@ class DBController:
             setup_object["sl"] = float(cursor_result["sl"])
             setup_object["is_active"] = cursor_result["is_active"]
             setup_object["start_balance"] = float(cursor_result["week_start_balance"])
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT SUM(equity) as equity FROM accounts as acc
+                        INNER JOIN clients_accounts cli_acc 
+                            ON cli_acc.account_id = acc.id
+                            AND cli_acc.client_code = {setup_object["code"]};
+                    """)
+        
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result != None:
+            setup_object["equity"] = float(cursor_result["equity"])
 
         return setup_object
     
