@@ -898,6 +898,8 @@ class DBController:
         if cursor_result != None:
             setup_object["total_equity"] = float(cursor_result["total_equity"])
             setup_object["total_balance"] = float(cursor_result["total_balance"])
+
+            setup_object["dd"] = self.get_drawdown_by_vars(setup_object["total_equity"], setup_object["start_balance"])
         else:
             setup_object["total_equity"] = 0.0
             setup_object["total_balance"] = 0.0
@@ -905,7 +907,7 @@ class DBController:
 
         return setup_object
     
-    def get_drawdown_by_vars(self, equity, balance, start_balance):
+    def get_drawdown_by_vars(self, equity, balance):
         
         dd = 0
 
