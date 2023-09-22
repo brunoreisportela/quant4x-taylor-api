@@ -269,11 +269,11 @@ class DBController:
 
         cursor.close()
 
-    def set_start_balance(self, account_id, balance, equity, start_balance):
+    def set_start_balance(self, account_id, balance, equity, start_balance, segment_balance):
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        sql = f"UPDATE accounts SET balance = '{balance}', equity = '{equity}' week_start_balance = '{start_balance}' WHERE id = '{account_id}'"
+        sql = f"UPDATE accounts SET balance = '{balance}', segment_balance = '{segment_balance}', equity = '{equity}', week_start_balance = '{start_balance}' WHERE id = '{account_id}'"
     
         cursor.execute(sql)
 
@@ -863,6 +863,7 @@ class DBController:
                                     j.product_id, prod.tp, prod.sl,
                                     prod.name as product_name,
                                     j.week_start_balance,
+                                    j.segment_balance,
                                     is_live_active as is_active FROM (
                             SELECT * FROM clients as cli
                             INNER JOIN clients_accounts as cli_acc
@@ -894,6 +895,7 @@ class DBController:
             setup_object["sl"] = float(cursor_result["sl"])
             setup_object["is_active"] = cursor_result["is_active"]
             setup_object["start_balance"] = float(cursor_result["week_start_balance"])
+            setup_object["segment_balance"] = float(cursor_result["segment_balance"])
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
