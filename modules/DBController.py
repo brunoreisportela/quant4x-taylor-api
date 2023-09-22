@@ -898,7 +898,6 @@ class DBController:
             setup_object["segment_balance"] = float(cursor_result["segment_balance"])
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
         cursor.execute(f"""
                         SELECT SUM(equity) as total_equity, SUM(week_start_balance) as total_balance FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
