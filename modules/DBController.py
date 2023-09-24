@@ -911,8 +911,8 @@ class DBController:
             setup_object["total_equity"] = float(cursor_result["total_equity"])
             setup_object["total_balance"] = float(cursor_result["total_balance"])
 
-            setup_object["o_profit"] = self.get_drawdown_by_vars(setup_object["total_balance"], setup_object["start_balance"])
-            setup_object["dd"] = self.get_drawdown_by_vars(setup_object["total_equity"], setup_object["start_balance"])
+            setup_object["o_profit"] = self.get_drawdown_by_vars(setup_object["total_equity"], setup_object["total_balance"])
+            setup_object["dd"] = self.get_drawdown_by_vars(setup_object["total_equity"], setup_object["total_balance"])
         else:
             setup_object["total_equity"] = 0.0
             setup_object["total_balance"] = 0.0
@@ -925,7 +925,7 @@ class DBController:
         
         dd = 0
 
-        if equity != 0 and balance != 0:
+        if equity != None and balance != None:
             dd = round(((equity-balance) * 100) / balance, 2) 
 
         return dd
