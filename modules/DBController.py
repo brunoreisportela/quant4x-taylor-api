@@ -740,41 +740,39 @@ class DBController:
 
 
     def aggregate_float_dd_KPI_per_cluster(self):
-        # cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        # cursor.execute(f"""
-        #                 SELECT * FROM accounts as acc
-        #                 SELECT * FROM clients ORDER BY code ASC;
-        #             """)
+        cursor.execute(f"""
+                        SELECT * FROM accounts as acc
+                        SELECT * FROM clients ORDER BY code ASC;
+                    """)
 
-        # cursor_result = cursor.fetchall()
+        cursor_result = cursor.fetchall()
 
-        # cursor.close()
+        cursor.close()
 
-        # clusters_performance = []
+        clusters_performance = []
 
-        # for client in cursor_result:
+        for client in cursor_result:
 
-        #     clusters = self.get_clusters_per_client( client["code"])
+            clusters = self.get_clusters_per_client( client["code"])
             
-        #     for cluster in clusters:
-        #         cluster_return = {}
+            for cluster in clusters:
+                cluster_return = {}
 
-        #         cluster_return["client_code"] = client["code"]
-        #         cluster_return["cluster_id"] = cluster["cluster_id"]
-        #         cluster_return["float_dd_percent"] = self.get_profit_percentage_by_code(client["code"], cluster["cluster_id"])
+                cluster_return["client_code"] = client["code"]
+                cluster_return["cluster_id"] = cluster["cluster_id"]
+                cluster_return["float_dd_percent"] = self.get_profit_percentage_by_code(client["code"], cluster["cluster_id"])
 
-        #         latest_percent = self.check_latest_percent_from_cluster(cluster_return)
+                latest_percent = self.check_latest_percent_from_cluster(cluster_return)
 
-        #         if cluster_return["float_dd_percent"] != latest_percent:
-        #             self.set_cluster_KPI(cluster_return)
+                if cluster_return["float_dd_percent"] != latest_percent:
+                    self.set_cluster_KPI(cluster_return)
                     
-        #         clusters_performance.append(cluster_return)
+                clusters_performance.append(cluster_return)
 
 
-        # return clusters_performance
-
-        return ""
+        return clusters_performance
     
     def get_account_setup(self, account_id):
 
@@ -851,7 +849,7 @@ class DBController:
             balance += float(account["week_start_balance"])
             start_balance += float(account["week_start_balance"])
 
-        dd = self.get_drawdown_by_vars(equity, balance, start_balance)
+        dd = self.get_drawdown_by_vars(equity, balance)
 
         return dd
     
