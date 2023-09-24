@@ -743,7 +743,6 @@ class DBController:
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
-                        SELECT * FROM accounts as acc
                         SELECT * FROM clients ORDER BY code ASC;
                     """)
 
