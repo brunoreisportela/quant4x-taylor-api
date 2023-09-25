@@ -896,7 +896,9 @@ class DBController:
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
         cursor.execute(f"""
-                        SELECT SUM(equity) as total_equity, SUM(week_start_balance) as total_balance FROM accounts as acc
+                        SELECT SUM(equity) as total_equity, 
+                               SUM(week_start_balance) as total_balance, 
+                               SUM(balance) as reserve_balance FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
                             AND cli_acc.client_code = {setup_object["code"]};
@@ -910,14 +912,22 @@ class DBController:
         if cursor_result != None:
             setup_object["total_equity"] = float(cursor_result["total_equity"])
             setup_object["total_balance"] = float(cursor_result["total_balance"])
+            setup_object["reserve_balance"] = float(cursor_result["reserve_balance"])
 
             setup_object["o_profit"] = self.get_drawdown_by_vars(setup_object["total_equity"], setup_object["total_balance"])
-            setup_object["dd"] = self.get_drawdown_by_vars(setup_object["total_equity"], setup_object["total_balance"])
+            
+            balance_to_use = setup_object["total_balance"]
+
+            if balance_to_use == 0:
+                balance_to_use = setup_object["reserve_balance"]
+
+            setup_object["dd"] = self.get_drawdown_by_vars(setup_object["total_equity"], balance_to_use)
         else:
             setup_object["total_equity"] = 0.0
             setup_object["total_balance"] = 0.0
             setup_object["o_profit"] = 0.0
             setup_object["is_active"] = False
+            setup_object["reserve_balance"] = 0.0
 
         return setup_object
     
