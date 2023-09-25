@@ -925,7 +925,7 @@ class DBController:
         
         dd = 0
 
-        if equity != None and balance != None:
+        if equity != 0 and balance != 0:
             dd = round(((equity-balance) * 100) / balance, 2) 
 
         return dd
