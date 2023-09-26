@@ -35,9 +35,18 @@ class DBController:
     def get_cluster_data(self, cluster_id, client_code):
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        cursor.execute(f"""SELECT * FROM cluster_kpis AS clu_kpi
-                            INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
-                            AND clu_kpi.client_code = {client_code};""")
+        cursor.execute(f"""
+                        SELECT * FROM (
+                            SELECT * FROM cluster_kpis AS clu_kpi
+                                                        INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
+                                                        AND clu_kpi.client_code = {client_code} ORDER BY updated_at DESC LIMIT 250
+                            ) as t
+                        ORDER BY updated_at ASC;
+                       """)
+
+        # cursor.execute(f"""SELECT * FROM cluster_kpis AS clu_kpi
+        #                     INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
+        #                     AND clu_kpi.client_code = {client_code};""")
 
         cursor_result = cursor.fetchall()
 
