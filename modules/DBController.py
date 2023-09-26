@@ -761,7 +761,7 @@ class DBController:
 
                 cluster_return["client_code"] = client["code"]
                 cluster_return["cluster_id"] = cluster["cluster_id"]
-                cluster_return["float_dd_percent"] = self.get_profit_percentage_by_code(client["code"], cluster["cluster_id"])
+                cluster_return["float_dd_percent"] = self.get_total_dd(client["code"])
 
                 latest_percent = self.check_latest_percent_from_cluster(cluster_return)
 
@@ -772,6 +772,29 @@ class DBController:
 
 
         return clusters_performance
+    
+    def get_total_dd(self, client_code):
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                                SELECT * FROM accounts as acc
+                                INNER JOIN clients_accounts cli_acc 
+                                    ON cli_acc.account_id = acc.id
+                                    AND cli_acc.client_code = {client_code};
+                    """)
+
+        cursor_result = cursor.fetchall()
+
+        cursor.close()
+
+        total_dd = 0.0
+
+        for result in cursor_result:
+            total_dd += float(result["drawdown"])
+
+        return -total_dd
+
     
     def get_account_setup(self, account_id):
 
