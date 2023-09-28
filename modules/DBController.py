@@ -893,6 +893,7 @@ class DBController:
                                     prod.name as product_name,
                                     j.week_start_balance,
                                     j.segment_balance,
+                                    prod.lot_ratio,
                                     is_live_active as is_active FROM (
                             SELECT * FROM clients as cli
                             INNER JOIN clients_accounts as cli_acc
@@ -922,6 +923,7 @@ class DBController:
             setup_object["product_id"] = cursor_result["product_id"]
             setup_object["tp"] = float(cursor_result["tp"])
             setup_object["sl"] = float(cursor_result["sl"])
+            setup_object["lot_ratio"] = float(cursor_result["lot_ratio"])
             setup_object["is_active"] = cursor_result["is_active"]
             setup_object["start_balance"] = float(cursor_result["week_start_balance"])
             setup_object["segment_balance"] = float(cursor_result["segment_balance"])
