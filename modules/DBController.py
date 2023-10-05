@@ -97,6 +97,7 @@ class DBController:
         client_dict["scope_profit"] = 0.0
         client_dict["scope_transactions"] = 0
         client_dict["scope_profit_percent"] = 0
+        client_dict["is_active"] = client["is_active"]
 
         if load_clusters:
             client_dict["clusters"] = self.get_clusters_per_client(client["code"])
