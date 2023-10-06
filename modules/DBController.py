@@ -37,16 +37,16 @@ class DBController:
 
         cursor.execute(f"""
                         SELECT * FROM (
-                            SELECT * FROM cluster_kpis AS clu_kpi
-                                                        INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
-                                                        AND clu_kpi.client_code = {client_code} ORDER BY updated_at DESC LIMIT 250
+                            SELECT *, (SELECT min(float_dd_percent) FROM cluster_kpis WHERE client_code = {client_code}),
+                                    (SELECT max(float_dd_percent) FROM cluster_kpis WHERE client_code = {client_code})
+                            FROM cluster_kpis AS clu_kpi
+                                INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
+                                AND clu_kpi.client_code = {client_code}
+                                ORDER BY updated_at 
+                                DESC LIMIT 250
                             ) as t
                         ORDER BY updated_at ASC;
                        """)
-
-        # cursor.execute(f"""SELECT * FROM cluster_kpis AS clu_kpi
-        #                     INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
-        #                     AND clu_kpi.client_code = {client_code};""")
 
         cursor_result = cursor.fetchall()
 
@@ -63,6 +63,9 @@ class DBController:
             cluster["stop_loss"] = float(result["stop_loss"])
             cluster["description"] = result["description"]
             cluster["float_dd_percent"] = float(result["float_dd_percent"])
+
+            cluster["min"] = float(result["min"])
+            cluster["max"] = float(result["max"])
 
             cluster["day"] = result["day"]
             cluster["month"] = result["month"]
