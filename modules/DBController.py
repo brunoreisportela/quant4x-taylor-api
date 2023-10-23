@@ -37,8 +37,8 @@ class DBController:
 
         cursor.execute(f"""
                         SELECT *,
-                            MIN(float_dd_percent) OVER (ORDER BY updated_at ASC) AS min,
-                            MAX(float_dd_percent) OVER (ORDER BY updated_at ASC) AS max
+                            MIN(float_dd_percent) OVER (ORDER BY updated_at ASC) AS "min",
+                            MAX(float_dd_percent) OVER (ORDER BY updated_at ASC) AS "max"
                         FROM (
                             SELECT *
                             FROM cluster_kpis AS clu_kpi
