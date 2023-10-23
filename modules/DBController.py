@@ -36,15 +36,17 @@ class DBController:
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         cursor.execute(f"""
-                        SELECT * FROM (
-                            SELECT *, (SELECT min(float_dd_percent) FROM cluster_kpis WHERE client_code = {client_code}),
-                                    (SELECT max(float_dd_percent) FROM cluster_kpis WHERE client_code = {client_code})
+                        SELECT *,
+                            MIN(float_dd_percent) OVER (ORDER BY updated_at ASC) AS min,
+                            MAX(float_dd_percent) OVER (ORDER BY updated_at ASC) AS max
+                        FROM (
+                            SELECT *
                             FROM cluster_kpis AS clu_kpi
-                                INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
+                            INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
                                 AND clu_kpi.client_code = {client_code}
-                                ORDER BY updated_at 
-                                DESC LIMIT 50
-                            ) as t
+                            ORDER BY updated_at DESC
+                            LIMIT 80
+                        ) AS t
                         ORDER BY updated_at ASC;
                        """)
 
