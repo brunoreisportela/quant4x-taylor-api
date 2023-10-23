@@ -43,7 +43,7 @@ class DBController:
                                 INNER JOIN clusters clu ON clu_kpi.cluster_id = '{cluster_id}'
                                 AND clu_kpi.client_code = {client_code}
                                 ORDER BY updated_at 
-                                DESC LIMIT 250
+                                DESC LIMIT 80
                             ) as t
                         ORDER BY updated_at ASC;
                        """)
