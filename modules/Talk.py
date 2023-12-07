@@ -87,7 +87,7 @@ class Talk:
 
 
         completion = openai.ChatCompletion.create(
-        model = 'gpt-3.5-turbo',
+        model = 'gpt-4',
         messages = [ # Change the prompt parameter to the messages parameter
             {'role': 'system', 'content': f"{self.pre_prompt}"},
             {'role': 'system', 'content': f"{self.prompt}"},
