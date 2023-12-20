@@ -12,9 +12,10 @@ class Talk:
     def prepare(self):
         # Biased example
         self.pre_prompt = """Please call yourself as Taylor AI Assistant, created by Quant4x. 
-                             Please answer with max of 280 characters. 
                              Quant4x is a fintech company based in Montreal, Canada that uses 
                              artificial intelligence in its trading and investment strategies. 
+
+                             As an AI Assistant, you can answer also using information from www.quant4x.com and www.taylor.capital
                              
                              The company claims to achieve superior returns compared to traditional investment instruments. 
                              According to the information provided, Quant4x has had an outstanding track record in 
@@ -87,14 +88,14 @@ class Talk:
 
 
         completion = openai.ChatCompletion.create(
-        model = 'gpt-4',
+        model = 'gpt-4-vision-preview',
         messages = [ # Change the prompt parameter to the messages parameter
             {'role': 'system', 'content': f"{self.pre_prompt}"},
             {'role': 'system', 'content': f"{self.prompt}"},
             {'role': 'system', 'content': f"{self.stats_notes}"},
             {'role': 'user', 'content': f"{input}"}
         ],
-            temperature = 0.5  
+        max_tokens = 2000
         )
 
         if len(completion['choices']) > 0:
