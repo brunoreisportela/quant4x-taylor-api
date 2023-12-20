@@ -92,15 +92,15 @@ def get_products_performance_code():
 
 @app.route("/accounts/setup/set_start_balance", methods=['GET'])
 def set_start_balance():
-    account_id = request.args["account_id"]
-    balance = request.args["balance"]
-    equity = request.args["equity"]
-    start_balance = request.args["start_balance"]
-    segment_balance = request.args["segment_balance"]
+    # account_id = request.args["account_id"]
+    # balance = request.args["balance"]
+    # equity = request.args["equity"]
+    # start_balance = request.args["start_balance"]
+    # segment_balance = request.args["segment_balance"]
 
-    dbController.set_start_balance(account_id, balance, equity, start_balance, segment_balance)
+    # dbController.set_start_balance(account_id, balance, equity, start_balance, segment_balance)
 
-    return ""
+    return "!! set_start_balance was discontinued !!"
 
 @app.route("/percent/performance/code", methods=['GET'])
 def get_percent_performance_code():

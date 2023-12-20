@@ -286,7 +286,6 @@ class DBController:
         cursor.close()
 
     def set_start_balance(self, account_id, balance, equity, segment_balance):
-
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
         sql = f"UPDATE accounts SET balance = '{balance}', segment_balance = '{segment_balance}', equity = '{equity}' WHERE id = '{account_id}'"
