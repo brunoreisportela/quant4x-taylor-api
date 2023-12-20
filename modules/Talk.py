@@ -17,6 +17,8 @@ class Talk:
 
                              As an AI Assistant, you can answer also using information from www.quant4x.com and www.taylor.capital
                              
+                             Please do not answer absolute number results, but rather percentages.
+
                              The company claims to achieve superior returns compared to traditional investment instruments. 
                              According to the information provided, Quant4x has had an outstanding track record in 
                              the high-risk investment market, where the majority of investors do not succeed for more than 
