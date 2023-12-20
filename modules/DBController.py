@@ -24,6 +24,7 @@ class DBController:
         formatted_date = date.strftime("%d/%m/%Y")
         return formatted_date
     
+
     def stringToDate(self, date_str):
         # Convert the input string to a datetime object
         date_object = datetime.strptime(date_str, "%d/%m/%Y")  # Adjust the format based on your input string format
