@@ -72,7 +72,7 @@ class Talk:
     def prepare_on_demand_prompt(self, data):
         self.stats_notes = json.dumps(data, use_decimal=True)
 
-    def get_response(self, input):
+    def get_response(self, input, is_context_prompt = True):
 
         input = input.replace("\"", "\n")
 
@@ -88,15 +88,18 @@ class Talk:
         # else:
         #     return "Error: No response could be obtained by Taylor this time."
 
+        context_array = []
+
+        if is_context_prompt:
+            context_array.append({'role': 'system', 'content': f"{self.pre_prompt}"})
+            context_array.append({'role': 'system', 'content': f"{self.prompt}"})
+            context_array.append({'role': 'system', 'content': f"{self.stats_notes}"})
+
+        context_array.append({'role': 'user', 'content': f"{input}"})
 
         completion = openai.ChatCompletion.create(
         model = 'gpt-4-vision-preview',
-        messages = [ # Change the prompt parameter to the messages parameter
-            {'role': 'system', 'content': f"{self.pre_prompt}"},
-            {'role': 'system', 'content': f"{self.prompt}"},
-            {'role': 'system', 'content': f"{self.stats_notes}"},
-            {'role': 'user', 'content': f"{input}"}
-        ],
+        messages = context_array,
         max_tokens = 2000
         )
 

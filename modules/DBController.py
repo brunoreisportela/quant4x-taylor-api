@@ -284,19 +284,6 @@ class DBController:
         self.conn.commit()
 
         cursor.close()
-
-    def set_start_balance(self, account_id, balance, equity, segment_balance):
-        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
-        sql = f"UPDATE accounts SET balance = '{balance}', segment_balance = '{segment_balance}', equity = '{equity}' WHERE id = '{account_id}'"
-    
-        cursor.execute(sql)
-
-        self.conn.commit()
-
-        cursor.close()
-        
-        return ""
     
     def set_user_code(self, email, code):
 
@@ -587,6 +574,10 @@ class DBController:
         
         talk_response = self.talk.get_response(message)
 
+        return talk_response
+    
+    def taylor_get_answer_without_context(self, message):        
+        talk_response = self.talk.get_response(message, is_context_prompt = False)
         return talk_response
 
     def taylor_says_telegram(self, message):
