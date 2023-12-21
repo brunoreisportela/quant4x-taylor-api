@@ -55,4 +55,4 @@ class MayTapi:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setup_webhook()
+        # self.setup_webhook()
