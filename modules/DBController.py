@@ -155,6 +155,36 @@ class DBController:
         summary["swap"] = swap
             
         return summary
+    
+    def get_sentiment_pairs(self):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""SELECT * FROM sentiment_pairs;""")
+
+        cursor_result = cursor.fetchall()
+
+        cursor.close()
+
+        sentiment_pairs = []
+
+        for result in cursor_result:
+            sentiment_pair = {"pair": result["pair"], "sentiment": result["sentiment"]}
+            sentiment_pairs.append(sentiment_pair)
+
+        return sentiment_pairs
+    
+    def save_sentiment_pair(self, pair, sentiment):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        sql = f"""UPDATE sentiment_pairs SET sentiment = '{sentiment}', updated_at = 'NOW()' WHERE pair = '{pair}'"""
+        
+        cursor.execute(sql)
+
+        self.conn.commit()
+
+        cursor.close()
+        
+        return ""
 
     def get_weeks_per_account(self, account, weeks_limit = 0):
 
@@ -891,14 +921,63 @@ class DBController:
                                     j.week_start_balance,
                                     j.segment_balance,
                                     prod.lot_ratio,
-                                    is_live_active as is_active FROM (
+                                    is_live_active as is_active,
+									
+									(SELECT 
+        CASE 
+            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+            ELSE 'mixed' 
+        END 
+     FROM sentiment_pairs 
+     WHERE pair = 'GBPUSD') AS GBPUSD,
+
+    (SELECT 
+        CASE 
+            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+            ELSE 'mixed' 
+        END 
+     FROM sentiment_pairs 
+     WHERE pair = 'EURUSD') AS EURUSD,
+
+    (SELECT 
+        CASE 
+            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+            ELSE 'mixed' 
+        END 
+     FROM sentiment_pairs 
+     WHERE pair = 'USDJPY') AS USDJPY,
+
+    (SELECT 
+        CASE 
+            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+            ELSE 'mixed' 
+        END 
+     FROM sentiment_pairs 
+     WHERE pair = 'USDCAD') AS USDCAD,
+
+    (SELECT 
+        CASE 
+            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+            ELSE 'mixed' 
+        END 
+     FROM sentiment_pairs 
+     WHERE pair = 'GOLD') AS GOLD,
+
+    (SELECT 
+        CASE 
+            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+            ELSE 'mixed' 
+        END 
+     FROM sentiment_pairs 
+     WHERE pair = 'SP500') AS SP500
+									FROM (
                             SELECT * FROM clients as cli
                             INNER JOIN clients_accounts as cli_acc
                                 ON cli_acc.client_code = cli.code
                             INNER JOIN accounts as acc
                                 ON cli_acc.account_id = acc.id 
                             WHERE acc.id = '{account_id}'
-                        ) as j 
+                        ) as j
                         INNER JOIN products prod
                         ON prod.id = product_id;
                     """)
