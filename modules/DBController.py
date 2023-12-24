@@ -911,6 +911,7 @@ class DBController:
 
         return dd
     
+    
     def get_json_setup(self, account_id):
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
