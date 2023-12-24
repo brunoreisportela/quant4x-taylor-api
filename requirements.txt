@@ -39,3 +39,4 @@ sortedcontainers==2.4.0
 soupsieve==2.4.1
 tqdm==4.65.0
 tradingview_ta
+bs4
