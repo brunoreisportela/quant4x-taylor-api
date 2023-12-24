@@ -29,7 +29,6 @@ packaging==23.1
 psycopg-binary==3.1.14
 psycopg2-binary==2.9.9
 pycparser==2.21
-pypiwin32
 PySocks==1.7.1
 python-dotenv==1.0.0
 requests==2.31.0
