@@ -924,62 +924,62 @@ class DBController:
                                     is_live_active as is_active,
 									
 									(SELECT 
-        CASE 
-            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
-            ELSE 'mixed' 
-        END 
-     FROM sentiment_pairs 
-     WHERE pair = 'GBPUSD') AS GBPUSD,
+                                        CASE 
+                                            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+                                            ELSE 'mixed' 
+                                        END 
+                                    FROM sentiment_pairs 
+                                    WHERE pair = 'GBPUSD') AS GBPUSD,
 
-    (SELECT 
-        CASE 
-            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
-            ELSE 'mixed' 
-        END 
-     FROM sentiment_pairs 
-     WHERE pair = 'EURUSD') AS EURUSD,
+                                    (SELECT 
+                                        CASE 
+                                            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+                                            ELSE 'mixed' 
+                                        END 
+                                    FROM sentiment_pairs 
+                                    WHERE pair = 'EURUSD') AS EURUSD,
 
-    (SELECT 
-        CASE 
-            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
-            ELSE 'mixed' 
-        END 
-     FROM sentiment_pairs 
-     WHERE pair = 'USDJPY') AS USDJPY,
+                                    (SELECT 
+                                        CASE 
+                                            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+                                            ELSE 'mixed' 
+                                        END 
+                                    FROM sentiment_pairs 
+                                    WHERE pair = 'USDJPY') AS USDJPY,
 
-    (SELECT 
-        CASE 
-            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
-            ELSE 'mixed' 
-        END 
-     FROM sentiment_pairs 
-     WHERE pair = 'USDCAD') AS USDCAD,
+                                    (SELECT 
+                                        CASE 
+                                            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+                                            ELSE 'mixed' 
+                                        END 
+                                    FROM sentiment_pairs 
+                                    WHERE pair = 'USDCAD') AS USDCAD,
 
-    (SELECT 
-        CASE 
-            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
-            ELSE 'mixed' 
-        END 
-     FROM sentiment_pairs 
-     WHERE pair = 'GOLD') AS GOLD,
+                                    (SELECT 
+                                        CASE 
+                                            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+                                            ELSE 'mixed' 
+                                        END 
+                                    FROM sentiment_pairs 
+                                    WHERE pair = 'GOLD') AS GOLD,
 
-    (SELECT 
-        CASE 
-            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
-            ELSE 'mixed' 
-        END 
-     FROM sentiment_pairs 
-     WHERE pair = 'SP500') AS SP500
+                                    (SELECT 
+                                        CASE 
+                                            WHEN NOW() - updated_at < INTERVAL '2 hours' THEN sentiment 
+                                            ELSE 'mixed' 
+                                        END 
+                                    FROM sentiment_pairs 
+                                    WHERE pair = 'SP500') AS SP500
 									FROM (
-                            SELECT * FROM clients as cli
-                            INNER JOIN clients_accounts as cli_acc
-                                ON cli_acc.client_code = cli.code
-                            INNER JOIN accounts as acc
-                                ON cli_acc.account_id = acc.id 
-                            WHERE acc.id = '{account_id}'
-                        ) as j
-                        INNER JOIN products prod
-                        ON prod.id = product_id;
+                                        SELECT * FROM clients as cli
+                                        INNER JOIN clients_accounts as cli_acc
+                                            ON cli_acc.client_code = cli.code
+                                        INNER JOIN accounts as acc
+                                            ON cli_acc.account_id = acc.id 
+                                        WHERE acc.id = '{account_id}'
+                                    ) as j
+                                    INNER JOIN products prod
+                                    ON prod.id = product_id;
                     """)
         
 
@@ -1003,6 +1003,12 @@ class DBController:
             setup_object["is_active"] = cursor_result["is_active"]
             setup_object["start_balance"] = float(cursor_result["week_start_balance"])
             setup_object["segment_balance"] = float(cursor_result["segment_balance"])
+            setup_object["GBPUSD"] = cursor_result["gbpusd"]
+            setup_object["EURUSD"] = cursor_result["eurusd"]
+            setup_object["USDCAD"] = cursor_result["usdcad"]
+            setup_object["USDJPY"] = cursor_result["usdjpy"]
+            setup_object["GOLD"] = cursor_result["gold"]
+            setup_object["SP500"] = cursor_result["sp500"]
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
         cursor.execute(f"""
