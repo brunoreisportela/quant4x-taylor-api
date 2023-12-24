@@ -117,12 +117,6 @@ def taylor_get_answer():
     message = request.form["message"]
     return dbController.taylor_get_answer(message)
 
-
-@app.route("/taylor/answer/without_context", methods=['POST'])
-def taylor_get_answer_without_context():
-    message = request.form["message"]
-    return dbController.taylor_get_answer_without_context(message)
-
 @app.route("/client/code", methods=['GET'])
 def get_client_code():
     code = request.args["code"]
