@@ -93,15 +93,23 @@ if __name__ == "__main__":
 
         prompt = f"""Considering the current economic indicators or news available, what is the current sentiment for the pair {sentiment_pair["pair"]}?  Please answer with the following pattern {{ \"pair\":\"pair_symbol\",  \"sentiment\": \"bullish_or_bearish\" }}. This is the information available: {sentiment_info}"""
 
-        get_result = dbController.taylor_get_answer(prompt)
-        get_result = get_result.replace("\n","")
-        get_result = fix_json(get_result)
+        try:
 
-        print(get_result)
+            get_result = dbController.taylor_get_answer(prompt)
+            get_result = get_result.replace("\n","")
+            get_result = extract_between_braces(get_result)[0]
+            get_result = "{"+get_result+"}"
+            get_result = fix_json(get_result)
 
-        json_ = json.loads(get_result)
+            print(get_result)
 
-        dbController.save_sentiment_pair(sentiment_pair["pair"], json_["sentiment"])
+            json_ = json.loads(get_result)
+
+            dbController.save_sentiment_pair(sentiment_pair["pair"], json_["sentiment"])
+
+        except Exception as e:
+            print(e)
+            print("Error getting sentiment for pair: "+sentiment_pair["pair"])
 
         time.sleep(10)
 
