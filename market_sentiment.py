@@ -12,8 +12,6 @@ from modules import DBController
 
 dbController = DBController()
 
-pair = "EURUSD"
-
 def get_url_data(url):
     if url == None:
         return None
@@ -82,6 +80,8 @@ def fix_json(json_string):
 
 if __name__ == "__main__":
 
+    print("", end='', flush=False)
+
     sentiment_pairs = dbController.get_sentiment_pairs()
 
     for sentiment_pair in sentiment_pairs:
@@ -113,6 +113,16 @@ if __name__ == "__main__":
 
         time.sleep(10)
 
-    time.sleep(900)
+    second_index = 0
+
+    while second_index < 1800:
+
+        if second_index % 60 == 0:
+            print(".", end='', flush=True)
+
+        second_index += 1        
+        time.sleep(1)
+
+    print("", end='', flush=False)
 
         
