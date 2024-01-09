@@ -540,17 +540,14 @@ class DBController:
                     difference_in_percent = round((difference/(abs(float(client_code_week_balance))+abs(difference))) * 100, 2)
 
                     if difference_in_percent > 0:
-                        question = f"""Please keep the emojis to make it looking cool and make a very short joke in context with the message at end. 
-                        May you create a message presenting the numbers in the first person of the pronoun with max 50 characters? 
-                        🟢 Total earned with the trade was +${difference} 💰 After this gain the current Taylor's balance is: ${round(week_balance,2)}"""
 
-                        self.taylor_says_telegram(question)
-                        
+                        message = f"""The balance has increased by {difference_in_percent:.2f}%."""
+                        self.send_telegram_message(message)
+
                     elif difference_in_percent < 0:
-                        question = f"""Please keep the emojis. There is nothing positive about the balance when there is a loss in the capital. May you create a message, presenting the numbers in the first person of the pronoun with max 50 characters? 
-                        🔴 Total earned with the trade was -${difference} 💰 After this loss the current Taylor's balance is: ${round(week_balance,2)}"""
 
-                        self.taylor_says_telegram(question)
+                        message = f"""The balance has decreased by {difference_in_percent:.2f}%."""
+                        self.send_telegram_message(message)
 
         return ""
     
@@ -610,21 +607,7 @@ class DBController:
         talk_response = self.talk.get_response(message, is_context_prompt = False)
         return talk_response
 
-    def taylor_says_telegram(self, message):
-
-        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
-        cursor.execute(f"""
-                        SELECT * FROM ai_controller WHERE channel = 'telegram';
-                    """)
-        
-        cursor_result = cursor.fetchone()
-
-        cursor.close()
-
-        if cursor_result["is_active"] == False:
-            return ""
-        
+    def taylor_says_telegram(self, message):        
         dt = datetime.today()
         start_date_fmt = self.dateToString(self.get_first_day_week(dt))
         end_date_fmt = self.dateToString(self.get_last_day_week(dt))
@@ -637,6 +620,19 @@ class DBController:
         return talk_response
     
     def send_telegram_message(self, message):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT * FROM ai_controller WHERE channel = 'telegram';
+                    """)
+        
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result["is_active"] == False:
+            return ""
+
         url = f"https://api.telegram.org/bot{self.telegram_bot_token}/sendMessage?chat_id={self.telegram_chat_id}&text={message}"
 
         x = requests.get(url)

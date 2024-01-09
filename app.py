@@ -14,6 +14,8 @@ CORS(app)
 maytapi = MayTapi()
 dbController = DBController()
 
+valid_tokens = {"c5c917655b6d0ax008ssd2d92026f772"}
+
 @app.route("/")
 def get_service():
     return get_echo()
@@ -32,6 +34,16 @@ def get_clients_report_scope():
     end_date = dbController.stringToDate(request.args["end_date"])
 
     return json.dumps(dbController.get_clients(start_date, end_date))
+
+@app.route("/message/telegram", methods=['POST'])
+def send_message_telegram():
+    token = request.headers.get('Authorization') 
+
+    if token not in valid_tokens:
+        return {"error": "Invalid token"}, 401
+    
+    message = request.args["message"]
+    return dbController.send_telegram_message(message)
 
 @app.route("/products/performance", methods=['GET'])
 def get_products_performance():
@@ -93,7 +105,6 @@ def get_products_performance_code():
 @app.route("/percent/performance/code", methods=['GET'])
 def get_percent_performance_code():
     code = request.args["code"]
-
     cluster_id = 1
 
     if "cluster_id" in request.args:
@@ -105,7 +116,6 @@ def get_percent_performance_code():
 def post_whatsapp_send_message():
     payload = request.form["payload"]
     return maytapi.sendMessage(payload)
-
 
 @app.route("/taylor/says", methods=['POST'])
 def taylor_says():
