@@ -44,7 +44,8 @@ def send_message_telegram():
     
     message = request.form["message"]
     dbController.send_telegram_message(message)
-    return ""
+
+    return "Ok"
 
 @app.route("/products/performance", methods=['GET'])
 def get_products_performance():
