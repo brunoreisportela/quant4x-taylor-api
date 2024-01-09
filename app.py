@@ -43,7 +43,8 @@ def send_message_telegram():
         return {"error": "Invalid token"}, 401
     
     message = request.form["message"]
-    return dbController.send_telegram_message(message)
+    dbController.send_telegram_message(message)
+    return ""
 
 @app.route("/products/performance", methods=['GET'])
 def get_products_performance():
