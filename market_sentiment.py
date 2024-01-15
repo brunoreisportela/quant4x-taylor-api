@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import re
 import json
+import requests
 import time
 
 from bs4 import BeautifulSoup
@@ -68,6 +69,42 @@ def extract_between_braces(text):
     matches = re.findall(pattern, text)
     return matches
 
+def request_llm(prompt):
+    url = 'https://taylor.ngrok.app/api/prompt_route'  # Replace with your target URL
+    payload = {
+        'user_prompt': prompt
+    }  # Replace with your data
+
+    response = requests.post(url, data=payload)
+
+    if response.status_code == 200:
+        if "task_id" in json.loads(response.text):
+            task_id = json.loads(response.text)["task_id"]
+            url_to_get_result = f'https://taylor.ngrok.app/api/result/{task_id}'
+
+            is_response_ready = False
+
+            while not is_response_ready:
+                time.sleep(5)
+
+                response = requests.get(url_to_get_result)
+                
+                if response.status_code == 200:
+                    if "answer" in json.loads(response.text):
+                        is_response_ready = False
+                        return json.loads(response.text)["answer"]
+                if response.status_code == 201:
+                    print("Task is not ready yet")
+                else:
+                    is_response_ready = False
+                    return "Error in response"
+
+        else:
+            return "No task_id in response"
+    else:
+        return "Error in response"
+
+        
 def fix_json(json_string):
     # Enclose keys in double quotes
     json_string = re.sub(r'(?<!")\b(\w+):\s', r'"\1": ', json_string)
@@ -90,18 +127,18 @@ if __name__ == "__main__":
         # sentiment_info = get_url_data(f"https://www.tradingview.com/symbols/{sentiment_pair["pair"]}/")
         sentiment_info = get_url_data(f"https://www.tradingview.com/symbols/{sentiment_pair["pair"]}/ideas/")
 
-
-        prompt = f"""Considering the current economic indicators or news available, what is the current sentiment for the pair {sentiment_pair["pair"]}?  Please answer with the following pattern {{ \"pair\":\"pair_symbol\",  \"sentiment\": \"bullish_or_bearish\" }}. This is the information available: {sentiment_info}"""
+        prompt = f"""Considering the current economic indicators or news available, what is the current sentiment for the pair {sentiment_pair["pair"]}?  Please answer with the following pattern {{ \"pair\":\"pair_symbol\",  \"sentiment\": \"bullish_or_mixed_or_bearish\" }}. This is the information available: {sentiment_info}."""
 
         try:
 
+            # get_result = request_llm(prompt)
+
             get_result = dbController.taylor_get_answer(prompt)
+
             get_result = get_result.replace("\n","")
             get_result = extract_between_braces(get_result)[0]
             get_result = "{"+get_result+"}"
             get_result = fix_json(get_result)
-
-            print(get_result)
 
             json_ = json.loads(get_result)
 
