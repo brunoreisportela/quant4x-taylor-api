@@ -542,12 +542,12 @@ class DBController:
                     if difference_in_percent > 0:
 
                         message = f"""📈🟢 The balance has increased by {difference_in_percent:.2f}%."""
-                        self.send_telegram_message(message)
+                        # self.send_telegram_message(message)
 
                     elif difference_in_percent < 0:
 
                         message = f"""📉🔴 The balance has decreased by {difference_in_percent:.2f}%."""
-                        self.send_telegram_message(message)
+                        # self.send_telegram_message(message)
 
         return ""
     
