@@ -37,7 +37,7 @@ class MayTapi:
 
         # talk_response = self.talk.get_response(f"""Send the following message, rephrasing it, keep it simple and objective, however, still personal enough to make it look like a real person behind the answers: {payload["message"]}""")
 
-        talk_response = self.talk.get_response({payload["message"]})
+        talk_response = payload["message"]
 
         payload.update({"message": talk_response})
 
