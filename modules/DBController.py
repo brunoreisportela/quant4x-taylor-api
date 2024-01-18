@@ -314,6 +314,47 @@ class DBController:
         self.conn.commit()
 
         cursor.close()
+
+    def add_performance(self, payload):
+        
+        day, month, year, hour, minute = self.get_current_time_details()
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+
+        sql = f"""
+                INSERT INTO public.performance(
+                    account_id, 
+                    day, 
+                    month, 
+                    year, 
+                    hour, 
+                    minute, 
+                    total_bankroll, 
+                    account_bankroll, 
+                    profit_loss)
+                VALUES (
+                    {payload["account_id"]},
+                    {day},
+                    {month},
+                    {year},
+                    {hour},
+                    {minute},
+                    {payload["total_bankroll"]},
+                    {payload["account_bankroll"]},
+                    {payload["profit_loss"]}
+                    );
+                """
+        
+        cursor.execute(sql)
+
+        self.conn.commit()
+
+        cursor.close()
+
+        return {"row_count": cursor.rowcount}
     
     def set_user_code(self, email, code):
 

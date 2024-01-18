@@ -124,6 +124,16 @@ def taylor_says():
     message = request.form["message"]
     return dbController.taylor_says_telegram(message)
 
+@app.route("/add/performance", methods=['POST'])
+def add_performance():
+    token = request.headers.get('Authorization') 
+
+    if token not in valid_tokens:
+        return {"error": "Invalid token"}, 401
+
+    payload = request.form["payload"]
+    return dbController.add_performance(payload)
+
 @app.route("/taylor/answer", methods=['POST'])
 def taylor_get_answer():
     message = request.form["message"]
