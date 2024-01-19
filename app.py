@@ -131,7 +131,7 @@ def add_performance():
     if token not in valid_tokens:
         return {"error": "Invalid token"}, 401
 
-    payload = request.form.get["payload"]
+    payload = request.form["payload"]
     return dbController.add_performance(payload)
 
 @app.route("/daily/performance", methods=['POST'])
