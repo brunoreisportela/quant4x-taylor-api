@@ -327,6 +327,7 @@ class DBController:
         sql = f"""
                 INSERT INTO public.performance(
                     account_id, 
+                    reference_id,
                     day, 
                     month, 
                     year, 
@@ -337,6 +338,7 @@ class DBController:
                     profit_loss)
                 VALUES (
                     {payload["account_id"]},
+                    {payload["reference_id"]},
                     {day},
                     {month},
                     {year},
