@@ -134,6 +134,17 @@ def add_performance():
     payload = request.form["payload"]
     return dbController.add_performance(payload)
 
+@app.route("/daily/performance", methods=['POST'])
+def daily_performance():
+    token = request.headers.get('Authorization') 
+
+    if token not in valid_tokens:
+        return {"error": "Invalid token"}, 401
+    
+    # add the logic to capture and consolidate the daily performance and notify the results.
+
+    return dbController.taylor_get_answer()
+
 @app.route("/taylor/answer", methods=['POST'])
 def taylor_get_answer():
     message = request.form["message"]
