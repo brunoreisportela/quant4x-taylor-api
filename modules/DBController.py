@@ -337,8 +337,8 @@ class DBController:
                     account_bankroll, 
                     profit_loss)
                 VALUES (
-                    {payload["account_id"]},
-                    {payload["reference_id"]},
+                    '{payload["account_id"]}',
+                    '{payload["reference_id"]}',
                     {day},
                     {month},
                     {year},
