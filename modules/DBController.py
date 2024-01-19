@@ -352,7 +352,7 @@ class DBController:
                 UPDATE 
                     SET 
                         update_time='now()',
-                        float_dd_percent='{payload["profit_loss"]}';
+                        profit_loss='{payload["profit_loss"]}';
                 """
         
         cursor.execute(sql)
