@@ -347,7 +347,12 @@ class DBController:
                     {payload["total_bankroll"]},
                     {payload["account_bankroll"]},
                     {payload["profit_loss"]}
-                    );
+                    )
+                ON CONFLICT ON CONSTRAINT performance_pkey DO
+                UPDATE 
+                    SET 
+                        update_time='now()',
+                        float_dd_percent='{payload["profit_loss"]}';
                 """
         
         cursor.execute(sql)
