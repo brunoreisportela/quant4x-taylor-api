@@ -3,6 +3,7 @@ import psycopg2.extras
 import requests
 from datetime import datetime, timedelta
 import simplejson as json
+import uuid 
 
 from modules import Talk
 
@@ -517,6 +518,18 @@ class DBController:
         return kpi
         
     def update_accounts_kpi(self):
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""
+                        SELECT * FROM ai_controller WHERE channel = 'telegram';
+                    """)
+        
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result["is_active"] == False:
+            return ""
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
@@ -596,6 +609,18 @@ class DBController:
 
                         message = f"""📉🔴 The balance has decreased by {difference_in_percent:.2f}%."""
                         # self.send_telegram_message(message)
+
+                    id = uuid.uuid1() 
+
+                    self.add_performance(
+                        {   
+                            "account_id": 1, 
+                            "reference_id": id.node, 
+                            "total_bankroll": week_balance, 
+                            "account_bankroll": week_balance, 
+                            "profit_loss": difference
+                        }
+                    )
 
         return ""
     
