@@ -316,6 +316,22 @@ class DBController:
 
         cursor.close()
 
+    def get_current_day_performance(self):
+        day, month, year, hour, minute = self.get_current_time_details()
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        cursor.execute(f"""SELECT SUM(profit_loss) as profit_loss FROM performance WHERE day = {day} AND month = {month} AND year = {year}""")
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result == None:
+            return 0
+
+        return cursor_result
+
     def add_performance(self, payload):
         
         day, month, year, hour, minute = self.get_current_time_details()
@@ -615,7 +631,7 @@ class DBController:
                     self.add_performance(
                         {   
                             "account_id": 1, 
-                            "reference_id": id.node, 
+                            "reference_id": str(id.node), 
                             "total_bankroll": week_balance, 
                             "account_bankroll": week_balance, 
                             "profit_loss": difference
