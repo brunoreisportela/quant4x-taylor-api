@@ -631,7 +631,7 @@ class DBController:
                     self.add_performance(
                         {   
                             "account_id": 1, 
-                            "reference_id": str(id.node), 
+                            "reference_id": id, 
                             "total_bankroll": week_balance, 
                             "account_bankroll": week_balance, 
                             "profit_loss": difference
