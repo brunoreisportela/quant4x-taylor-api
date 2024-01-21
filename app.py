@@ -145,16 +145,20 @@ def day_performance():
     current_day_performance = dbController.get_current_day_performance()
     
     profit_loss = 0
+    cycle = 0
 
     if "profit_loss" in current_day_performance:
         profit_loss = float(current_day_performance["profit_loss"])
 
+    if "cycle" in current_day_performance:
+        cycle = int(current_day_performance["cycle"])
+
     message = ""
     
     if profit_loss > 0:
-        message = f"📈Today´s result: +{profit_loss}"
+        message = f"📈Accumulated result - Cycle {cycle}: +{profit_loss}"
     elif profit_loss < 0:
-        message = f"📉Today´s result: -{profit_loss}"
+        message = f"📉Accumulated result - Cycle {cycle}: -{profit_loss}"
 
     if message != "":
         dbController.send_telegram_message(message)

@@ -316,12 +316,48 @@ class DBController:
 
         cursor.close()
 
+    def get_week_boundaries(self, current_date):
+        # Parse the current date
+        date_format = "%Y-%m-%d"
+        current_date = datetime.strptime(current_date, date_format)
+
+        # Calculate the Sunday and Friday of the week
+        start_of_week = current_date - timedelta(days=current_date.weekday() + 1)
+        end_of_week = start_of_week + timedelta(days=5)
+
+        # Prepare the JSON output with separated day, month, and year
+        result = {
+            "sunday": {
+                "day": start_of_week.day,
+                "month": start_of_week.month,
+                "year": start_of_week.year
+            },
+            "friday": {
+                "day": end_of_week.day,
+                "month": end_of_week.month,
+                "year": end_of_week.year
+            }
+        }
+
+        return result
+    
     def get_current_day_performance(self):
-        day, month, year, hour, minute = self.get_current_time_details()
+        current_date = datetime.now() # Example current date and time
+        next_date = current_date + timedelta(days=1)
+
+        day = next_date.day
+        month = next_date.month
+        year = next_date.year
+        hour = next_date.hour
+        minute = next_date.minute
+
+        get_week_boundaries = self.get_week_boundaries(f"{year}-{month}-{day}")
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        cursor.execute(f"""SELECT SUM(profit_loss) as profit_loss FROM performance WHERE day = {day} AND month = {month} AND year = {year}""")
+        query = f"""SELECT SUM(profit_loss) as profit_loss, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-08')) / 86400) / 7.0) AS cycle FROM performance WHERE (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle"""
+
+        cursor.execute(query)
 
         cursor_result = cursor.fetchone()
 
