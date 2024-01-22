@@ -341,6 +341,33 @@ class DBController:
 
         return result
     
+    def get_current_day_only_bet_performance(self):
+        current_date = datetime.now() # Example current date and time
+        next_date = current_date + timedelta(days=1)
+
+        day = next_date.day
+        month = next_date.month
+        year = next_date.year
+        hour = next_date.hour
+        minute = next_date.minute
+
+        get_week_boundaries = self.get_week_boundaries(f"{year}-{month}-{day}")
+
+        cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        query = f"""SELECT SUM(profit_loss) as profit_loss, (SELECT account_bankroll FROM performance WHERE account_id = '8' ORDER BY update_time DESC LIMIT 1) AS balance, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.0) AS cycle FROM performance WHERE account_id = '8' AND (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle"""
+
+        cursor.execute(query)
+
+        cursor_result = cursor.fetchone()
+
+        cursor.close()
+
+        if cursor_result == None:
+            return 0
+
+        return cursor_result
+    
     def get_current_day_performance(self):
         current_date = datetime.now() # Example current date and time
         next_date = current_date + timedelta(days=1)
@@ -355,7 +382,7 @@ class DBController:
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        query = f"""SELECT SUM(profit_loss) as profit_loss, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.0) AS cycle FROM performance WHERE (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle"""
+        query = f"""SELECT SUM(profit_loss) as profit_loss, (SELECT account_bankroll FROM performance WHERE account_id = '8' ORDER BY update_time DESC LIMIT 1) AS balance, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.0) AS cycle FROM performance WHERE (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle"""
 
         cursor.execute(query)
 
@@ -1272,6 +1299,21 @@ class DBController:
                     product['profit_loss'] = 0.0
 
         cursor.close()
+
+
+        bet_performance = self.get_current_day_only_bet_performance()
+
+        product = {}
+        product["balance"] = float(bet_performance["balance"])
+        product["drawdown"] = 0
+        product["equity"] = float(bet_performance["balance"])
+        product["id"] = '100100'
+        product["product_name"] = "Montagul"
+        product["trades"] = 0
+        product["profit_loss"] = float(bet_performance["profit_loss"])
+        product["week_start_balance"] =  bet_performance["profit_loss"] + bet_performance["balance"]
+
+        return_object['products'].append(product)
 
         if return_object == None:
             return None
