@@ -156,9 +156,9 @@ def day_performance():
     message = ""
     
     if profit_loss > 0:
-        message = f"📈Accumulated result - Cycle {cycle}: +{profit_loss}"
+        message = f"📈Accumulated result - Cycle {cycle}: +{profit_loss:.2f}"
     elif profit_loss < 0:
-        message = f"📉Accumulated result - Cycle {cycle}: -{profit_loss}"
+        message = f"📉Accumulated result - Cycle {cycle}: -{profit_loss:.2f}"
 
     if message != "":
         dbController.send_telegram_message(message)

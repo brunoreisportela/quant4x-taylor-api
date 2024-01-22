@@ -355,7 +355,7 @@ class DBController:
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        query = f"""SELECT SUM(profit_loss) as profit_loss, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-08')) / 86400) / 7.0) AS cycle FROM performance WHERE (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle"""
+        query = f"""SELECT SUM(profit_loss) as profit_loss, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.0) AS cycle FROM performance WHERE (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle"""
 
         cursor.execute(query)
 
