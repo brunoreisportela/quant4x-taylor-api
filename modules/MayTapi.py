@@ -30,7 +30,7 @@ class MayTapi:
         
         print("webhook ", response.json())
 
-    def sendMessage(self, payload):
+    def send_message(self, payload):
 
         if isinstance(payload, str):
             payload = json.loads(payload)

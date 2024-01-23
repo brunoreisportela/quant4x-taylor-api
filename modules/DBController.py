@@ -4,14 +4,17 @@ import requests
 from datetime import datetime, timedelta
 import simplejson as json
 import uuid 
+import re
 
 from modules import Talk
+from modules import MayTapi
 
 class DBController:
 
     conn = None
 
     talk = Talk()
+    maytapi = MayTapi()
 
     latest_telegram_message_read = ""
 
@@ -20,6 +23,18 @@ class DBController:
     # The Taylor's official chat_id = -1001712753849
     # The Taylor's Group performance report chat_id = -1001755698269
     telegram_chat_id = "-1001712753849"
+
+    def send_whatsapp_message(self, payload):
+        self.maytapi.send_message(payload)
+
+    def standardize_phone_number(self, number):
+        cleaned_number = re.sub(r'(?<!^)\D', '', number)
+
+        # Ensure the number starts with '+'
+        if not cleaned_number.startswith('+'):
+            cleaned_number = '+' + cleaned_number
+
+        return cleaned_number
 
     def dateToString(self, date):
         formatted_date = date.strftime("%d/%m/%Y")
@@ -1240,6 +1255,55 @@ class DBController:
         else:
             return cursor_result
         
+    def send_whatsapp_broadcast(self, current_day_performance):
+        url = "https://reborn.taylor.capital/active-users-with-phone-numbers"
+
+        x = requests.get(url)
+
+        if x.status_code != 200:
+            return x.status_code
+        
+        users = x.json()
+
+        for user in users:
+            
+            if "activePercentage" in user and "phoneNumber" in user and "whatsappTransaction" in user:
+                # if user["whatsappTransaction"] == True:
+                if len(user["phoneNumber"]) > 0:
+                    phone_number = self.standardize_phone_number(user["phoneNumber"])
+                    active_percentage = float(user["activePercentage"])
+                    proportional_profit_loss = round(float(current_day_performance["profit_loss"]) * active_percentage, 2)
+
+                    message = ""
+                    profit_loss = 0
+                    cycle = 0
+
+                    if proportional_profit_loss != 0:
+
+                        if "profit_loss" in current_day_performance:
+                            profit_loss = float(current_day_performance["profit_loss"])
+
+                        if "cycle" in current_day_performance:
+                            cycle = int(current_day_performance["cycle"])
+
+                        if profit_loss > 0:
+                            message = f"📈 Your Accumulated Result - Cycle {cycle}: *+${proportional_profit_loss:.2f}* _Note: This is a preliminary result, subject to change until the end of the cycle._"
+                        elif profit_loss < 0:
+                            message = f"📉Your Accumulated result - Cycle {cycle}: *-${proportional_profit_loss:.2f}* _Note: This is a preliminary result, subject to change until the end of the cycle._"
+
+                        # message_payload = {"to_number": phone_number,"type": "text","message": message}
+                        message_payload = {"to_number": "+14389215001","type": "text","message": message}
+
+                        try:
+                            self.send_whatsapp_message(message_payload)
+                        except Exception as e:
+                            print(e)
+                            print(message_payload)
+                            continue
+
+                    print(proportional_profit_loss)
+
+        return x.status_code   
         
     def get_platform_performance(self, code):        
 

@@ -5,13 +5,11 @@ import json
 from flask import Flask,request,render_template, jsonify
 from flask_cors import CORS
 from datetime import datetime, timedelta
-from modules import MayTapi
 from modules import DBController
 
 app = Flask(__name__)
 CORS(app)
 
-maytapi = MayTapi()
 dbController = DBController()
 
 valid_tokens = {"c5c917655b6d0ax008ssd2d92026f772"}
@@ -117,7 +115,7 @@ def get_percent_performance_code():
 @app.route("/whatsapp/send_message", methods=['POST'])
 def post_whatsapp_send_message():
     payload = request.form["payload"]
-    return maytapi.sendMessage(payload)
+    return dbController.send_whatsapp_message(payload)
 
 @app.route("/taylor/says", methods=['POST'])
 def taylor_says():
@@ -165,6 +163,29 @@ def day_performance():
 
     return current_day_performance
 
+@app.route("/day/performance/whatsapp", methods=['GET'])
+def day_performance_whatsapp():
+    token = request.headers.get('Authorization') 
+
+    if token not in valid_tokens:
+        return {"error": "Invalid token"}, 401
+    
+    current_day_performance = dbController.get_current_day_performance()
+    
+    if "profit_loss" in current_day_performance:
+        current_day_performance["profit_loss"] = float(current_day_performance["profit_loss"])
+    else:
+        current_day_performance["profit_loss"] = 0.0
+
+    if "cycle" in current_day_performance:
+        current_day_performance["cycle"] = int(current_day_performance["cycle"])
+    else:
+        current_day_performance["cycle"] = 0
+
+    dbController.send_whatsapp_broadcast(current_day_performance)
+
+    return current_day_performance
+
 @app.route("/taylor/answer", methods=['POST'])
 def taylor_get_answer():
     message = request.form["message"]
@@ -207,7 +228,7 @@ def webhook():
             body = {"type": "text","message": response_from_ai}
             body.update({"to_number": conversation})
             
-            maytapi.sendMessage(body)
+            dbController.send_whatsapp_message(body)
     else:
         print("Unknow Type:", wttype,  file=sys.stdout, flush=True)
         
