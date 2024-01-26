@@ -1313,11 +1313,9 @@ class DBController:
             'Authorization': 'c5c917655b6d0ax008ssd2d92026f772'
         }
 
-        payload["email"] = "breisportela@gmail.com"
-
         url = "https://prod-taylor-reborn-service-lui32.ondigitalocean.app/send-push-notification"
 
-        x = requests.post(url, json=payload)
+        x = requests.post(url, json=payload, headers=headers)
 
         if x.status_code != 200:
             return x.status_code
