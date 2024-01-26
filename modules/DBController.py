@@ -370,7 +370,7 @@ class DBController:
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        query = f"""SELECT SUM(profit_loss) as profit_loss, (SELECT account_bankroll FROM performance WHERE account_id = '8' ORDER BY update_time DESC LIMIT 1) AS balance, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.0) AS cycle FROM performance WHERE account_id = '8' AND (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle"""
+        query = f"""SELECT SUM(profit_loss) as profit_loss, (SELECT account_bankroll FROM performance WHERE account_id = '8' ORDER BY update_time DESC LIMIT 1) AS balance, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.03) AS cycle FROM performance WHERE account_id = '8' AND (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle"""
 
         cursor.execute(query)
 
@@ -1254,7 +1254,76 @@ class DBController:
             return None
         else:
             return cursor_result
+    
+    def send_push_broadcast(self, current_day_performance):
+        url = "https://prod-taylor-reborn-service-lui32.ondigitalocean.app/active-users-with-push-token"
+
+        x = requests.get(url)
+
+        if x.status_code != 200:
+            return x.status_code
         
+        users = x.json()
+
+        for user in users:
+            
+            if "activePercentage" in user:
+                if float(user["activePercentage"]) > 0:
+                    email = user["email"]
+                    active_percentage = float(user["activePercentage"])
+                    proportional_profit_loss = round(float(current_day_performance["profit_loss"]) * active_percentage, 2)
+
+                    message = ""
+                    profit_loss = 0
+                    cycle = 0
+
+                    if proportional_profit_loss != 0:
+
+                        if "profit_loss" in current_day_performance:
+                            profit_loss = float(current_day_performance["profit_loss"])
+
+                        if "cycle" in current_day_performance:
+                            cycle = int(current_day_performance["cycle"])
+
+                        title = "Float Weekly Result"
+
+                        if profit_loss > 0:
+                            message = f"📈 Your Accumulated Result - Cycle {cycle}: +${proportional_profit_loss:.2f} Note: This is a preliminary result, subject to change until the end of the cycle."
+                        elif profit_loss < 0:
+                            message = f"📉Your Accumulated result - Cycle {cycle}: -${proportional_profit_loss:.2f} Note: This is a preliminary result, subject to change until the end of the cycle."
+
+                        # message_payload = {"to_number": phone_number,"type": "text","message": message}
+                        message_payload = {"title": title,"email": email, "message": message}
+
+                        try:
+                            self.send_push_notification(message_payload)
+                        except Exception as e:
+                            print(e)
+                            print(message_payload)
+                            continue
+
+                    print(proportional_profit_loss)
+
+        return x.status_code
+    
+    def send_push_notification(self, payload):
+
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'c5c917655b6d0ax008ssd2d92026f772'
+        }
+
+        payload["email"] = "breisportela@gmail.com"
+
+        url = "https://prod-taylor-reborn-service-lui32.ondigitalocean.app/send-push-notification"
+
+        x = requests.post(url, json=payload)
+
+        if x.status_code != 200:
+            return x.status_code
+        
+        return x.status_code
+
     def send_whatsapp_broadcast(self, current_day_performance):
         url = "https://reborn.taylor.capital/active-users-with-phone-numbers"
 
@@ -1303,7 +1372,7 @@ class DBController:
 
                     print(proportional_profit_loss)
 
-        return x.status_code   
+        return x.status_code
         
     def get_platform_performance(self, code):        
 

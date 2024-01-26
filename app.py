@@ -163,6 +163,24 @@ def day_performance():
 
     return current_day_performance
 
+@app.route("/day/performance/push", methods=['GET'])
+def day_performance_push():
+    current_day_performance = dbController.get_current_day_performance()
+    
+    if "profit_loss" in current_day_performance:
+        current_day_performance["profit_loss"] = float(current_day_performance["profit_loss"])
+    else:
+        current_day_performance["profit_loss"] = 0.0
+
+    if "cycle" in current_day_performance:
+        current_day_performance["cycle"] = int(current_day_performance["cycle"])
+    else:
+        current_day_performance["cycle"] = 0
+
+    dbController.send_push_broadcast(current_day_performance)
+
+    return current_day_performance
+
 @app.route("/day/performance/whatsapp", methods=['GET'])
 def day_performance_whatsapp():
     token = request.headers.get('Authorization') 
