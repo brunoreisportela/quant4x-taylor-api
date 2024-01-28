@@ -1238,7 +1238,7 @@ class DBController:
 
         cursor.execute(f"""
 
-                        SELECT id, balance, drawdown, week_balance_start, equity, product_name, profit_loss, trades 
+                        SELECT id, balance, drawdown, week_start_balance, equity, product_name, profit_loss, trades 
                         FROM accounts as acc
                         INNER JOIN clients_accounts cli_acc 
                             ON cli_acc.account_id = acc.id
