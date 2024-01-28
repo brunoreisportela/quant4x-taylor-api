@@ -370,7 +370,7 @@ class DBController:
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        query = f"""SELECT SUM(profit_loss) as profit_loss, (SELECT account_bankroll FROM performance WHERE account_id = '8' ORDER BY update_time DESC LIMIT 1) AS balance, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.03) AS cycle FROM performance WHERE account_id = '8' AND (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle ORDER BY cycle DESC LIMIT 1"""
+        query = f"""SELECT SUM(profit_loss) as profit_loss, (SELECT account_bankroll FROM performance WHERE account_id = '8' ORDER BY update_time DESC LIMIT 1) AS balance, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.03) AS cycle FROM performance WHERE account_id = '8' AND (day >= {get_week_boundaries["sunday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle ORDER BY cycle DESC LIMIT 1"""
 
         cursor.execute(query)
 
@@ -397,7 +397,7 @@ class DBController:
 
         cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
-        query = f"""SELECT SUM(profit_loss) as profit_loss, (SELECT account_bankroll FROM performance WHERE account_id = '8' ORDER BY update_time DESC LIMIT 1) AS balance, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.03) AS cycle FROM performance WHERE (day >= {get_week_boundaries["sunday"]["day"]} and day <= {get_week_boundaries["friday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle"""
+        query = f"""SELECT SUM(profit_loss) as profit_loss, (SELECT account_bankroll FROM performance WHERE account_id = '8' ORDER BY update_time DESC LIMIT 1) AS balance, CEIL((EXTRACT(EPOCH FROM AGE(TO_DATE(year || '-' || month || '-' || day, 'YYYY-MM-DD'), DATE '2022-12-01')) / 86400) / 7.03) AS cycle FROM performance WHERE (day >= {get_week_boundaries["sunday"]["day"]}) AND (month >= {get_week_boundaries["sunday"]["month"]} and month <= {get_week_boundaries["friday"]["month"]}) AND (year >= {get_week_boundaries["sunday"]["year"]} and year <= {get_week_boundaries["friday"]["year"]}) group by cycle ORDER BY cycle DESC LIMIT 1"""
 
         cursor.execute(query)
 
@@ -1358,15 +1358,16 @@ class DBController:
                         elif profit_loss < 0:
                             message = f"📉Your Accumulated result - Cycle {cycle}: *-${proportional_profit_loss:.2f}* _Note: This is a preliminary result, subject to change until the end of the cycle._"
 
-                        # message_payload = {"to_number": phone_number,"type": "text","message": message}
-                        message_payload = {"to_number": "+14389215001","type": "text","message": message}
+                        if profit_loss != 0.00:
+                            message_payload = {"to_number": phone_number,"type": "text","message": message}
+                            # message_payload = {"to_number": "+14389215001","type": "text","message": message}
 
-                        try:
-                            self.send_whatsapp_message(message_payload)
-                        except Exception as e:
-                            print(e)
-                            print(message_payload)
-                            continue
+                            try:
+                                self.send_whatsapp_message(message_payload)
+                            except Exception as e:
+                                print(e)
+                                print(message_payload)
+                                continue
 
                     print(proportional_profit_loss)
 
