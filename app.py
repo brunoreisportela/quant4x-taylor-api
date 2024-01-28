@@ -13,6 +13,7 @@ CORS(app)
 dbController = DBController()
 
 valid_tokens = {"c5c917655b6d0ax008ssd2d92026f772"}
+# c5c917655b6d0ax008ssd2d92026f772
 
 @app.route("/")
 def get_service():
