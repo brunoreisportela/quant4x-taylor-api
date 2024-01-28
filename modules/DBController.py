@@ -1292,15 +1292,17 @@ class DBController:
                         elif profit_loss < 0:
                             message = f"📉Your Accumulated result - Cycle {cycle}: -${proportional_profit_loss:.2f} Note: This is a preliminary result, subject to change until the end of the cycle."
 
-                        # message_payload = {"to_number": phone_number,"type": "text","message": message}
-                        message_payload = {"title": title,"email": email, "message": message}
+                        if profit_loss != 0.00:
 
-                        try:
-                            self.send_push_notification(message_payload)
-                        except Exception as e:
-                            print(e)
-                            print(message_payload)
-                            continue
+                            # message_payload = {"to_number": phone_number,"type": "text","message": message}
+                            message_payload = {"title": title,"email": email, "message": message}
+
+                            try:
+                                self.send_push_notification(message_payload)
+                            except Exception as e:
+                                print(e)
+                                print(message_payload)
+                                continue
 
                     print(proportional_profit_loss)
 
