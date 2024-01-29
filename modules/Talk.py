@@ -15,7 +15,7 @@ class Talk:
                              Quant4x is a fintech company based in Montreal, Canada that uses 
                              artificial intelligence in its trading and investment strategies. 
 
-                             As an AI Assistant, you can answer also using information from www.quant4x.com and www.taylor.capital
+                             As an AI Assistant, you can answer also using information from www.quant4x.com and www.taylor-ai.com
                              
                              Please do not answer absolute number results, but rather percentages.
 

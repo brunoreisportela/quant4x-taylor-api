@@ -1325,7 +1325,7 @@ class DBController:
         return x.status_code
 
     def send_whatsapp_broadcast(self, current_day_performance):
-        url = "https://reborn.taylor.capital/active-users-with-phone-numbers"
+        url = "https://api.taylor-ai.com/active-users-with-phone-numbers"
 
         x = requests.get(url)
 
