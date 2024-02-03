@@ -6,6 +6,15 @@ import simplejson as json
 import uuid 
 import re
 
+import time
+import uuid
+import threading
+import queue
+
+# Dictionary to store results
+results = {}
+task_queue = queue.Queue()
+
 from modules import Talk
 from modules import MayTapi
 
@@ -24,8 +33,71 @@ class DBController:
     # The Taylor's Group performance report chat_id = -1001755698269
     telegram_chat_id = "-1001712753849"
 
+    def clean_legacy_results(self):
+        current_time = datetime.now()
+        to_delete = []
+
+        for task_id, result in results.items():
+            # Parse the timestamp from the result
+            timestamp = datetime.strptime(result["updated_at"], "%Y-%m-%d %H:%M:%S")
+            # Calculate the time difference
+            time_diff = current_time - timestamp
+            # Format the time difference (e.g., in minutes)
+            minutes_passed = divmod(time_diff.total_seconds(), 60)[0]
+            
+            if "status" in result:
+                if minutes_passed > 30 and result["status"] != "pending":
+                    to_delete.append(task_id)
+            else:
+                if minutes_passed > 30:
+                    to_delete.append(task_id)
+
+        # Delete the items outside of the iteration loop
+        for task_id in to_delete:
+            del results[task_id]
+
+    def process_tasks(self):
+        
+        self.clean_legacy_results()
+
+        print("process_tasks started")  # Debugging print statement
+        while True:
+            print("Waiting for the next task...")  # Debugging print statement
+            payload, task_id = task_queue.get()
+            print(f"Processing task: {task_id}")  # Debugging print statement
+
+            try:
+                self.maytapi.send_message(payload)
+
+                result = results[task_id]
+                result["status"] = "done"
+                result["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                results[task_id] = result
+                
+            except Exception as e:
+                error_message = "Error processing request: " + str(e)
+
+                result = results[task_id]
+                result["status"] = "error"
+                result["error"] = error_message
+                results[task_id] = result
+
+            finally:
+                # Signal that the task is done
+                print("Task Processed")
+                print("Sleeping....")
+                time.sleep(30)
+                print("Waking up....")
+                task_queue.task_done()
+
     def send_whatsapp_message(self, payload):
-        self.maytapi.send_message(payload)
+        task_id = str(uuid.uuid4())
+        
+        payload["task_id"] = task_id
+        payload["status"] = "pending"
+    
+        results[task_id] = payload
+        task_queue.put((payload, task_id))  # Add the task to the queue
 
     def standardize_phone_number(self, number):
         cleaned_number = re.sub(r'(?<!^)\D', '', number)
@@ -1474,5 +1546,8 @@ class DBController:
                         port="25060")
         
         self.conn.autocommit = True
+
+        task_processor_thread = threading.Thread(target=self.process_tasks, daemon=True)
+        task_processor_thread.start()
 
         super().__init__(*args, **kwargs)
