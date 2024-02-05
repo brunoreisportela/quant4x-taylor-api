@@ -337,7 +337,7 @@ class DBController:
         current_date = datetime.strptime(current_date, date_format)
 
         # Calculate the Sunday and Friday of the week
-        start_of_week = current_date - timedelta(days=current_date.weekday() + 1)
+        start_of_week = current_date - timedelta(days=current_date.weekday() + 2)
         end_of_week = start_of_week + timedelta(days=5)
 
         # Prepare the JSON output with separated day, month, and year
