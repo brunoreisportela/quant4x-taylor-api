@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import requests
 
 from flask import Flask,request,render_template, jsonify
 from flask_cors import CORS
@@ -136,11 +137,23 @@ def add_performance():
 
 @app.route("/day/performance", methods=['GET'])
 def day_performance():
+
     token = request.headers.get('Authorization') 
 
     if token not in valid_tokens:
         return {"error": "Invalid token"}, 401
     
+    url = f"https://api.taylor-ai.com/product-state"
+
+    response = requests.get(url)
+
+    response_json = response.json()
+
+    if "totalInvestedActive" not in response_json:
+        return ""
+
+    total_invested_active = float(response_json["totalInvestedActive"])
+
     current_day_performance = dbController.get_current_day_performance()
     
     profit_loss = 0
@@ -152,12 +165,14 @@ def day_performance():
     if "cycle" in current_day_performance:
         cycle = int(current_day_performance["cycle"])
 
+    percent = (profit_loss/total_invested_active)*100
+
     message = ""
     
     if profit_loss > 0:
-        message = f"📈Accumulated result - Cycle {cycle}: +${profit_loss:.2f}"
+        message = f"📈Accumulated result - Cycle {cycle}: +{percent:.2f}%"
     elif profit_loss < 0:
-        message = f"📉Accumulated result - Cycle {cycle}: -${profit_loss:.2f}"
+        message = f"📉Accumulated result - Cycle {cycle}: -${percent:.2f}%"
 
     if message != "":
         dbController.send_telegram_message(message)
