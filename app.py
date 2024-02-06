@@ -165,7 +165,8 @@ def day_performance():
     if "cycle" in current_day_performance:
         cycle = int(current_day_performance["cycle"])
 
-    percent = (profit_loss/total_invested_active)*100
+    # 15% of the profit = 85% of the total
+    percent = ((profit_loss/total_invested_active)*100)*0.85
 
     message = ""
     
