@@ -14,6 +14,37 @@ from datetime import datetime, timedelta
 conn = None
 cursor = None
 
+def get_week_boundaries(current_date):
+    # Parse the current date
+    date_format = "%Y-%m-%d"
+    current_date = datetime.strptime(current_date, date_format)
+
+    # Calculate the Sunday and Friday of the week
+    start_of_week = current_date - timedelta(days=current_date.weekday() + 2)
+    end_of_week = start_of_week + timedelta(days=5)
+
+    # Format the start and end of the week for PostgreSQL timestamp without timezone
+    start_of_week_str = start_of_week.strftime("%Y-%m-%d %H:%M:%S")
+    end_of_week_str = end_of_week.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Prepare the JSON output with separated day, month, and year
+    result = {
+        "sunday": {
+            "day": start_of_week.day,
+            "month": start_of_week.month,
+            "year": start_of_week.year,
+            "timestamp": start_of_week_str
+        },
+        "friday": {
+            "day": end_of_week.day,
+            "month": end_of_week.month,
+            "year": end_of_week.year,
+            "timestamp": end_of_week_str 
+        }
+    }
+
+    return result
+
 def plot_performance():
     # Fetch the data
     df = get_performance_data()
@@ -73,9 +104,19 @@ def plot_performance():
     plt.show()
 
 def get_performance_data():
+    current_date = datetime.now() # Example current date and time
+    next_date = current_date + timedelta(days=1)
+
+    day = next_date.day
+    month = next_date.month
+    year = next_date.year
+    hour = next_date.hour
+    minute = next_date.minute
+
+    week_boundaries = get_week_boundaries(f"{year}-{month}-{day}")
 
     sql = f"""
-                SELECT * FROM platform_performance;  
+                SELECT * FROM platform_performance WHERE created_at >= '{week_boundaries['sunday']['timestamp']}' AND created_at <= '{week_boundaries['friday']['timestamp']}'
           """
     
     cursor.execute(sql)

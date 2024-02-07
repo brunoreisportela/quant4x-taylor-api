@@ -468,17 +468,23 @@ class DBController:
         start_of_week = current_date - timedelta(days=current_date.weekday() + 2)
         end_of_week = start_of_week + timedelta(days=5)
 
+        # Format the start and end of the week for PostgreSQL timestamp without timezone
+        start_of_week_str = start_of_week.strftime("%Y-%m-%d %H:%M:%S")
+        end_of_week_str = end_of_week.strftime("%Y-%m-%d %H:%M:%S")
+
         # Prepare the JSON output with separated day, month, and year
         result = {
             "sunday": {
                 "day": start_of_week.day,
                 "month": start_of_week.month,
-                "year": start_of_week.year
+                "year": start_of_week.year,
+                "timestamp": start_of_week_str
             },
             "friday": {
                 "day": end_of_week.day,
                 "month": end_of_week.month,
-                "year": end_of_week.year
+                "year": end_of_week.year,
+                "timestamp": end_of_week_str 
             }
         }
 
