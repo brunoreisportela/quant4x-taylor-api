@@ -171,7 +171,7 @@ def day_performance():
     message = ""
     
     if profit_loss > 0:
-        message = f"📈Accumulated result - Cycle {cycle}: +{percent:.2f}%"
+        message = f"📈Accumulated result - Cycle {cycle}: +{percent:.2f}%."
     elif profit_loss < 0:
         message = f"📉Accumulated result - Cycle {cycle}: -${percent:.2f}%"
 
