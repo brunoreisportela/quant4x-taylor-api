@@ -14,6 +14,11 @@ from datetime import datetime, timedelta
 conn = None
 cursor = None
 
+fig, axes = None, None
+
+# Enable interactive mode
+plt.ion()
+
 def get_week_boundaries(current_date):
     # Parse the current date
     date_format = "%Y-%m-%d"
@@ -46,64 +51,75 @@ def get_week_boundaries(current_date):
     return result
 
 def plot_performance():
-    # Fetch the data
-    df = get_performance_data()
+    global fig, axes
 
-    # RADAR
-    radar_df = df.groupby('product_name').agg({'profit_loss': 'mean', 'drawdown': 'mean'}).reset_index()
-    # Number of variable
-    categories = list(radar_df)[1:]  # ['profit_loss', 'drawdown']
-    N = len(categories)
-    # What will be the angle of each axis in the plot? (we divide the plot / number of variable)
-    angles = [n / float(N) * 2 * pi for n in range(N)]
-    angles += angles[:1]  # Complete the loop
-    # END RADAR
-    
-    # Convert 'created_at' to datetime
-    df['created_at'] = pd.to_datetime(df['created_at'])
+    # Check if fig and axes are already initialized
+    if fig is None or axes is None:
+        # Create figure and axes if they don't exist
+        fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(21, 6), sharex='col')
+    else:
+        # Clear existing axes for update
+        for ax in axes:
+            ax.clear()
 
-    # Convert 'profit_loss' and 'drawdown' to numeric, handling NaNs
-    df['profit_loss'] = pd.to_numeric(df['profit_loss'], errors='coerce').fillna(0)
-    df['drawdown'] = pd.to_numeric(df['drawdown'], errors='coerce').fillna(0)
+    try:
+        df = get_performance_data()
+    except Exception as e:
+        print(f"Error fetching data: {e}")
+        return
 
-    # Sort by 'created_at' for chronological plotting
-    df.sort_values('created_at', inplace=True)
-    
-    # Adjust the subplot grid to 1 row, 3 columns
-    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(21, 6), sharex='col')
+    try: 
+        # Convert 'created_at' to datetime
+        df['created_at'] = pd.to_datetime(df['created_at'])
 
-    # Plot Profit/Loss and Drawdown over time for each product
-    unique_products = df['product_name'].unique()
-    for product in unique_products:
-        product_df = df[df['product_name'] == product]
-        axes[0].plot(product_df['created_at'], product_df['profit_loss'], label=product)
-        axes[1].plot(product_df['created_at'], product_df['drawdown'], label=product)
+        # Convert 'profit_loss' and 'drawdown' to numeric, handling NaNs
+        df['profit_loss'] = pd.to_numeric(df['profit_loss'], errors='coerce').fillna(0)
+        df['drawdown'] = pd.to_numeric(df['drawdown'], errors='coerce').fillna(0)
 
-    # Set titles and labels for the first two plots
-    axes[0].set_title('Profit/Loss by Product Name over Time')
-    axes[0].set_xlabel('Date')
-    axes[0].set_ylabel('Profit/Loss')
-    axes[0].legend(loc="best")
-    
-    axes[1].set_title('Drawdown by Product Name over Time')
-    axes[1].set_xlabel('Date')
-    axes[1].set_ylabel('Drawdown')
-    axes[1].legend(loc="best")
-    
-    # Plot histogram of drawdowns grouped by product name in the third subplot
-    for product in unique_products:
-        product_df = df[df['product_name'] == product]
-        axes[2].hist(product_df['drawdown'], label=product, alpha=0.5, bins=20)
+        # Sort by 'created_at' for chronological plotting
+        df.sort_values('created_at', inplace=True)
 
-    axes[2].set_title('Histogram of Drawdowns by Product Name')
-    axes[2].set_xlabel('Drawdown')
-    axes[2].set_ylabel('Frequency')
-    axes[2].legend(loc="best")
-    
-    plt.tight_layout()
-    plt.show()
+        # Plot Profit/Loss and Drawdown over time for each product
+        unique_products = df['product_name'].unique()
+        for product in unique_products:
+            product_df = df[df['product_name'] == product]
+            axes[0].plot(product_df['created_at'], product_df['profit_loss'], label=product)
+            axes[1].plot(product_df['created_at'], product_df['drawdown'], label=product)
+
+        # Set titles and labels for the first two plots
+        axes[0].set_title('Profit/Loss by Product Name over Time')
+        axes[0].set_xlabel('Date')
+        axes[0].set_ylabel('Profit/Loss')
+        axes[0].legend(loc="best")
+        
+        axes[1].set_title('Drawdown by Product Name over Time')
+        axes[1].set_xlabel('Date')
+        axes[1].set_ylabel('Drawdown')
+        axes[1].legend(loc="best")
+        
+        # Plot histogram of drawdowns grouped by product name in the third subplot
+        for product in unique_products:
+            product_df = df[df['product_name'] == product]
+            axes[2].hist(product_df['drawdown'], label=product, alpha=0.5, bins=20)
+
+        axes[2].set_title('Histogram of Drawdowns by Product Name')
+        axes[2].set_xlabel('Drawdown')
+        axes[2].set_ylabel('Frequency')
+        axes[2].legend(loc="best")
+        
+        plt.tight_layout()
+        # plt.show()
+
+        plt.draw()
+        plt.pause(0.00001)  # Pause briefly to allow plot to be drawn
+
+    except Exception as e:
+        print(f"Error during plotting: {e}")
 
 def get_performance_data():
+    # Initialize connection and cursor within the function
+    global conn,cursor  # Ensure conn is accessible
+
     current_date = datetime.now() # Example current date and time
     next_date = current_date + timedelta(days=1)
 
@@ -123,43 +139,46 @@ def get_performance_data():
 
     data = cursor.fetchall()
 
-    cursor.close()
+    # cursor.close()
 
     # Replace 'column_names_here' with your actual column names
     columns = ['ID', 'product_name', 'updated_at', 'created_at', 'profit_loss', 'equity', 'year', 'month', 'day', 'drawdown']
+   
     df = pd.DataFrame(data, columns=columns)
     
     return df
 
 if __name__ == "__main__":
 
-    if conn == None:
-
+    try:
         conn = psycopg2.connect(database="defaultdb",
-                        host="quant4x-admin-database-do-user-3044858-0.b.db.ondigitalocean.com",
-                        user="doadmin",
-                        password="AVNS_KmHOAPDB_osaTG-XvN9",
-                        port="25060")
-        
+                                host="quant4x-admin-database-do-user-3044858-0.b.db.ondigitalocean.com",
+                                user="doadmin",
+                                password="AVNS_KmHOAPDB_osaTG-XvN9",
+                                port="25060")
         conn.autocommit = True
 
-    # to test
-    # read_file("track_taylor.txt")
-    # pass
-
-    cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
-    try:
-        plot_performance()
-    except Exception as e:
-        print(f"APP FAILED - {e}")
-        # create_app()
-    except KeyboardInterrupt:
-        print("Program finished by user.")
-    pass
-
-    if conn != None:
-        conn.close()
+        if conn is None:
+            print("Failed to connect to the database.")
+        else:
+            print("Database connection established successfully.")
         
+        cursor = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+        while True:
+            try:
+                plot_performance()  # Ensure this function uses a freshly created cursor each time
+                print("Plot updated at:", datetime.now())
+                time.sleep(1800)  # 30 minutes
+                # time.sleep(10)  # 30 minutes
+            except Exception as e:
+                print(f"Error updating plot - {e}")
+            except KeyboardInterrupt:
+                print("Program terminated by user.")
+                break
+    finally:
+        if conn is not None:
+            conn.close()
+            print("Database connection closed.")
 
     
