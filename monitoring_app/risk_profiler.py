@@ -111,7 +111,7 @@ def plot_performance():
         # plt.show()
 
         plt.draw()
-        plt.pause(0.00001)  # Pause briefly to allow plot to be drawn
+        plt.pause(1800)  # Pause briefly to allow plot to be drawn
 
     except Exception as e:
         print(f"Error during plotting: {e}")
@@ -169,7 +169,7 @@ if __name__ == "__main__":
             try:
                 plot_performance()  # Ensure this function uses a freshly created cursor each time
                 print("Plot updated at:", datetime.now())
-                time.sleep(1800)  # 30 minutes
+                # time.sleep(1800)  # 30 minutes
                 # time.sleep(10)  # 30 minutes
             except Exception as e:
                 print(f"Error updating plot - {e}")
