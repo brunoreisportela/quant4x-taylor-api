@@ -1573,13 +1573,13 @@ class DBController:
 
         product = {}
         product["balance"] = float(bet_performance["balance"])
-        product["drawdown"] = 0
+        product["drawdown"] = float(bet_performance["profit_loss"])
         product["equity"] = float(bet_performance["balance"])
         product["id"] = '100100'
         product["product_name"] = "Montagul"
         product["trades"] = 0
         product["profit_loss"] = float(bet_performance["profit_loss"])
-        product["week_start_balance"] =  bet_performance["profit_loss"] + bet_performance["balance"]
+        product["week_start_balance"] =  bet_performance["profit_loss"] - bet_performance["balance"]
 
         return_object['products'].append(product)
 
