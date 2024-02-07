@@ -61,6 +61,10 @@ def get_bot_message_from_group():
 def get_platform_performance():
     return dbController.get_platform_performance(1)
 
+@app.route("/platform/performance/kpi", methods=['GET'])
+def set_platform_performance_KPI():
+    return dbController.set_platform_performance_KPI()
+
 @app.route("/update/accounts/kpi", methods=['GET'])
 def update_accounts_kpi():
     return dbController.update_accounts_kpi()

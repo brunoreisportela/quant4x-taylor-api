@@ -362,6 +362,60 @@ class DBController:
             minute = 45
 
         return day, month, year, hour, minute
+    
+    def set_platform_performance_KPI(self):
+        
+        performance_info = self.get_platform_performance(1)
+
+        if "products" not in performance_info:
+            return {"error": "No products found"}
+        
+        for product in performance_info["products"]:
+
+            day, month, year, hour, minute = self.get_current_time_details()
+
+            cursor = self.conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
+
+            sql = f"""
+                    INSERT INTO public.platform_performance(
+                        id, 
+                        product_name, 
+                        drawdown, 
+                        equity, 
+                        trades, 
+                        week_start_balance,
+                        day, 
+                        month, 
+                        year, 
+                        hour, 
+                        minute)
+                    VALUES (
+                        {product["id"]}, 
+                        '{product["product_name"]}',
+                        {float(product["drawdown"])}, 
+                        {float(product["equity"])}, 
+                        {product["trades"]}, 
+                        {float(product["week_start_balance"])},
+                        {day}, 
+                        {month}, 
+                        {year}, 
+                        {hour}, 
+                        {minute}
+                    )
+                    ON CONFLICT ON CONSTRAINT platform_performance_pkey DO
+                    UPDATE 
+                        SET 
+                            updated_at='now()',
+                            drawdown='{product["drawdown"]}';
+                    """
+            
+            cursor.execute(sql)
+
+            self.conn.commit()
+
+            cursor.close()
+
+        return performance_info
 
     def set_cluster_KPI(self, cluster_info):
         
