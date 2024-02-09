@@ -132,7 +132,7 @@ def get_performance_data():
     week_boundaries = get_week_boundaries(f"{year}-{month}-{day}")
 
     sql = f"""
-                SELECT * FROM platform_performance WHERE created_at >= '{week_boundaries['sunday']['timestamp']}' AND created_at <= '{week_boundaries['friday']['timestamp']}'
+                SELECT * FROM platform_performance WHERE created_at >= '{week_boundaries['sunday']['timestamp']}'
           """
     
     cursor.execute(sql)
