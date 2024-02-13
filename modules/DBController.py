@@ -10,6 +10,7 @@ import time
 import uuid
 import threading
 import queue
+import random
 
 # Dictionary to store results
 results = {}
@@ -67,7 +68,7 @@ class DBController:
             print(f"Processing task: {task_id}")  # Debugging print statement
 
             try:
-                self.maytapi.send_message(payload)
+                self.send_whatsapp_via_api(payload)
 
                 result = results[task_id]
                 result["status"] = "done"
@@ -86,7 +87,7 @@ class DBController:
                 # Signal that the task is done
                 print("Task Processed")
                 print("Sleeping....")
-                time.sleep(30)
+                time.sleep(random.randint(3, 9))
                 print("Waking up....")
                 task_queue.task_done()
 
@@ -1457,6 +1458,13 @@ class DBController:
             return x.status_code
         
         return x.status_code
+    
+    def send_whatsapp_via_api(self, payload):
+        url = "https://api.taylor-ai.com/whatsapp/send-message"
+
+        x = requests.post(url, json=payload)
+
+        return x.status_code
 
     def send_whatsapp_broadcast(self, current_day_performance):
         url = "https://api.taylor-ai.com/active-users-with-phone-numbers"
@@ -1495,7 +1503,7 @@ class DBController:
                             message = f"📉Your Accumulated result - Cycle {cycle}: *-${proportional_profit_loss:.2f}* _Note: This is a preliminary result, subject to change until the end of the cycle._"
 
                         if profit_loss != 0.00:
-                            message_payload = {"to_number": phone_number,"type": "text","message": message}
+                            message_payload = {"phoneNumber": phone_number,"type": "text","message": message}
                             # message_payload = {"to_number": "+14389215001","type": "text","message": message}
 
                             try:
