@@ -1586,8 +1586,8 @@ class DBController:
         product["id"] = '100100'
         product["product_name"] = "Montagul"
         product["trades"] = 0
-        # product["profit_loss"] = float(bet_performance["profit_loss"])
-        product["profit_loss"] = 0.0
+        product["profit_loss"] = float(bet_performance["profit_loss"])
+        # product["profit_loss"] = 0.0
         product["week_start_balance"] =  bet_performance["profit_loss"] - bet_performance["balance"]
 
         return_object['products'].append(product)
