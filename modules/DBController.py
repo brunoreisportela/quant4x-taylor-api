@@ -1576,23 +1576,23 @@ class DBController:
 
         cursor.close()
 
-
         bet_performance = self.get_current_day_only_bet_performance()
 
-        print(bet_performance)
+        print("BET PERFORMANCE: ", bet_performance)
 
-        product = {}
-        product["balance"] = float(bet_performance["balance"])
-        product["drawdown"] = float(bet_performance["profit_loss"])
-        product["equity"] = float(bet_performance["balance"])
-        product["id"] = '100100'
-        product["product_name"] = "Montagul"
-        product["trades"] = 0
-        product["profit_loss"] = float(bet_performance["profit_loss"])
-        # product["profit_loss"] = 0.0
-        product["week_start_balance"] =  bet_performance["profit_loss"] - bet_performance["balance"]
+        if isinstance(bet_performance, int):
+            product = {}
+            product["balance"] = float(bet_performance["balance"])
+            product["drawdown"] = float(bet_performance["profit_loss"])
+            product["equity"] = float(bet_performance["balance"])
+            product["id"] = '100100'
+            product["product_name"] = "Montagul"
+            product["trades"] = 0
+            product["profit_loss"] = float(bet_performance["profit_loss"])
+            # product["profit_loss"] = 0.0
+            product["week_start_balance"] =  bet_performance["profit_loss"] - bet_performance["balance"]
 
-        return_object['products'].append(product)
+            return_object['products'].append(product)
 
         if return_object == None:
             return None
