@@ -1579,6 +1579,8 @@ class DBController:
 
         bet_performance = self.get_current_day_only_bet_performance()
 
+        print(bet_performance)
+
         product = {}
         product["balance"] = float(bet_performance["balance"])
         product["drawdown"] = float(bet_performance["profit_loss"])
