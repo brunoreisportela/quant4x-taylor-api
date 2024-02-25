@@ -1580,7 +1580,7 @@ class DBController:
 
         print("BET PERFORMANCE: ", bet_performance)
 
-        if isinstance(bet_performance, int):
+        if isinstance(bet_performance, dict) and len(bet_performance) > 0:
             product = {}
             product["balance"] = float(bet_performance["balance"])
             product["drawdown"] = float(bet_performance["profit_loss"])
