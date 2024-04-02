@@ -7,17 +7,17 @@ from tabulate import tabulate
 from datetime import datetime
 from colorama import Fore, Back, Style
 
-from modules_hive.DBController import DBController
-from modules_taylor import DBController as DBControllerModules
+from modules.DBController import DBController
+from modules.SimilarityUtils import *
+from modules.Structs import *
+from modules.ConvertionUtils import *
+from modules.ScreenUtils import *
 
-from modules_hive.SimilarityUtils import *
-from modules_hive.Structs import *
-from modules_hive.ConvertionUtils import *
-from modules_hive.ScreenUtils import *
+from modules_taylor import DBController as DBControllerModules
 
 colorama.init(autoreset=True)
 
-class TraylorService:
+class TaylorService:
 
     db_controller = DBController()
     db_controller_modules = DBControllerModules()
@@ -207,8 +207,7 @@ class TraylorService:
 if __name__ == "__main__":
     print(Fore.LIGHTYELLOW_EX+"Application Opened")
 
-    # ScreenUtils()
-    BetService()
+    TaylorService()
     
     print(Fore.LIGHTYELLOW_EX+"Trigering Interval Before Close Application - 300 seconds")
     time.sleep(300)

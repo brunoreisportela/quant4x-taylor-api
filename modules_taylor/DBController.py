@@ -16,8 +16,8 @@ import random
 results = {}
 task_queue = queue.Queue()
 
-from modules import Talk
-from modules import MayTapi
+from modules_taylor import Talk
+from modules_taylor import MayTapi
 
 class DBController:
 

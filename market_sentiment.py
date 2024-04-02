@@ -9,7 +9,7 @@ import time
 
 from bs4 import BeautifulSoup
 
-from modules import DBController
+from modules_taylor import DBController
 
 dbController = DBController()
 
