@@ -42,3 +42,4 @@ tradingview_ta
 bs4
 pandas
 matplotlib
+tabulate
