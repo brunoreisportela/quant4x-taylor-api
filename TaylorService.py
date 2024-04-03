@@ -111,4 +111,4 @@ if __name__ == "__main__":
     TaylorService()
     
     print(Fore.LIGHTYELLOW_EX+"Trigering Interval Before Close Application - 300 seconds")
-    time.sleep(600)
+    time.sleep(900)
