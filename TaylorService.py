@@ -54,7 +54,7 @@ class TaylorService:
             print(f"{Fore.LIGHTRED_EX}Error {response.status_code}: {response.text}")
 
     def load_waiting_tasks(self):
-        
+        print(Fore.LIGHTGREEN_EX+"Checking tasks")
         waiting_tasks = self.db_controller.get_waiting_tasks_collection(ProcessorType.PROMPT_INVESTMENT_CREW.value)
 
         if len(waiting_tasks) > 0:
@@ -64,6 +64,8 @@ class TaylorService:
 
                     if "pair" in answer_json and "sentiment" in answer_json:
                         pair = str(answer_json["pair"]).replace("/","")
+                        pair = str(answer_json["pair"]).replace("\\","")
+                        pair = str(answer_json["pair"]).replace("\\/","")
                         pair = pair.upper()
 
                         sentiment = str(answer_json["sentiment"]).lower()
@@ -75,6 +77,8 @@ class TaylorService:
 
                         task["collected_status"] = StatusType.COLLECTED.value
                         self.db_controller.update_task(task)
+
+                        print(Fore.LIGHTYELLOW_EX+f"Collected: {pair} - {sentiment}")
 
                 except Exception as e:
                     task["collected_status"] = StatusType.COLLECTED.value
@@ -101,7 +105,17 @@ class TaylorService:
         super().__init__(*args, **kwargs)
         
         self.sync_symbols_to_predict()
-        time.sleep(1)
+        time.sleep(300)
+        self.load_waiting_tasks()
+        time.sleep(300)
+        self.load_waiting_tasks()
+        time.sleep(300)
+        self.load_waiting_tasks()
+        time.sleep(300)
+        self.load_waiting_tasks()
+        time.sleep(300)
+        self.load_waiting_tasks()
+        time.sleep(300)
         self.load_waiting_tasks()
         time.sleep(1)
 
@@ -111,4 +125,4 @@ if __name__ == "__main__":
     TaylorService()
     
     print(Fore.LIGHTYELLOW_EX+"Trigering Interval Before Close Application - 300 seconds")
-    time.sleep(3600)
+    time.sleep(1800)
