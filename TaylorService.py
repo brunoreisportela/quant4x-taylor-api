@@ -60,25 +60,22 @@ class TaylorService:
         if len(waiting_tasks) > 0:
             for task in waiting_tasks:
                 try:
-                    answer_json = ConvertionUtils.string_to_json( ConvertionUtils.string_to_json( task["answer"] ))
+                    answer_json = ConvertionUtils.string_to_json( task["answer"] )
 
-                    if "pair" in answer_json and "sentiment" in answer_json:
-                        pair = str(answer_json["pair"]).replace("/","")
-                        pair = str(answer_json["pair"]).replace("\\","")
-                        pair = str(answer_json["pair"]).replace("\\/","")
-                        pair = pair.upper()
+                    if "symbol" in answer_json and "market_sentiment" in answer_json:
+                        symbol = answer_json["symbol"].upper()
 
-                        sentiment = str(answer_json["sentiment"]).lower()
+                        market_sentiment = str(answer_json["market_sentiment"]).lower()
 
-                        if sentiment != "bullish" and sentiment != "bearish":
-                            sentiment = "mixed"
+                        if market_sentiment != "bullish" and market_sentiment != "bearish":
+                            market_sentiment = "mixed"
 
-                        self.db_controller_modules.save_sentiment_pair(pair, sentiment)
+                        self.db_controller_modules.save_sentiment_pair(symbol, market_sentiment)
 
                         task["collected_status"] = StatusType.COLLECTED.value
                         self.db_controller.update_task(task)
 
-                        print(Fore.LIGHTYELLOW_EX+f"Collected: {pair} - {sentiment}")
+                        print(Fore.LIGHTYELLOW_EX+f"Collected: {symbol} - {market_sentiment}")
 
                 except Exception as e:
                     task["collected_status"] = StatusType.COLLECTED.value
@@ -88,7 +85,7 @@ class TaylorService:
         return waiting_tasks
     
     def sync_symbols_to_predict(self):
-        list_to_predict = ["GBPUSD", "EURUSD", "USDJPY", "USDCAD", "GOLD", "SP500"]
+        list_to_predict = ["GBPUSD", "EURUSD", "USDJPY", "USDCAD", "GOLD"]
 
         for symbol in list_to_predict:
             
@@ -105,19 +102,18 @@ class TaylorService:
         super().__init__(*args, **kwargs)
         
         self.sync_symbols_to_predict()
-        time.sleep(300)
+        time.sleep(600)
         self.load_waiting_tasks()
-        time.sleep(300)
+        time.sleep(600)
         self.load_waiting_tasks()
-        time.sleep(300)
+        time.sleep(600)
         self.load_waiting_tasks()
-        time.sleep(300)
+        time.sleep(600)
         self.load_waiting_tasks()
-        time.sleep(300)
+        time.sleep(600)
         self.load_waiting_tasks()
-        time.sleep(300)
+        time.sleep(600)
         self.load_waiting_tasks()
-        time.sleep(1)
 
 if __name__ == "__main__":
     print(Fore.LIGHTYELLOW_EX+"Application Opened")
@@ -125,4 +121,4 @@ if __name__ == "__main__":
     TaylorService()
     
     print(Fore.LIGHTYELLOW_EX+"Trigering Interval Before Close Application - 300 seconds")
-    time.sleep(1800)
+    time.sleep(3600)

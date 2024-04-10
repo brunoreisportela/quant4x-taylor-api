@@ -9,7 +9,7 @@ from .ConvertionUtils import *
 class DBController:
 
     db = None
-    connection_string = 'postgresql://doadmin:AVNS_KmHOAPDB_osaTG-XvN9@botbetiq-pg-prod-do-user-3044858-0.c.db.ondigitalocean.com:25060/hive?sslmode=require'
+    connection_string = 'postgresql://doadmin:AVNS_m8HfG6vH25KxQ9aeYGh@hive-db-do-user-8774571-0.c.db.ondigitalocean.com:25060/defaultdb?sslmode=require'
 
     def __init__(self):
         self.db = psycopg2.connect(self.connection_string)
