@@ -120,7 +120,7 @@ if __name__ == "__main__":
         pair = sentiment_pair["pair"]
         sentiment_info = get_url_data(f"https://www.tradingview.com/symbols/{pair}/technicals/")
 
-        prompt = f"""Considering the current economic indicators, what is the current sentiment for the pair {sentiment_pair["pair"]}?  Please answer with the pattern {{ \"pair\":\"pair_symbol\",  \"sentiment\": \"bullish_or_mixed_or_bearish\" }}. This is the information available: {sentiment_info}."""
+        prompt = f"""Considering the current economic indicators or news available, what is the current sentiment for the pair {sentiment_pair["pair"]}?  Please answer with the pattern {{ \"pair\":\"pair_symbol\",  \"sentiment\": \"bullish_or_mixed_or_bearish\" }}. This is the information available: {sentiment_info}."""
 
         try:
 
