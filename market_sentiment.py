@@ -33,31 +33,25 @@ def get_url_data(url):
     return json_
 
 def convert_html_to_json(url, html):
-    # Parse the HTML
+
     soup = BeautifulSoup(html, 'html.parser')
-
-    content = dict()
     
-    # Extract the JSON data
-    pre = soup.find('body')
+    indicators = []
 
-    content["url"] = url
-    content["tile"] = soup.title.string
-    # content["html"] = soup.find('body').prettify()
-
-    pattern = re.compile('tv-widget-idea__description-row')
-
-    # Find all elements with a class that matches the pattern
-    content["ideas_and_timeline"] = []
-
-    elements = soup.find_all(class_=pattern)
+    elements = soup.find_all('tr')
 
     # Process or print the elements
     for element in elements:
-        content["ideas_and_timeline"].append(element.text.replace("\n","").replace("\t","").replace("\r","").strip())
-    # You can process each element as per your requirement here
+        element_item = {}
+        
+        if len(element.contents) > 2:
+            element_item["indicator"] = element.contents[0].text
 
-    json_ = json.dumps(content)
+            if element.contents[2].text == "Buy" or element.contents[2].text == "Strong Buy" or element.contents[2].text == "Sell" or element.contents[2].text == "Strong Sell" or element.contents[2].text == "Neutral":
+                element_item["action"] = element.contents[2].text
+                indicators.append(element_item)
+
+    json_ = json.dumps(indicators)
 
     return json_
 
@@ -122,12 +116,11 @@ if __name__ == "__main__":
     sentiment_pairs = dbController.get_sentiment_pairs()
 
     for sentiment_pair in sentiment_pairs:
+        
+        pair = sentiment_pair["pair"]
+        sentiment_info = get_url_data(f"https://www.tradingview.com/symbols/{pair}/technicals/")
 
-        # sentiment_info = get_url_data(f"https://www.tradingview.com/symbols/{sentiment_pair["pair"]}/technicals/")
-        # sentiment_info = get_url_data(f"https://www.tradingview.com/symbols/{sentiment_pair["pair"]}/")
-        sentiment_info = get_url_data(f"https://www.tradingview.com/symbols/{sentiment_pair["pair"]}/ideas/")
-
-        prompt = f"""Considering the current economic indicators or news available, what is the current sentiment for the pair {sentiment_pair["pair"]}?  Please answer with the pattern {{ \"pair\":\"pair_symbol\",  \"sentiment\": \"bullish_or_mixed_or_bearish\" }}. This is the information available: {sentiment_info}."""
+        prompt = f"""Considering the current economic indicators, what is the current sentiment for the pair {sentiment_pair["pair"]}?  Please answer with the pattern {{ \"pair\":\"pair_symbol\",  \"sentiment\": \"bullish_or_mixed_or_bearish\" }}. This is the information available: {sentiment_info}."""
 
         try:
 
