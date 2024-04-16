@@ -85,7 +85,8 @@ class TaylorService:
                 except Exception as e:
                     task["collected_status"] = StatusType.COLLECTED.value
                     self.db_controller.update_task(task)
-                    print(f"{Fore.LIGHTRED_EX}Error: {e}")
+                    
+                    print(f"{Fore.LIGHTRED_EX}Error: {str(e)}")
         
         return waiting_tasks
     
