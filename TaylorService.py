@@ -62,30 +62,38 @@ class TaylorService:
         if len(waiting_tasks) > 0:
             for task in waiting_tasks:
                 try:
+                    if "prompt" not in task or "answer" not in task:
+                        break
+
                     prompt = task["prompt"]
+
+                    if ConvertionUtils.is_valid_json_string( task["answer"] ) == False:
+                        self.db_controller_modules.save_sentiment_pair(prompt, "mixed")
+                        task["collected_status"] = StatusType.COLLECTED.value
+                        self.db_controller.update_task(task)
+                        break
+
                     answer_json = ConvertionUtils.string_to_json( task["answer"] )
 
-                    if "symbol" in answer_json and "market_sentiment" in answer_json:
-                        symbol = answer_json["symbol"].upper()
+                    if "market_sentiment" in answer_json:
 
                         market_sentiment = str(answer_json["market_sentiment"]).lower()
 
                         if market_sentiment != "bullish" and market_sentiment != "bearish":
                             market_sentiment = "mixed"
 
-                        self.db_controller_modules.save_sentiment_pair(symbol, market_sentiment)
+                        self.db_controller_modules.save_sentiment_pair(prompt, market_sentiment)
 
                         task["collected_status"] = StatusType.COLLECTED.value
                         self.db_controller.update_task(task)
 
                         print(f"Collected: {prompt} - {market_sentiment}")
 
-                        # print(Fore.LIGHTYELLOW_EX+f"Collected: {symbol} - {market_sentiment}")
-
                 except Exception as e:
+                    self.db_controller_modules.save_sentiment_pair(prompt, "mixed")
                     task["collected_status"] = StatusType.COLLECTED.value
                     self.db_controller.update_task(task)
-                    
+
                     print(f"{Fore.LIGHTRED_EX}Error: {str(e)}")
         
         return waiting_tasks
