@@ -17,6 +17,8 @@ from modules_taylor import DBController as DBControllerModules
 
 colorama.init(autoreset=True)
 
+total_interval = 1200
+
 class TaylorService:
 
     db_controller = DBController()
@@ -60,6 +62,7 @@ class TaylorService:
         if len(waiting_tasks) > 0:
             for task in waiting_tasks:
                 try:
+                    prompt = task["prompt"]
                     answer_json = ConvertionUtils.string_to_json( task["answer"] )
 
                     if "symbol" in answer_json and "market_sentiment" in answer_json:
@@ -75,7 +78,9 @@ class TaylorService:
                         task["collected_status"] = StatusType.COLLECTED.value
                         self.db_controller.update_task(task)
 
-                        print(Fore.LIGHTYELLOW_EX+f"Collected: {symbol} - {market_sentiment}")
+                        print(f"Collected: {prompt} - {market_sentiment}")
+
+                        # print(Fore.LIGHTYELLOW_EX+f"Collected: {symbol} - {market_sentiment}")
 
                 except Exception as e:
                     task["collected_status"] = StatusType.COLLECTED.value
@@ -102,17 +107,9 @@ class TaylorService:
         super().__init__(*args, **kwargs)
         
         self.sync_symbols_to_predict()
-        time.sleep(600)
+        time.sleep(total_interval/4)
         self.load_waiting_tasks()
-        time.sleep(600)
-        self.load_waiting_tasks()
-        time.sleep(600)
-        self.load_waiting_tasks()
-        time.sleep(600)
-        self.load_waiting_tasks()
-        time.sleep(600)
-        self.load_waiting_tasks()
-        time.sleep(600)
+        time.sleep(total_interval/4)
         self.load_waiting_tasks()
 
 if __name__ == "__main__":
@@ -121,4 +118,4 @@ if __name__ == "__main__":
     TaylorService()
     
     print(Fore.LIGHTYELLOW_EX+"Trigering Interval Before Close Application - 300 seconds")
-    time.sleep(3600)
+    time.sleep(total_interval)
