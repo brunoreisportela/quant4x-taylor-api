@@ -1553,7 +1553,7 @@ class DBController:
             else:
                 apply_deduction_5_percent = float(fbalance)
 
-            account['profit_loss'] = apply_deduction_5_percent
+            # account['profit_loss'] = apply_deduction_5_percent
 
         return_object['products'] = cursor_result
 
